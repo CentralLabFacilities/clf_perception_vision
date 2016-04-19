@@ -4,7 +4,7 @@ Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
 
 Detect any kind of objects using 2d object detection and GPU acceleration
 
-![CLF GPU DETECT](https://github.com/CentralLabFacilities/clf_2d_gpu_detect.git/raw/master/clf_gpu_detect_screenshot.png "")
+![CLF GPU DETECT](https://github.com/CentralLabFacilities/clf_2d_gpu_detect/blob/master/clf_gpu_detect_screenshot.png "")
 
 ### Installation
 
