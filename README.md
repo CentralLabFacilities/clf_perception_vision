@@ -14,9 +14,13 @@ This version (master) has been tested with version 7.5
 
     HowTo: http://www.r-tutor.com/gpu-computing/cuda-installation/cuda7.5-ubuntu
 
-Install OpenCV minimum 3.1.0
+Install OpenCV minimum 3.1.0 with CUDA support
 
     HowTo: http://docs.opencv.org/3.1.0/d7/d9f/tutorial_linux_install.htm
+
+Invoke OpenCV's cmake with:
+
+    -DWITH_CUDA=ON
 
 Then:
 
