@@ -1,0 +1,26 @@
+%YAML:1.0
+targets:
+ - /home/nao/dev/sample_images/card_hands_full.png
+ - /home/nao/dev/sample_images/card_nao_full.png
+ - /home/nao/dev/sample_images/card_billy_full.png
+ - /home/nao/dev/sample_images/card_flobi_full.png
+
+labels:
+ - "Hands"
+ - "NAO"
+ - "Billy"
+ - "Flobi"
+
+maxkeypoints: 2500
+
+maxmatches: 30
+
+detectionthreshold: 45
+
+resolutionx: 1600
+
+resolutiony: 1200
+
+keypointalgo: ORB
+
+homography: true

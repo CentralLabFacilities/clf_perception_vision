@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     detect2d.setup(argc, argv);
     native_grabber.setup(detect2d.get_x_resolution(), detect2d.get_y_resolution(), 0);
 
-    cv::namedWindow(":: OTC ORB Detection ::", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow(":: CLF GPU Detect ::", cv::WINDOW_AUTOSIZE);
     cv::Mat current_image;
 
     while(cv::waitKey(1) <= 0){
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
         string string_time_main = to_string(diff_main.total_milliseconds());
 
         cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1, cv::LINE_AA);
-        cv::imshow(":: OTC ORB Detection ::", current_image);
+        cv::imshow(":: CLF GPU Detect ::", current_image);
     }
 
     native_grabber.closeGrabber();
