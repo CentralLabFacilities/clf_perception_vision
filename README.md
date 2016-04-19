@@ -14,9 +14,9 @@ This version (master) has been tested with version 7.5
 
     HowTo: http://www.r-tutor.com/gpu-computing/cuda-installation/cuda7.5-ubuntu
 
-Install OpenCV minimum 3.1.0 with CUDA support
+Install OpenCV minimum 2.4.12 with CUDA support
 
-    HowTo: http://docs.opencv.org/3.1.0/d7/d9f/tutorial_linux_install.htm
+    HowTo: http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
 
 Invoke OpenCV's cmake with:
 
@@ -26,8 +26,10 @@ Then:
 
     git clone https://github.com/CentralLabFacilities/clf_2d_gpu_detect.git
     cd clf_2d_gpu_detect
+    git checkout ros_support
     mkdir build
     cd build
+    source /opt/ros/indigo/setup.bash
     cmake -DCMAKE_INSTALL_PREFIX={your decision} ..
     make
     make install
