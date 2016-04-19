@@ -53,13 +53,13 @@ the use of this software, even if advised of the possibility of such damage.
 #include <iostream>
 
 // OPENCV
-#include <opencv2/core/utility.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-// CUDA
-#include <opencv2/cudafeatures2d.hpp>
-#include <opencv2/cudaimgproc.hpp>
+// GPU
+#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/gpu/gpumat.hpp>
 
 // BOOST
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -86,7 +86,7 @@ private:
     std::vector<std::string> target_labels;
     std::vector<cv::Mat> target_images;
     std::vector<std::vector<cv::KeyPoint>> keys_current_target;
-    std::vector<cv::cuda::GpuMat> cuda_desc_current_target_image;
+    std::vector<cv::gpu::GpuMat> gpu_desc_current_target_image;
     std::vector<cv::KeyPoint> keys_camera_image;
 
     const int text_origin = 10;
@@ -104,9 +104,9 @@ private:
     std::string point_matcher;
     std::string draw_homography;
 
-    cv::cuda::GpuMat cuda_camera_tmp_img;
-    cv::cuda::GpuMat cuda_desc_camera_image;
+    cv::gpu::GpuMat gpu_camera_tmp_img;
+    cv::gpu::GpuMat gpu_desc_camera_image;
 
-    cv::Ptr<cv::cuda::ORB> cuda_orb;
-    cv::Ptr<cv::cuda::DescriptorMatcher> cuda_bf_matcher;
+    cv::gpu::ORB_GPU *gpu_orb;
+    cv::gpu::BruteForceMatcher_GPU<cv::Hamming> *gpu_bf_matcher;
 };

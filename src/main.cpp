@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         boost::posix_time::time_duration diff_main = end_main - start_main;
         string string_time_main = to_string(diff_main.total_milliseconds());
 
-        cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1, cv::LINE_AA);
+        cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
         cv::imshow(":: CLF GPU Detect ::", current_image);
     }
 

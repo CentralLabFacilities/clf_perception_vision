@@ -90,26 +90,20 @@ int Detect2D::get_y_resolution() {
 }
 
 int Detect2D::setup(int argc, char *argv[]) {
-    cout << ">>> CUDA Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
+    cout << ">>> gpu Enabled Devices --> " << gpu::getCudaEnabledDeviceCount() << endl;
 
-    if (cuda::getCudaEnabledDeviceCount() == 0)
+    if (gpu::getCudaEnabledDeviceCount() == 0)
     {
-        cout << "E >>> No CUDA Enabled Devices" << endl;
+        cout << "E >>> No gpu Enabled Devices" << endl;
         return -1;
     } else {
         cout << ">>> ";
-        cuda::printShortCudaDeviceInfo(cuda::getDevice());
+        gpu::printShortCudaDeviceInfo(gpu::getDevice());
     }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
 
-    if (parser.has("help"))
-    {
-        // TODO: Write help function
-        return 0;
-    }
-
-    FileStorage fs(parser.get<string>(0), FileStorage::READ);
+    FileStorage fs(argv[1], FileStorage::READ);
 
     if (fs.isOpened()) {\
         fs["keypointalgo"] >> type_descriptor;
@@ -172,12 +166,12 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     colors = color_mix();
 
-    cuda_orb = cuda::ORB::create(max_keypoints, 1.2f, 8, 31, 0, 2, ORB::HARRIS_SCORE, 31, 20);
-    cuda_bf_matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+    gpu_orb = new gpu::ORB_GPU(max_keypoints);
+    gpu_bf_matcher = new gpu::BruteForceMatcher_GPU<Hamming>;
 
     for(int i=0; i < target_paths.size(); i++) {
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
-        cuda::GpuMat cuda_tmp_img(tmp_img);
+        gpu::GpuMat gpu_tmp_img(tmp_img);
 
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
@@ -187,11 +181,11 @@ int Detect2D::setup(int argc, char *argv[]) {
         target_images.push_back(tmp_img);
 
         vector<KeyPoint> tmp_kp;
-        cuda::GpuMat tmp_cuda_dc;
+        gpu::GpuMat tmp_gpu_dc;
 
-        cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+        gpu_orb->operator()(gpu_tmp_img, gpu::GpuMat(), tmp_kp, tmp_gpu_dc);
         keys_current_target.push_back(tmp_kp);
-        cuda_desc_current_target_image.push_back(tmp_cuda_dc);
+        gpu_desc_current_target_image.push_back(tmp_gpu_dc);
     }
 
 }
@@ -200,12 +194,12 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
 
-    cuda::GpuMat cuda_frame_tmp_img(input_image);
-    cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
-    Mat camera_image(cuda_camera_tmp_img);
+    gpu::GpuMat gpu_frame_tmp_img(input_image);
+    gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+    Mat camera_image(gpu_camera_tmp_img);
 
     try {
-        cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+        gpu_orb->operator()(gpu_camera_tmp_img, gpu::GpuMat(), keys_camera_image, gpu_desc_camera_image);
     }
     catch (Exception& e) {
         cout << "E >>> ORB fail O_O" << "\n";
@@ -230,9 +224,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
 
             try {
 
-                if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
+                if(!gpu_desc_current_target_image[i].empty() && !gpu_desc_camera_image.empty()) {
 
-                    cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
+                    gpu_bf_matcher->match(gpu_desc_current_target_image[i], gpu_desc_camera_image, matches);
 
                     // Keep best matches only to have a nice drawing.
                     // We sort distance between descriptor matches
@@ -323,14 +317,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
                     Point2d location = Point2d(median_x, median_y);
 
                     if (cum_distance[i] <= detection_threshold) {
-                        putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2, LINE_AA);
+                        putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
 
                     }
 
                     string label = target_labels[i]+": ";
                     string distance_raw = to_string(cum_distance[i]);
 
-                    putText(input_image, label+distance_raw, Point2d(text_origin, text_offset_y), fontFace, fontScale, colors[i], 1, LINE_AA);
+                    putText(input_image, label+distance_raw, Point2d(text_origin, text_offset_y), fontFace, fontScale, colors[i], 1);
                     text_offset_y = text_offset_y+15;
                 }
             } catch (Exception& e) {
@@ -365,16 +359,17 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
                     obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
                     obj_corners[3] = Point(0, target_images[i].rows);
 
-                    vector<Point2d> scene_corners(4);
                     vector<Point2f> scene_corners_f(4);
+                    vector<Point2d> scene_corners(4);
 
                     perspectiveTransform(obj_corners, scene_corners, H);
 
-                    for (int i=0; i < scene_corners.size(); i++) {
-                        scene_corners_f[i] = Point2f(scene_corners[i]);
+                    for (size_t i=0 ; i<scene_corners.size(); i++)
+                    {
+                        scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
                     }
 
-                    cv::TermCriteria termCriteria = cv::TermCriteria(cv::TermCriteria::MAX_ITER| cv::TermCriteria::EPS, 20, 0.01);
+                    TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
                     cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
@@ -396,8 +391,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
     string string_time_detect = to_string(diff_detect.total_milliseconds());
     string string_time_match = to_string(diff_match.total_milliseconds());
 
-    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-220, 20), fontFace, fontScale, Scalar(156, 188, 26), 1, LINE_AA);
-    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-220, 40), fontFace, fontScale, Scalar(43, 57, 192), 1, LINE_AA);
-    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-220, 60), fontFace, fontScale, Scalar(34, 126, 230), 1, LINE_AA);
+    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-220, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
+    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-220, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
+    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-220, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
 
 }
