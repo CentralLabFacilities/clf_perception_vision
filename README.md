@@ -1,8 +1,9 @@
-### clf_2d_gpu_detect
+### CLF 2D OBJECT DETECT
 
 Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
 
 Detect any kind of objects using 2d object detection and GPU acceleration
+using OpenCV and CUDA
 
 ![CLF GPU DETECT](https://github.com/CentralLabFacilities/clf_2d_gpu_detect/blob/master/clf_gpu_detect_screenshot.png "")
 
@@ -12,6 +13,10 @@ Install the latest nvidia cuda toolkit: https://developer.nvidia.com/cuda-toolki
 This version (master) has been tested with version 7.5
 
     HowTo: http://www.r-tutor.com/gpu-computing/cuda-installation/cuda7.5-ubuntu
+
+Install OpenCV minimum 3.1.0
+
+    HowTo: http://docs.opencv.org/3.1.0/d7/d9f/tutorial_linux_install.htm
 
 Then:
 
