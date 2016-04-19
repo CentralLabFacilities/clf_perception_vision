@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+
+"""
+
+Copyright(c) <Florian Lier>
+
+This file may be licensed under the terms of the
+GNU Lesser General Public License Version 3 (the ``LGPL''),
+or (at your option) any later version.
+Software distributed under the License is distributed
+on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+express or implied. See the LGPL for the specific language
+governing rights and limitations.
+You should have received a copy of the LGPL along with this
+program. If not, go to http://www.gnu.org/licenses/lgpl.html
+or write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+The development of this software was supported by the
+Excellence Cluster EXC 277 Cognitive Interaction Technology.
+The Excellence Cluster EXC 277 is a grant of the Deutsche
+Forschungsgemeinschaft (DFG) in the context of the German
+Excellence Initiative.
+
+Authors: Florian Lier
+<flier>@techfak.uni-bielefeld.de
+
+"""
+
+import os
+import sys
+import cv2
+import time
+from optparse import OptionParser
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import fromstring
+
+# Parser setup
+parser = OptionParser()
+parser.add_option("-p", "--path", dest="path", help="write training files to path")
+parser.add_option("-n", "--name", dest="name", help="name of the traing set")
+
+(options, args) = parser.parse_args()
+
+cap = cv2.VideoCapture(0)
+
+# Check cmd line options
+if not options.path or not options.name:
+    parser.print_help()
+    sys.exit(1)
+
+# Prepare directories
+data_dir = options.path+'/'+options.name+'/'
+data_dir_positive = options.path+'/'+options.name+'/positive/'
+data_dir_negative = options.path+'/'+options.name+'/negative/'
+file_name = options.name
+
+print ">> Positive Sample Images are Saved to --> %s " % data_dir_positive
+# print ">> Negative Sample Images are Saved to --> %s " % data_dir_positive
+
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+else:
+    print ">> ERROR: path %s exists" % data_dir
+    sys.exit(1)
+
+if not os.path.exists(data_dir_positive):
+    os.makedirs(data_dir_positive)
+else:
+    print ">> ERROR: path %s exists" % data_dir_positive
+    sys.exit(1)
+
+if not os.path.exists(data_dir_negative):
+    os.makedirs(data_dir_negative)
+else:
+    print ">>> ERROR: path %s exists" % data_dir_negative
+    sys.exit(1)
+
+file_path = str(options.path)
+
+# Helper vars
+cool_down_time = 3.0
+now = time.time()
+idx = 0
+
+# XML prep
+xml_string = """<?xml version='1.0' encoding='ISO-8859-1'?>
+<dataset>
+    <name>Training %s</name>
+    <comment>Training Images for %s</comment>
+    <images>
+    </images>
+</dataset>
+""" % (options.name, options.name)
+
+xml_structure = fromstring(xml_string)
+images_tag = None
+for image in xml_structure.findall('images'):
+    images_tag = image
+
+# Run Positive
+while True:
+    ret, frame = cap.read()
+    img = cv2.cvtColor(frame, 0)
+    img_save = cv2.cvtColor(frame, 0)
+    height, width, channels = img.shape
+    cv2.putText(img, 'Samples Taken: ' + str(idx+1), (15, 40), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
+    if cv2.waitKey(5) & 0xFF == ord('s'):
+        f_name = data_dir_positive+file_name+str(idx)+'.png'
+        cv2.imwrite(f_name, img_save)
+        i = ET.Element("image", file=str(f_name))
+        b = ET.Element("box", top=str(0), left=str(0), width=str(width), height=str(height))
+        i.append(b)
+        images_tag.append(i)
+        idx += 1
+    cv2.imshow(':: CLF 2D Collect Data (Quit: press q Save: press s) ::', img)
+    if cv2.waitKey(5) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+# Saving training data xml
+xml_tree = ET.ElementTree(xml_structure)
+print ">> Saving dtc-training.xml to --> %s" % data_dir
+xml_tree.write(data_dir+"/otc-training.xml")
