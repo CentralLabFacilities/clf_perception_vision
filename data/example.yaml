@@ -11,11 +11,11 @@ labels:
  - "Billy"
  - "Flobi"
 
-maxkeypoints: 2500
+maxkeypoints: 7500
 
 maxmatches: 30
 
-detectionthreshold: 45
+detectionthreshold: 40
 
 resolutionx: 1600
 

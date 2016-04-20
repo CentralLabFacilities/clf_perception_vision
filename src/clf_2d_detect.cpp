@@ -188,9 +188,13 @@ int Detect2D::setup(int argc, char *argv[]) {
         gpu_desc_current_target_image.push_back(tmp_gpu_dc);
     }
 
+    object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>("clf_2d_detect/objects", 1);
+
 }
 
 void Detect2D::detect(Mat input_image, std::string capture_duration) {
+
+    h.stamp = ros::Time::now();
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
 
@@ -319,6 +323,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
                     if (cum_distance[i] <= detection_threshold) {
                         putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
 
+                        h.frame_id = "0";
+                        msg.header = h;
+                        pt.x = median_x;
+                        pt.y = median_y;
+                        pt.z = 0.0;
+                        msg.pose.position = pt;
+                        msg.name = target_labels[i];
+                        object_pub.publish(msg);
                     }
 
                     string label = target_labels[i]+": ";

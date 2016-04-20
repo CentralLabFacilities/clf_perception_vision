@@ -30,7 +30,7 @@ Then:
     mkdir build
     cd build
     source /opt/ros/indigo/setup.bash
-    cmake -DCMAKE_INSTALL_PREFIX={your decision} ..
+    cmake -DCMAKE_INSTALL_PREFIX={YOUR DECISION} ..
     make
     make install
 
@@ -38,7 +38,11 @@ Then:
 
 An exemplary config file can be found in the data folder.
 
-    ./clf_2d_detect /path/to/configfile/example.yaml
+    source /opt/ros/indigo/setup.bash
+
+    ./clf_2d_detect /path/to/configfile/example.yaml /camera/input/topic loop_rate {int}
+
+    rostopic echo /clf_2d_detect/objects
 
 ### License
 

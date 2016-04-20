@@ -64,6 +64,11 @@ the use of this software, even if advised of the possibility of such damage.
 // BOOST
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+// ROS
+#include <ros/ros.h>
+#include <visualization_msgs/InteractiveMarkerPose.h>
+#include <std_msgs/Header.h>
+#include <geometry_msgs/Point.h>
 
 class Detect2D {
 
@@ -109,4 +114,10 @@ private:
 
     cv::gpu::ORB_GPU *gpu_orb;
     cv::gpu::BruteForceMatcher_GPU<cv::Hamming> *gpu_bf_matcher;
+
+    ros::NodeHandle node_handle_;
+    ros::Publisher object_pub;
+    visualization_msgs::InteractiveMarkerPose msg;
+    std_msgs::Header h;
+    geometry_msgs::Point pt;
 };

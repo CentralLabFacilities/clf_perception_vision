@@ -70,19 +70,23 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
 
     ROSGrabber ros_grabber(argv[2]);
-    Detect2D detect2d;
+    cout << ">>> Input Topic --> " << argv[2] << endl;
 
+    ros::Rate loop_rate(atoi(argv[3]));
+    cout << ">>> Loop Rate --> " << atoi(argv[3]) << " Hz" << endl;
+
+    Detect2D detect2d;
     detect2d.setup(argc, argv);
 
     cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE);
     cv::Mat current_image;
 
-    ros::Rate loop_rate(atoi(argv[3]));
-
     while(cv::waitKey(1) <= 0){
         ros::spinOnce();
+
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
         ros::Time frame_timestamp;
+
         try {
             ros_grabber.getImage(&frame_timestamp, &current_image);
             if (current_image.rows+current_image.cols > 0) {
@@ -94,6 +98,8 @@ int main(int argc, char *argv[]) {
             cout << "E >>> " << e.what() << endl;
         }
 
+        loop_rate.sleep();
+
         boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::time_duration diff_main = end_main - start_main;
         string string_time_main = to_string(diff_main.total_milliseconds());
@@ -101,10 +107,11 @@ int main(int argc, char *argv[]) {
         cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
         cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
 
-        loop_rate.sleep();
     }
 
-    ros_grabber.closeGrabber();
     cv::destroyAllWindows();
+    ros::shutdown();
+
+    return 0;
 }
 
