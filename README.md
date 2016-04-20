@@ -42,6 +42,8 @@ An exemplary config file can be found in the data folder.
 
     ./clf_2d_detect /path/to/configfile/example.yaml /camera/input/topic loop_rate {int}
 
+    source /opt/ros/indigo/setup.bash
+
     rostopic echo /clf_2d_detect/objects
 
 ### License
