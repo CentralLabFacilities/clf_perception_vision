@@ -1,0 +1,94 @@
+/*
+
+Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
+
+By downloading, copying, installing or using the software you agree to this license.
+If you do not agree to this license, do not download, install, copy or use the software.
+
+                          License Agreement
+               For Open Source Computer Vision Library
+                       (3-clause BSD License)
+
+Copyright (C) 2000-2016, Intel Corporation, all rights reserved.
+Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+Third party copyrights are property of their respective owners.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  * Neither the names of the copyright holders nor the names of the contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+This software is provided by the copyright holders and contributors "as is" and
+any express or implied warranties, including, but not limited to, the implied
+warranties of merchantability and fitness for a particular purpose are disclaimed.
+In no event shall copyright holders or contributors be liable for any direct,
+indirect, incidental, special, exemplary, or consequential damages
+(including, but not limited to, procurement of substitute goods or services;
+loss of use, data, or profits; or business interruption) however caused
+and on any theory of liability, whether in contract, strict liability,
+or tort (including negligence or otherwise) arising in any way out of
+the use of this software, even if advised of the possibility of such damage.
+
+*/
+
+// SELF
+#include "ros_grabber.hpp"
+
+
+ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
+    image_sub_ = it_.subscribe(i_scope, 5, &ROSGrabber::imageCallback, this);
+}
+
+ROSGrabber::~ROSGrabber() { }
+
+void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
+
+    boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
+
+    cv_bridge::CvImagePtr cv_ptr;
+
+    try {
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception &e) {
+        ROS_ERROR("E >>> CV_BRIDGE exception: %s", e.what());
+        return;
+    }
+
+    ros::Time frame_time = ros::Time::now();
+    timestamp = frame_time;
+    mtx.lock();
+    source_frame = cv_ptr->image;
+    output_frame = source_frame;
+    mtx.unlock();
+
+    boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration cdiff = c - init;
+    duration = std::to_string(cdiff.total_milliseconds());
+}
+
+void ROSGrabber::getImage(ros::Time *target_timestamp, cv::Mat *mat) {
+    mtx.lock();
+    *mat = output_frame;
+    if (target_timestamp != NULL) {
+        *target_timestamp = timestamp;
+    }
+    mtx.unlock();
+}
+
+std::string ROSGrabber::getDuration() {
+    return duration;
+}
