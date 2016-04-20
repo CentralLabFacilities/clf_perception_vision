@@ -81,16 +81,21 @@ int main(int argc, char *argv[]) {
     cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE);
     cv::Mat current_image;
 
+    cout << ">>> Press 'q' to exit" << endl;
+    cout << ">>> NOTE Displaying results (silent:false) has a huge impact on the loop rate for large images" << endl;
+    cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
+
     while(cv::waitKey(1) <= 0){
-        ros::spinOnce();
 
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
+
+        ros::spinOnce();
         ros::Time frame_timestamp;
 
         try {
             ros_grabber.getImage(&frame_timestamp, &current_image);
             if (current_image.rows+current_image.cols > 0) {
-                detect2d.detect(current_image, ros_grabber.getDuration());
+                detect2d.detect(current_image, ros_grabber.getDuration(), frame_timestamp);
             } else {
                 cout << "E >>> Image could not be grabbed" << endl;
             }
@@ -104,13 +109,17 @@ int main(int argc, char *argv[]) {
         boost::posix_time::time_duration diff_main = end_main - start_main;
         string string_time_main = to_string(diff_main.total_milliseconds());
 
-        cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
-        cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+        if (!detect2d.get_silent()){
+            cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
+            cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+        }
 
     }
 
     cv::destroyAllWindows();
     ros::shutdown();
+
+    cout << ">>> Cleaning Up. Goodbye!" << endl;
 
     return 0;
 }

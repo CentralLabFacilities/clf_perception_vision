@@ -89,6 +89,10 @@ int Detect2D::get_y_resolution() {
     return res_y;
 }
 
+bool Detect2D::get_silent() {
+    return toggle_silent;
+}
+
 int Detect2D::setup(int argc, char *argv[]) {
     cout << ">>> gpu Enabled Devices --> " << gpu::getCudaEnabledDeviceCount() << endl;
 
@@ -132,6 +136,13 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         if (draw_homography == "true") {
             toggle_homography = true;
+        }
+
+        fs["silent"] >> draw_image;
+        cout << ">>> Silent --> " << draw_image << endl;
+
+        if (draw_image == "true") {
+            toggle_silent = true;
         }
 
         FileNode targets = fs["targets"];
@@ -192,9 +203,7 @@ int Detect2D::setup(int argc, char *argv[]) {
 
 }
 
-void Detect2D::detect(Mat input_image, std::string capture_duration) {
-
-    h.stamp = ros::Time::now();
+void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time timestamp) {
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
 
@@ -321,8 +330,10 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
                     Point2d location = Point2d(median_x, median_y);
 
                     if (cum_distance[i] <= detection_threshold) {
+
                         putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
 
+                        h.stamp = timestamp;
                         h.frame_id = "0";
                         msg.header = h;
                         pt.x = median_x;
@@ -331,6 +342,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
                         msg.pose.position = pt;
                         msg.name = target_labels[i];
                         object_pub.publish(msg);
+
                     }
 
                     string label = target_labels[i]+": ";
@@ -403,8 +415,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration) {
     string string_time_detect = to_string(diff_detect.total_milliseconds());
     string string_time_match = to_string(diff_match.total_milliseconds());
 
-    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-220, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
-    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-220, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
-    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-220, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
+    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-280, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
+    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-280, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
+    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
 
 }

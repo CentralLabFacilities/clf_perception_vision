@@ -74,11 +74,11 @@ class Detect2D {
 
 public:
     int setup(int argc, char *argv[]);
-    void detect(cv::Mat i_image, std::string capture_duration);
+    void detect(cv::Mat i_image, std::string capture_duration, ros::Time timestamp);
     std::vector<cv::Scalar> color_mix();
     int get_x_resolution();
     int get_y_resolution();
-
+    bool get_silent();
     Detect2D();
     ~Detect2D();
 
@@ -104,10 +104,12 @@ private:
 
     bool do_not_draw = false;
     bool toggle_homography = false;
+    bool toggle_silent = false;
 
     std::string type_descriptor;
     std::string point_matcher;
     std::string draw_homography;
+    std::string draw_image;
 
     cv::gpu::GpuMat gpu_camera_tmp_img;
     cv::gpu::GpuMat gpu_desc_camera_image;
