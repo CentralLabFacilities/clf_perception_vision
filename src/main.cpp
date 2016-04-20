@@ -55,33 +55,43 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "clf_2d_detect.hpp"
-#include "native_grabber.hpp"
+#include "ros_grabber.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
 
-    NativeGrabber native_grabber;
+    if (argc < 4) {
+        cout << ">>> Usage: clf_2d_detect {path/to/config/file} {input scope} {loop rate}" << endl;
+        cout << ">>> Example: clf_2d_detect /tmp/example.yaml /usb_cam/image_raw 50" << endl;
+        return -1;
+    }
+
+    ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
+
+    ROSGrabber ros_grabber(argv[2]);
     Detect2D detect2d;
 
     detect2d.setup(argc, argv);
-    native_grabber.setup(detect2d.get_x_resolution(), detect2d.get_y_resolution(), 0);
 
-    cv::namedWindow(":: CLF GPU Detect ::", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE);
     cv::Mat current_image;
 
-    while(cv::waitKey(1) <= 0){
-        boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
+    ros::Rate loop_rate(atoi(argv[3]));
 
+    while(cv::waitKey(1) <= 0){
+        ros::spinOnce();
+        boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
+        ros::Time frame_timestamp;
         try {
-            native_grabber.grabImage(&current_image);
+            ros_grabber.getImage(&frame_timestamp, &current_image);
             if (current_image.rows+current_image.cols > 0) {
-                detect2d.detect(current_image, native_grabber.getDuration());
+                detect2d.detect(current_image, ros_grabber.getDuration());
             } else {
-                std::cout << "E >>> Image could not be grabbed" << std::endl;
+                cout << "E >>> Image could not be grabbed" << endl;
             }
         } catch (std::exception& e) {
-            std::cout << "E >>> " << e.what() << std::endl;
+            cout << "E >>> " << e.what() << endl;
         }
 
         boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
@@ -89,10 +99,12 @@ int main(int argc, char *argv[]) {
         string string_time_main = to_string(diff_main.total_milliseconds());
 
         cv::putText(current_image, "Delta T (Total): "+string_time_main+" ms", cv::Point2d(current_image.cols-220, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
-        cv::imshow(":: CLF GPU Detect ::", current_image);
+        cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+
+        loop_rate.sleep();
     }
 
-    native_grabber.closeGrabber();
+    ros_grabber.closeGrabber();
     cv::destroyAllWindows();
 }
 

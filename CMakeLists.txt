@@ -43,6 +43,7 @@ FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp)
 ADD_EXECUTABLE(clf_2d_detect
                src/clf_2d_detect.cpp
                src/native_grabber.cpp
+               src/ros_grabber.cpp
                src/main.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
