@@ -40,7 +40,7 @@ An exemplary config file can be found in the data folder.
 
     source /opt/ros/indigo/setup.bash
 
-    ./clf_2d_detect /path/to/configfile/example.yaml /camera/input/topic loop_rate {int}
+    ./clf_2d_detect /path/to/configfile/example.yaml /camera/input/topic
 
     source /opt/ros/indigo/setup.bash
 

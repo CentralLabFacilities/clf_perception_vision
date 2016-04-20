@@ -61,9 +61,9 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-    if (argc < 4) {
-        cout << ">>> Usage: clf_2d_detect {path/to/config/file} {input scope} {loop rate}" << endl;
-        cout << ">>> Example: clf_2d_detect /tmp/example.yaml /usb_cam/image_raw 50" << endl;
+    if (argc < 3) {
+        cout << ">>> Usage: clf_2d_detect {path/to/config/file} {input scope}" << endl;
+        cout << ">>> Example: clf_2d_detect /tmp/example.yaml /usb_cam/image_raw" << endl;
         return -1;
     }
 
@@ -71,9 +71,6 @@ int main(int argc, char *argv[]) {
 
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> Input Topic --> " << argv[2] << endl;
-
-    ros::Rate loop_rate(atoi(argv[3]));
-    cout << ">>> Loop Rate --> " << atoi(argv[3]) << " Hz" << endl;
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);
@@ -90,12 +87,11 @@ int main(int argc, char *argv[]) {
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
         ros::spinOnce();
-        ros::Time frame_timestamp;
 
         try {
-            ros_grabber.getImage(&frame_timestamp, &current_image);
+            ros_grabber.getImage(&current_image);
             if (current_image.rows+current_image.cols > 0) {
-                detect2d.detect(current_image, ros_grabber.getDuration(), frame_timestamp);
+                detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
             } else {
                 cout << "E >>> Image could not be grabbed" << endl;
             }
@@ -103,15 +99,16 @@ int main(int argc, char *argv[]) {
             cout << "E >>> " << e.what() << endl;
         }
 
-        loop_rate.sleep();
-
         boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::time_duration diff_main = end_main - start_main;
         string string_time_main = to_string(diff_main.total_milliseconds());
 
         if (!detect2d.get_silent()){
             cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
-            cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+            cv::Size size(current_image.cols/2,current_image.rows/2);
+            cv::Mat resize;
+            cv::resize(current_image, resize, size);
+            cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
         }
 
     }

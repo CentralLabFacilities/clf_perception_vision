@@ -50,6 +50,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
     image_sub_ = it_.subscribe(i_scope, 5, &ROSGrabber::imageCallback, this);
+    last_frame = ros::Time::now();
 }
 
 ROSGrabber::~ROSGrabber() { }
@@ -69,8 +70,8 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
     }
 
     ros::Time frame_time = ros::Time::now();
-    timestamp = frame_time;
     mtx.lock();
+    timestamp = frame_time;
     source_frame = cv_ptr->image;
     output_frame = source_frame;
     mtx.unlock();
@@ -80,15 +81,21 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
     duration = std::to_string(cdiff.total_milliseconds());
 }
 
-void ROSGrabber::getImage(ros::Time *target_timestamp, cv::Mat *mat) {
+void ROSGrabber::getImage(cv::Mat *mat) {
+    while((timestamp.toSec() - last_frame.toSec()) <= 0) {
+        usleep(1000);
+        ros::spinOnce();
+    }
     mtx.lock();
     *mat = output_frame;
-    if (target_timestamp != NULL) {
-        *target_timestamp = timestamp;
-    }
+    last_frame = timestamp;
     mtx.unlock();
 }
 
 std::string ROSGrabber::getDuration() {
     return duration;
+}
+
+ros::Time ROSGrabber::getTimestamp() {
+    return timestamp;
 }

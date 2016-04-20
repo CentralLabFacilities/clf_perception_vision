@@ -26,7 +26,8 @@ public:
     ROSGrabber(std::string i_scope);
     ~ROSGrabber();
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void getImage(ros::Time *timestamp, cv::Mat *mat);
+    void getImage(cv::Mat *mat);
+    ros::Time getTimestamp();
     std::string getDuration();
 private:
     ros::NodeHandle node_handle_;
@@ -35,6 +36,7 @@ private:
     cv::Mat output_frame;
     cv::Mat source_frame;
     ros::Time timestamp;
+    ros::Time last_frame;
     std::string duration;
     std::recursive_mutex mtx;
 };
