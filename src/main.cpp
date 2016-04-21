@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     Detect2D detect2d;
     detect2d.setup(argc, argv);
 
-    cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     cv::Mat current_image;
 
     cout << ">>> Press 'q' to exit" << endl;
@@ -118,7 +118,8 @@ int main(int argc, char *argv[]) {
 
     }
 
-    cv::destroyAllWindows();
+    // This seems to make things worse. Investigate.
+    // cv::destroyAllWindows();
     ros::shutdown();
 
     cout << ">>> Cleaning Up. Goodbye!" << endl;
