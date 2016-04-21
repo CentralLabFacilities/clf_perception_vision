@@ -36,6 +36,9 @@ Then:
 
 ### Usage
 
+NOTE: Images larger than 1000px will be resized before displaying. The actual
+feature detection will be done on the original input size.
+
 An exemplary config file can be found in the data folder.
 
     source /opt/ros/indigo/setup.bash

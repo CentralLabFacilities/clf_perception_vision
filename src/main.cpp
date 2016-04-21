@@ -105,10 +105,15 @@ int main(int argc, char *argv[]) {
 
         if (!detect2d.get_silent()){
             cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
-            cv::Size size(current_image.cols/2,current_image.rows/2);
-            cv::Mat resize;
-            cv::resize(current_image, resize, size);
-            cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
+            if (current_image.cols > 1000) {
+                cv::Size size(current_image.cols/2,current_image.rows/2);
+                cv::Mat resize;
+                cv::resize(current_image, resize, size);
+                cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
+            } else {
+                cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+            }
+
         }
 
     }
