@@ -330,19 +330,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     Point2d location = Point2d(median_x, median_y);
 
                     if (cum_distance[i] <= detection_threshold) {
-
                         putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
-
-                        h.stamp = timestamp;
-                        h.frame_id = "0";
-                        msg.header = h;
-                        pt.x = median_x;
-                        pt.y = median_y;
-                        pt.z = 0.0;
-                        msg.pose.position = pt;
-                        msg.name = target_labels[i];
-                        object_pub.publish(msg);
-
                     }
 
                     string label = target_labels[i]+": ";
@@ -393,14 +381,34 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
                     }
 
-                    TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
-                    cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
+                    //TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
+                    //cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
                     line(input_image, scene_corners[0], scene_corners[1], Scalar(113, 204, 46), 4 );
                     line(input_image, scene_corners[1], scene_corners[2], Scalar(113, 204, 46), 4 );
                     line(input_image, scene_corners[2], scene_corners[3], Scalar(113, 204, 46), 4 );
                     line(input_image, scene_corners[3], scene_corners[0], Scalar(113, 204, 46), 4 );
+
+                    int diff_0 = scene_corners[1].x - scene_corners[0].x;
+                    int diff_1 = scene_corners[2].y - scene_corners[1].y;
+
+                    if (diff_0 > 0 && diff_1 > 0) {
+                        int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
+                        // cout << ">>> " << target_labels[i] << " | Derived Angle: " << angle << endl;
+                        if (abs(angle) > 80 && abs(angle) < 95) {
+                            h.stamp = timestamp;
+                            h.frame_id = "0";
+                            msg.header = h;
+                            pt.x = median_x;
+                            pt.y = median_y;
+                            pt.z = 0.0;
+                            msg.pose.position = pt;
+                            msg.name = target_labels[i];
+                            object_pub.publish(msg);
+                        }
+                    }
+
                 }
 
             } catch (Exception& e) {
