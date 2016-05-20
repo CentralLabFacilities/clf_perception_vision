@@ -176,6 +176,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     fs.release();
 
     colors = color_mix();
+    target_medians = new cv::Point2d[target_paths.size()];
 
     gpu_orb = new gpu::ORB_GPU(max_keypoints);
     gpu_bf_matcher = new gpu::BruteForceMatcher_GPU<Hamming>;
@@ -328,6 +329,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     int median_y = point_list_y[point_list_y.size()/2];
 
                     Point2d location = Point2d(median_x, median_y);
+                    target_medians[i] = location;
 
                     if (cum_distance[i] <= detection_threshold) {
                         putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
@@ -400,9 +402,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             h.stamp = timestamp;
                             h.frame_id = "0";
                             msg.header = h;
-                            pt.x = median_x;
-                            pt.y = median_y;
-                            pt.z = 0.0;
+                            pt.x = target_medians[i].x;
+                            pt.y = target_medians[i].x;
+                            pt.z = target_medians[i].x*target_medians[i].y;
                             msg.pose.position = pt;
                             msg.name = target_labels[i];
                             object_pub.publish(msg);
