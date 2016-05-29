@@ -125,11 +125,12 @@ int Detect2D::setup(int argc, char *argv[]) {
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
 
-        res_x = fs["resolutionx"];
-        cout << ">>> Sensor X resolution --> " << res_x << endl;
+        // Not needed anymore
+        //res_x = fs["resolutionx"];
+        //cout << ">>> Sensor X resolution --> " << res_x << endl;
 
-        res_y = fs["resolutiony"];
-        cout << ">>> Sensor Y resolution --> " << res_y << endl;
+        //res_y = fs["resolutiony"];
+        //cout << ">>> Sensor Y resolution --> " << res_y << endl;
 
         fs["homography"] >> draw_homography;
         cout << ">>> Draw Homography --> " << draw_homography << endl;
