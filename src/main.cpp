@@ -66,6 +66,7 @@ using namespace std;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toggle = _toggle.data;
+    cout << ">>> Computing is: " << toggle << endl;
 }
 
 int main(int argc, char *argv[]) {
