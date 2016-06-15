@@ -58,14 +58,11 @@ the use of this software, even if advised of the possibility of such damage.
 #include "ros_grabber.hpp"
 #include "main.hpp"
 
-
 // ROS
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 
 using namespace std;
-
-bool toggle;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toogle=_toggle.data;
@@ -78,6 +75,8 @@ int main(int argc, char *argv[]) {
         cout << ">>> Example: clf_2d_detect /tmp/example.yaml /usb_cam/image_raw" << endl;
         return -1;
     }
+
+    toggle = true;
 
     ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
 
