@@ -56,8 +56,19 @@ the use of this software, even if advised of the possibility of such damage.
 // SELF
 #include "clf_2d_detect.hpp"
 #include "ros_grabber.hpp"
+#include "main.hpp"
+
+
+// ROS
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
 
 using namespace std;
+
+
+void toggle_callback(const std_msgs::Bool& _toggle) {
+    toogle=_toggle.data;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -71,6 +82,8 @@ int main(int argc, char *argv[]) {
 
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> Input Topic --> " << argv[2] << endl;
+
+    ros::Subscriber sub = nh.subscribe("/clf_2d_detect/toggle", 1, toggle_callback);
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);
@@ -88,15 +101,17 @@ int main(int argc, char *argv[]) {
 
         ros::spinOnce();
 
-        try {
-            ros_grabber.getImage(&current_image);
-            if (current_image.rows+current_image.cols > 0) {
-                detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
-            } else {
-                cout << "E >>> Image could not be grabbed" << endl;
+        if(toggle) {
+            try {
+                ros_grabber.getImage(&current_image);
+                if (current_image.rows+current_image.cols > 0) {
+                    detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
+                } else {
+                    cout << "E >>> Image could not be grabbed" << endl;
+                }
+            } catch (std::exception& e) {
+                cout << "E >>> " << e.what() << endl;
             }
-        } catch (std::exception& e) {
-            cout << "E >>> " << e.what() << endl;
         }
 
         boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
