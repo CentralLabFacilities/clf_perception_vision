@@ -65,6 +65,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 using namespace std;
 
+bool toggle;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toogle=_toggle.data;
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> Input Topic --> " << argv[2] << endl;
 
-    ros::Subscriber sub = nh.subscribe("/clf_2d_detect/toggle", 1, toggle_callback);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/toggle", 1, toggle_callback);
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);

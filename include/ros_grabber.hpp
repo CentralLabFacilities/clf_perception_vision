@@ -29,8 +29,8 @@ public:
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
     std::string getDuration();
-private:
     ros::NodeHandle node_handle_;
+private:
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_sub_;
     cv::Mat output_frame;
