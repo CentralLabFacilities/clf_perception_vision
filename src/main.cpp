@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     cout << ">>> NOTE Displaying results (silent:false) has a huge impact on the loop rate for large images" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
 
-    while(cv::waitKey(1) <= 0){
+    while(cv::waitKey(1) <= 0) {
 
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
@@ -113,21 +113,23 @@ int main(int argc, char *argv[]) {
             } catch (std::exception& e) {
                 cout << "E >>> " << e.what() << endl;
             }
-        }
 
-        boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::time_duration diff_main = end_main - start_main;
-        string string_time_main = to_string(diff_main.total_milliseconds());
 
-        if (!detect2d.get_silent()){
-            cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
-            if (current_image.cols > 1000) {
-                cv::Size size(current_image.cols/2,current_image.rows/2);
-                cv::Mat resize;
-                cv::resize(current_image, resize, size);
-                cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
-            } else {
-                cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+            boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
+            boost::posix_time::time_duration diff_main = end_main - start_main;
+            string string_time_main = to_string(diff_main.total_milliseconds());
+
+            if (!detect2d.get_silent()){
+                cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
+                if (current_image.cols > 1000) {
+                    cv::Size size(current_image.cols/2,current_image.rows/2);
+                    cv::Mat resize;
+                    cv::resize(current_image, resize, size);
+                    cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
+                } else {
+                    cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+                }
+
             }
 
         }
