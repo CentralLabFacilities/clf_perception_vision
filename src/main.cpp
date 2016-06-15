@@ -65,7 +65,7 @@ the use of this software, even if advised of the possibility of such damage.
 using namespace std;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
-    toogle=_toggle.data;
+    toggle = _toggle.data;
 }
 
 int main(int argc, char *argv[]) {
