@@ -391,7 +391,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
                         // scene_corners_f.push_back(cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
-                        scene_corners_draw.push_back(cv::Point2d(scene_corners[i].x/scale_factor, scene_corners[i].y/scale_factor));
+                        scene_corners_draw.push_back(cv::Point2d(scene_corners[i].x/4.0, scene_corners[i].y/4.0));
                     }
 
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
