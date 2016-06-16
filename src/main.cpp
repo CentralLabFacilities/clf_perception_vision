@@ -66,7 +66,7 @@ using namespace std;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toggle = _toggle.data;
-    cout << ">>> I am currently computing? " << toggle << endl;
+    cout << ">>> I am currently computing? --> " << toggle << endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> Input Topic --> " << argv[2] << endl;
 
-    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/toggle", 1, toggle_callback);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/subscribe", 1, toggle_callback);
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);
