@@ -209,6 +209,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     if (scale_factor > 1.0) {
         cv::gpu::resize(gpu_frame_tmp_img, gpu_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+        cv::resize(input_image, input_image, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
         gpu::cvtColor(gpu_frame_scaled, gpu_camera_tmp_img, COLOR_BGR2GRAY);
     } else {
         gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
