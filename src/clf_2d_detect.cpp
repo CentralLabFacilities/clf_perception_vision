@@ -209,13 +209,10 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     if (scale_factor > 1.0) {
         cv::gpu::resize(gpu_frame_tmp_img, gpu_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
-        cv::resize(input_image, input_image, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
         gpu::cvtColor(gpu_frame_scaled, gpu_camera_tmp_img, COLOR_BGR2GRAY);
     } else {
         gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
     }
-
-    // Mat camera_image(gpu_camera_tmp_img);
 
     try {
         gpu_orb->operator()(gpu_camera_tmp_img, gpu::GpuMat(), keys_camera_image, gpu_desc_camera_image);
@@ -323,7 +320,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     point_list_y.push_back(c_t.y);
 
                     Point2d current_point(c_t.x, c_t.y );
-                    circle(input_image, current_point, 3.0, colors[i], 1, 1 );
+                    circle(input_image, current_point/scale_factor, 3.0, colors[i], 1, 1 );
                 }
 
                 nth_element(point_list_x.begin(), point_list_x.begin() + point_list_x.size()/2, point_list_x.end());
@@ -337,7 +334,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     target_medians[i] = location;
 
                     if (cum_distance[i] <= detection_threshold) {
-                        putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
+                        putText(input_image, target_labels[i], location/scale_factor, fontFace, fontScale, colors[i], 2);
                     }
 
                     string label = target_labels[i]+": ";
@@ -389,13 +386,13 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     }
 
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
-                    // cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
+                    // cornerSubPix(input_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                    line(input_image, scene_corners[0], scene_corners[1], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[1], scene_corners[2], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[2], scene_corners[3], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[3], scene_corners[0], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners[0]/scale_factor, scene_corners[1]/scale_factor, Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners[1]/scale_factor, scene_corners[2]/scale_factor, Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners[2]/scale_factor, scene_corners[3]/scale_factor, Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners[3]/scale_factor, scene_corners[0]/scale_factor, Scalar(113, 204, 46), 4 );
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
