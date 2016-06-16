@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     cout << ">>> NOTE Displaying results (silent:false) has a huge impact on the loop rate for large images" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
 
-    while(cv::waitKey(10) <= 0) {
+    while(cv::waitKey(5) <= 0) {
 
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
@@ -132,6 +132,9 @@ int main(int argc, char *argv[]) {
             }
 
         }
+
+        // Maximum 100 Hz
+        usleep(1000*10);
 
     }
 
