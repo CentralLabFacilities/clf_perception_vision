@@ -387,7 +387,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     vector<Point2d> scene_corners(4);
                     vector<Point2d> scene_corners_draw(4);
 
-                    perspectiveTransform(obj_corners, scene_corners_draw, H);
+                    perspectiveTransform(obj_corners, scene_corners, H);
 
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
                         // scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
