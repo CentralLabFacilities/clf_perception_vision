@@ -429,7 +429,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             } catch (Exception& e) {
                 cout << "E >>> Could not derive transform" << endl;
             }
-        } else {
+        }
+        if (cum_distance[i] <= detection_threshold && !toggle_homography){
             h.stamp = timestamp;
             h.frame_id = "0";
             msg.header = h;
