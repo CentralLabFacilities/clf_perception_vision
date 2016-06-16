@@ -44,6 +44,8 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
+// STD
+#include <stdlib.h>
 
 // SELF
 #include "clf_2d_detect.hpp"
@@ -155,7 +157,7 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         if(idx > 6) {
             cout << "E >>> Sorry, only 5 targets are allowed (for now)" << endl;
-            return -1;
+            exit(EXIT_FAILURE);
         }
 
         FileNode labels = fs["labels"];
@@ -235,7 +237,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
 
     for(int i=0; i < target_images.size(); i++) {
+
         vector<DMatch> matches;
+
         try {
 
             try {
@@ -383,7 +387,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     vector<Point2d> scene_corners(4);
                     vector<Point2d> scene_corners_draw(4);
 
-                    perspectiveTransform(obj_corners, scene_corners, H);
+                    perspectiveTransform(obj_corners, scene_corners_draw, H);
 
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
                         // scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
