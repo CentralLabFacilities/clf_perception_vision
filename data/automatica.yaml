@@ -21,9 +21,7 @@ maxmatches: 30
 
 detectionthreshold: 40
 
-resolutionx: 1920
-
-resolutiony: 1080
+scalefactor: 2.0
 
 keypointalgo: ORB
 

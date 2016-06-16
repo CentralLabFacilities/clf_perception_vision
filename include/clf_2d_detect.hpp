@@ -102,6 +102,7 @@ private:
     int detection_threshold = 0;
     int res_x = 640;
     int res_y = 480;
+    double scale_factor = 1.0;
 
     bool do_not_draw = false;
     bool toggle_homography = false;
@@ -112,6 +113,7 @@ private:
     std::string draw_homography;
     std::string draw_image;
 
+    cv::gpu::GpuMat gpu_frame_scaled;
     cv::gpu::GpuMat gpu_camera_tmp_img;
     cv::gpu::GpuMat gpu_desc_camera_image;
 

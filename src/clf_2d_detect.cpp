@@ -125,12 +125,8 @@ int Detect2D::setup(int argc, char *argv[]) {
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
 
-        // Not needed anymore
-        //res_x = fs["resolutionx"];
-        //cout << ">>> Sensor X resolution --> " << res_x << endl;
-
-        //res_y = fs["resolutiony"];
-        //cout << ">>> Sensor Y resolution --> " << res_y << endl;
+        scale_factor = fs["scalefactor"];
+        cout << ">>> Scalefactor --> " << scale_factor << endl;
 
         fs["homography"] >> draw_homography;
         cout << ">>> Draw Homography --> " << draw_homography << endl;
@@ -210,7 +206,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
 
     gpu::GpuMat gpu_frame_tmp_img(input_image);
-    gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+
+    if (scale_factor > 1.0) {
+        cv::gpu::resize(gpu_frame_tmp_img, gpu_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+        gpu::cvtColor(gpu_frame_scaled, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+    } else {
+        gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+    }
+
     Mat camera_image(gpu_camera_tmp_img);
 
     try {
