@@ -15,13 +15,13 @@ labels:
  - "KogniChef"
  - "Sound"
 
-maxkeypoints: 1500
+maxkeypoints: 3500
 
-maxmatches: 30
+maxmatches: 40
 
-detectionthreshold: 35
+detectionthreshold: 36
 
-scalefactor: 1.5
+scalefactor: 3.0
 
 keypointalgo: ORB
 
