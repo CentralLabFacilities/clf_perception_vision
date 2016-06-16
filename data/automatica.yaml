@@ -1,11 +1,11 @@
 %YAML:1.0
 targets:
- - data/train/Automatica/Adamaas.png
- - data/train/Automatica/Amiro.png
- - data/train/Automatica/CITEC.png
- - data/train/Automatica/Floka.png
- - data/train/Automatica/KogniChef.png
- - data/train/Automatica/Sound.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/Adamaas.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/Amiro.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/CITEC.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/Floka.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/KogniChef.png
+ - /vol/flobi/floka/floka-automatica-nightly/share/clf_2d_gpu_detect/data/train/Automatica/Sound.png
 
 labels:
  - "Adamaas"
