@@ -331,10 +331,12 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     int median_y = point_list_y[point_list_y.size()/2];
 
                     Point2d location = Point2d(median_x, median_y);
+                    Point2d draw_location = Point2d(median_x/scale_factor, median_y/scale_factor);
+
                     target_medians[i] = location;
 
                     if (cum_distance[i] <= detection_threshold) {
-                        putText(input_image, target_labels[i], location/scale_factor, fontFace, fontScale, colors[i], 2);
+                        putText(input_image, target_labels[i], draw_location, fontFace, fontScale, colors[i], 2);
                     }
 
                     string label = target_labels[i]+": ";
