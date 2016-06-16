@@ -157,7 +157,7 @@ int Detect2D::setup(int argc, char *argv[]) {
             target_paths.push_back((String)(*it));
         }
 
-        if(idx > 5) {
+        if(idx > 6) {
             cout << "E >>> Sorry, only 5 targets are allowed (for now)" << endl;
             return -1;
         }
