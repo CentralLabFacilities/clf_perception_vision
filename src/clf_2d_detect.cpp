@@ -389,19 +389,22 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     perspectiveTransform(obj_corners, scene_corners, H);
 
+                    // TODO: Fix the view for scaled images!
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
                         // scene_corners_f.push_back(cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
-                        scene_corners_draw.push_back(cv::Point2d(scene_corners[i].x/scale_factor, scene_corners[i].y/scale_factor));
+                        double x = scene_corners[i].x/scale_factor;
+                        double y = scene_corners[i].y/scale_factor
+                        scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
 
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
                     // cornerSubPix(input_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                    line(input_image, scene_corners[0], scene_corners[1], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[1], scene_corners[2], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[2], scene_corners[3], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[3], scene_corners[0], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], Scalar(113, 204, 46), 4 );
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
@@ -426,6 +429,16 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             } catch (Exception& e) {
                 cout << "E >>> Could not derive transform" << endl;
             }
+        } else {
+            h.stamp = timestamp;
+            h.frame_id = "0";
+            msg.header = h;
+            pt.x = target_medians[i].x;
+            pt.y = target_medians[i].y;
+            pt.z = target_medians[i].x*target_medians[i].y;
+            msg.pose.position = pt;
+            msg.name = target_labels[i];
+            object_pub.publish(msg);
         }
     }
 

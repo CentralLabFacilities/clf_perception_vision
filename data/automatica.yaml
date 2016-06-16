@@ -25,6 +25,6 @@ scalefactor: 3.0
 
 keypointalgo: ORB
 
-homography: true
+homography: false
 
 silent: false
