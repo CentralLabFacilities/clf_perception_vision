@@ -320,7 +320,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     point_list_y.push_back(c_t.y);
 
                     Point2d current_point(c_t.x, c_t.y );
-                    circle(input_image, current_point/scale_factor, 3.0, colors[i], 1, 1 );
+                    Point2d current_point_draw(c_t.x/scale_factor, c_t.y/scale_factor);
+
+                    circle(input_image, current_point, 3.0, colors[i], 1, 1 );
                 }
 
                 nth_element(point_list_x.begin(), point_list_x.begin() + point_list_x.size()/2, point_list_x.end());
@@ -370,31 +372,32 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     Mat H = findHomography(obj, scene, cv::RANSAC);
 
-                    //-- get the corners from the object to be detected
+                    // Get the corners from the object to be detected
                     vector<cv::Point2d> obj_corners(4);
                     obj_corners[0] = Point(0, 0);
                     obj_corners[1] = Point(target_images[i].cols, 0);
                     obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
                     obj_corners[3] = Point(0, target_images[i].rows);
 
-                    vector<Point2f> scene_corners_f(4);
+                    // vector<Point2f> scene_corners_f(4);
                     vector<Point2d> scene_corners(4);
+                    vector<Point2d> scene_corners_draw(4);
 
                     perspectiveTransform(obj_corners, scene_corners, H);
 
-                    for (size_t i=0 ; i<scene_corners.size(); i++)
-                    {
-                        scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
+                    for (size_t i=0 ; i<scene_corners.size(); i++) {
+                        // scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
+                        scene_corners_draw.push_back( cv::Point2f((float)scene_corners[i].x/scale_factor, (float)scene_corners[i].y/scale_factor));
                     }
 
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
                     // cornerSubPix(input_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                    line(input_image, scene_corners[0]/scale_factor, scene_corners[1]/scale_factor, Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[1]/scale_factor, scene_corners[2]/scale_factor, Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[2]/scale_factor, scene_corners[3]/scale_factor, Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[3]/scale_factor, scene_corners[0]/scale_factor, Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], Scalar(113, 204, 46), 4 );
+                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], Scalar(113, 204, 46), 4 );
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
