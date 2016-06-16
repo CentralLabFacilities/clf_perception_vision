@@ -326,7 +326,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     Point2d current_point(c_t.x, c_t.y );
                     Point2d current_point_draw(c_t.x/scale_factor, c_t.y/scale_factor);
 
-                    circle(input_image, current_point, 3.0, colors[i], 1, 1 );
+                    circle(input_image, current_point_draw, 3.0, colors[i], 1, 1 );
                 }
 
                 nth_element(point_list_x.begin(), point_list_x.begin() + point_list_x.size()/2, point_list_x.end());
@@ -390,8 +390,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     perspectiveTransform(obj_corners, scene_corners, H);
 
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
-                        // scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
-                        scene_corners_draw.push_back( cv::Point2f((float)scene_corners[i].x/scale_factor, (float)scene_corners[i].y/scale_factor));
+                        // scene_corners_f.push_back(cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
+                        scene_corners_draw.push_back(cv::Point2d(scene_corners[i].x/scale_factor, scene_corners[i].y/scale_factor));
                     }
 
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
