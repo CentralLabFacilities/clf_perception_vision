@@ -114,7 +114,6 @@ int main(int argc, char *argv[]) {
                 cout << "E >>> " << e.what() << endl;
             }
 
-
             boost::posix_time::ptime end_main = boost::posix_time::microsec_clock::local_time();
             boost::posix_time::time_duration diff_main = end_main - start_main;
             string string_time_main = to_string(diff_main.total_milliseconds());
