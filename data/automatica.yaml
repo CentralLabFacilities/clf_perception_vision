@@ -1,0 +1,32 @@
+%YAML:1.0
+targets:
+ - data/train/Automatica/Adamaas.png
+ - data/train/Automatica/Amiro.png
+ - data/train/Automatica/CITEC.png
+ - data/train/Automatica/Floka.png
+ - data/train/Automatica/KogniChef.png
+ - data/train/Automatica/Sound.png
+
+labels:
+ - "Adamaas"
+ - "Amiro"
+ - "CITEC"
+ - "Floka"
+ - "KogniChef"
+ - "Sound"
+
+maxkeypoints: 3500
+
+maxmatches: 30
+
+detectionthreshold: 40
+
+resolutionx: 1920
+
+resolutiony: 1080
+
+keypointalgo: ORB
+
+homography: true
+
+silent: false
