@@ -66,7 +66,7 @@ using namespace std;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toggle = _toggle.data;
-    cout << ">>> Computing is: " << toggle << endl;
+    cout << ">>> I am currently computing? " << toggle << endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     cout << ">>> NOTE Displaying results (silent:false) has a huge impact on the loop rate for large images" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
 
-    while(cv::waitKey(1) <= 0) {
+    while(cv::waitKey(10) <= 0) {
 
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
