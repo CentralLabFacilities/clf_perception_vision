@@ -133,9 +133,6 @@ int main(int argc, char *argv[]) {
 
         }
 
-        // Maximum 100 Hz
-        usleep(1000*10);
-
     }
 
     // This seems to make things worse. Investigate.
