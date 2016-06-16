@@ -322,7 +322,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     point_list_y.push_back(c_t.y);
 
                     Point2d current_point(c_t.x, c_t.y );
-                    circle(input_image, current_point, 3.0, colors[i], 1, 1 );
+                    circle(camera_image, current_point, 3.0, colors[i], 1, 1 );
                 }
 
                 nth_element(point_list_x.begin(), point_list_x.begin() + point_list_x.size()/2, point_list_x.end());
@@ -336,13 +336,13 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     target_medians[i] = location;
 
                     if (cum_distance[i] <= detection_threshold) {
-                        putText(input_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
+                        putText(camera_image, target_labels[i], location, fontFace, fontScale, colors[i], 2);
                     }
 
                     string label = target_labels[i]+": ";
                     string distance_raw = to_string(cum_distance[i]);
 
-                    putText(input_image, label+distance_raw, Point2d(text_origin, text_offset_y), fontFace, fontScale, colors[i], 1);
+                    putText(camera_image, label+distance_raw, Point2d(text_origin, text_offset_y), fontFace, fontScale, colors[i], 1);
                     text_offset_y = text_offset_y+15;
                 }
             } catch (Exception& e) {
@@ -387,14 +387,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         scene_corners_f.push_back( cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
                     }
 
-                    //TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
-                    //cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
+                    // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
+                    // cornerSubPix(camera_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                    line(input_image, scene_corners[0], scene_corners[1], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[1], scene_corners[2], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[2], scene_corners[3], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners[3], scene_corners[0], Scalar(113, 204, 46), 4 );
+                    line(camera_image, scene_corners[0], scene_corners[1], Scalar(113, 204, 46), 4 );
+                    line(camera_image, scene_corners[1], scene_corners[2], Scalar(113, 204, 46), 4 );
+                    line(camera_image, scene_corners[2], scene_corners[3], Scalar(113, 204, 46), 4 );
+                    line(camera_image, scene_corners[3], scene_corners[0], Scalar(113, 204, 46), 4 );
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
@@ -429,8 +429,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     string string_time_detect = to_string(diff_detect.total_milliseconds());
     string string_time_match = to_string(diff_match.total_milliseconds());
 
-    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-280, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
-    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-280, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
-    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
+    putText(camera_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(camera_image.cols-280, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
+    putText(camera_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(camera_image.cols-280, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
+    putText(camera_image, "Delta T (Match): "+string_time_match+" ms", Point2d(camera_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
 
 }
