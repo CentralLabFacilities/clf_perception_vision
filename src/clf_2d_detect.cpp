@@ -214,7 +214,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
     }
 
-    Mat camera_image(gpu_camera_tmp_img);
+    // Mat camera_image(gpu_camera_tmp_img);
 
     try {
         gpu_orb->operator()(gpu_camera_tmp_img, gpu::GpuMat(), keys_camera_image, gpu_desc_camera_image);
