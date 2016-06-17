@@ -82,7 +82,7 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
 }
 
 void ROSGrabber::getImage(cv::Mat *mat) {
-    cout << last_frame - timestamp << endl;
+    std::cout << last_frame - timestamp << std::endl;
     mtx.lock();
     *mat = output_frame;
     last_frame = timestamp;
