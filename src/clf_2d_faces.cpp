@@ -71,6 +71,7 @@ using namespace cv;
 using namespace cv::gpu;
 
 bool toggle = true;
+bool draw = false;
 
 
 static void help()
@@ -292,15 +293,15 @@ int main(int argc, char *argv[])
                 people_pub.publish(people_msg);
             }
 
-            cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
-
             tm.stop();
             double detectionTime = tm.getTimeMilli();
             double fps = 1000 / detectionTime;
 
-            displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
-
-            imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
+            if(draw) {
+                cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
+                displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
+                imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
+            }
 
         }
 
@@ -331,6 +332,11 @@ int main(int argc, char *argv[])
         case 'h':
         case 'H':
             // helpScreen = !helpScreen;
+            break;
+        }
+        case 's':
+        case 'S':
+            draw = !draw;
             break;
         }
     }
