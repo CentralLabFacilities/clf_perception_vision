@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
             people_msgs::Person person_msg;
             people_msg.header = h;
 
-            double face_size = 0.0
+            double face_size = 0.0;
 
             for (int i = 0; i < detections_num; ++i) {
                 person_msg.name = "unknown";
