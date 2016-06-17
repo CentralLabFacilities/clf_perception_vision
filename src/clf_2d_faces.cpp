@@ -150,7 +150,7 @@ int main(int argc, const char *argv[])
 
     if (getCudaEnabledDeviceCount() == 0)
     {
-        return cerr << ">> No GPU found or the library is compiled without GPU support" << endl, -1;
+        return cerr << ">>> No GPU found or the library is compiled without GPU support" << endl, -1;
     }
 
     cv::gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
@@ -162,9 +162,11 @@ int main(int argc, const char *argv[])
     {
         if (string(argv[i]) == "--cascade")
             cascadeName = argv[++i];
+            cout << ">>> Cascadename " << cascadeName << endl;
         else if (string(argv[i]) == "--topic")
         {
             topic = argv[++i];
+            cout << ">>> Input Topic " << topic << endl;
         }
         else if (string(argv[i]) == "--help")
         {
@@ -179,20 +181,13 @@ int main(int argc, const char *argv[])
     }
 
     CascadeClassifier_GPU cascade_gpu;
+
     if (!cascade_gpu.load(cascadeName))
     {
-        return cerr << ">>> ERROR: Could not load cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
-    }
-
-    CascadeClassifier cascade_cpu;
-    if (!cascade_cpu.load(cascadeName))
-    {
-        return cerr << ">>> ERROR: Could not load cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
+        return cerr << ">>> ERROR: Could not load GPU cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
     }
 
     ROSGrabber ros_grabber(topic);
-    cout << ">>> Input Topic --> " << topic << endl;
-
 
     namedWindow(":: CLF GPU Face Detect [ROS] ::", 1);
 
