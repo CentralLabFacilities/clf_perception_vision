@@ -71,9 +71,7 @@ using namespace cv;
 using namespace cv::gpu;
 
 bool toggle = true;
-ros::NodeHandle nh_;
-ros::Publisher people_pub;
-ros::Subscriber toggle_sub;
+
 
 static void help()
 {
@@ -160,6 +158,10 @@ int main(int argc, char *argv[])
 {
 
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
+
+    ros::NodeHandle nh_;
+    ros::Publisher people_pub;
+    ros::Subscriber toggle_sub;
 
     people_pub = nh_.advertise<people_msgs::People>("clf_2d_detect/people", 20);
     toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
