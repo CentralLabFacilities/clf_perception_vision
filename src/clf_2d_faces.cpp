@@ -273,10 +273,10 @@ int main(int argc, char *argv[])
                 person_msg.reliability = 0.0;
                 geometry_msgs::Point p;
                 Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2.0, (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2.0);
-                double mid_x = center.x;
-                double mid_y = center.y;
-                p.x = mid_x;
-                p.y = mid_y;
+                // double mid_x = center.x;
+                // double mid_y = center.y;
+                p.x = faces_downloaded.ptr<cv::Rect>()[i].x;
+                p.y = faces_downloaded.ptr<cv::Rect>()[i].y;
                 p.z = faces_downloaded.ptr<cv::Rect>()[i].size().area();
                 person_msg.position = p;
                 people_msg.people.push_back(person_msg);
