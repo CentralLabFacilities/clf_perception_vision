@@ -59,6 +59,8 @@ the use of this software, even if advised of the possibility of such damage.
 
 // ROS
 #include "ros_grabber.hpp"
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
 
 using namespace std;
 using namespace cv;
@@ -142,6 +144,9 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
 
 int main(int argc, const char *argv[])
 {
+
+    ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
+
     if (argc == 1)
     {
         help();
