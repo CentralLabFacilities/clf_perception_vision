@@ -69,7 +69,7 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
         return;
     }
 
-    ros::Time frame_time = msg.header.stamp;
+    ros::Time frame_time = msg->header.stamp;
     mtx.lock();
     timestamp = frame_time;
     source_frame = cv_ptr->image;
