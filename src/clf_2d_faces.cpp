@@ -71,6 +71,9 @@ using namespace cv;
 using namespace cv::gpu;
 
 bool toggle = true;
+ros::NodeHandle nh_;
+ros::Publisher people_pub;
+ros::Subscriber toggle_sub;
 
 static void help()
 {
@@ -158,9 +161,8 @@ int main(int argc, char *argv[])
 
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
 
-    ros::NodeHandle nh_;
-    ros::Publisher people_pub = nh_.advertise<people_msgs::People>("clf_2d_detect/people", 20);
-    ros::Subscriber toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
+    people_pub = nh_.advertise<people_msgs::People>("clf_2d_detect/people", 20);
+    toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
 
     if (argc == 1)
     {
@@ -283,36 +285,15 @@ int main(int argc, char *argv[])
             // TODO revert this, this is just for the stupid Floka
             people_pub.publish(people_msg);
 
-            tm.stop();
-            double detectionTime = tm.getTimeMilli();
-            double fps = 1000 / detectionTime;
-
-            /*
-
-            // cout << setw(6) << fixed << fps << " FPS, " << detections_num << " det";
-            // cout << setfill(' ') << setprecision(2);
-
-            if ((filterRects || findLargestObject) && detections_num > 0)
-            {
-                Rect *faceRects = useGPU ? faces_downloaded.ptr<Rect>() : &facesBuf_cpu[0];
-                for (int i = 0; i < min(detections_num, 2); ++i)
-                {
-                    cout << ", [" << setw(4) << faceRects[i].x
-                         << ", " << setw(4) << faceRects[i].y
-                         << ", " << setw(4) << faceRects[i].width
-                         << ", " << setw(4) << faceRects[i].height << "]";
-                }
-            }
-
-            cout << endl;
-
-            */
-
             cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
 
             displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
 
             imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
+
+            tm.stop();
+            double detectionTime = tm.getTimeMilli();
+            double fps = 1000 / detectionTime;
 
         }
 
