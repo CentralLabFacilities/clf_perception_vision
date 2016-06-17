@@ -70,7 +70,7 @@ using namespace std;
 using namespace cv;
 using namespace cv::gpu;
 
-bool toggle = false;
+bool toggle = true;
 
 static void help()
 {
