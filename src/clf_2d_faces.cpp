@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
             if (frame.empty())
             {
-                break;
+                continue;
             }
 
             frame_gpu.upload(image.empty() ? frame : image);
