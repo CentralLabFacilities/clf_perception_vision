@@ -190,7 +190,7 @@ int main(int argc, const char *argv[])
         return cerr << ">>> ERROR: Could not load cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
     }
 
-    ROSGrabber ros_grabber(argv[2]);
+    ROSGrabber ros_grabber(topic);
     cout << ">>> Input Topic --> " << topic << endl;
 
 
