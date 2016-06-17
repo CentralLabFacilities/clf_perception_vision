@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
 
     ros::NodeHandle nh_;
-    ros::Publisher people_pub = nh_.advertise<n.advertise<people_msgs::People>>("clf_2d_detect/people", 20);
+    ros::Publisher people_pub = nh_.advertise<people_msgs::People>>("clf_2d_detect/people", 20);
     ros::Subscriber toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
 
     if (argc == 1)
