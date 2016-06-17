@@ -92,10 +92,6 @@ void ROSGrabber::getImage(cv::Mat *mat) {
     mtx.unlock();
 }
 
-std::string ROSGrabber::getDuration() {
-    return duration;
-}
-
 ros::Time ROSGrabber::getTimestamp() {
     return timestamp;
 }
