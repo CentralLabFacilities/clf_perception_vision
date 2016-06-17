@@ -102,8 +102,8 @@ void convertAndResize(const T& src, T& gray, T& resized, double scale)
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
 {
     int fontFace = FONT_HERSHEY_DUPLEX;
-    double fontScale = 0.5;
-    int fontThickness = 0.5;
+    double fontScale = 0.45;
+    int fontThickness = 0.2;
     Size fontSize = cv::getTextSize("T[]", fontFace, fontScale, fontThickness, 0);
 
     Point org;
@@ -124,8 +124,8 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     ss << "FPS = " << setprecision(1) << fixed << fps;
     matPrint(canvas, 0, fontColorWhite, ss.str());
     ss.str("");
-    ss << "[" << canvas.cols << "x" << canvas.rows << "], " <<
-        (bLargestFace ? "OneFace, " : "MultiFace, ") <<
+    ss << "[" << canvas.cols << "x" << canvas.rows << "] | " <<
+        (bLargestFace ? "OneFace | " : "MultiFace | ") <<
         (bFilter ? "Filter:ON" : "Filter:OFF");
 
     matPrint(canvas, 1, fontColorWhite, ss.str());
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
         resized_gpu.download(resized_cpu);
 
         for (int i = 0; i < detections_num; ++i) {
-           rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(135,206,250));
+           rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(250,2016,135));
         }
 
         tm.stop();
