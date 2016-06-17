@@ -333,7 +333,6 @@ int main(int argc, char *argv[])
         case 'H':
             // helpScreen = !helpScreen;
             break;
-        }
         case 's':
         case 'S':
             draw = !draw;
