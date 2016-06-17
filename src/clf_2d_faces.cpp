@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     bool findLargestObject = true;
     bool filterRects = true;
     bool helpScreen = false;
-
+    std::string duration;
     int detections_num;
 
     for (;;) {
