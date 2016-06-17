@@ -196,7 +196,7 @@ int main(int argc, const char *argv[])
 
     namedWindow(":: CLF GPU Face Detect [ROS] ::", 1);
 
-    Mat frame, frame_cpu, gray_cpu, resized_cpu, faces_downloaded, frameDisp;
+    Mat frame, frame_cpu, gray_cpu, resized_cpu, faces_downloaded, frameDisp, image;
     vector<Rect> facesBuf_cpu;
 
     GpuMat frame_gpu, gray_gpu, resized_gpu, facesBuf_gpu;
