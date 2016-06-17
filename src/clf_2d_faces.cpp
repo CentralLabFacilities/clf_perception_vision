@@ -236,11 +236,11 @@ int main(int argc, char *argv[])
 
     for (;;) {
 
+        boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
+
         ros::spinOnce();
 
         if(toggle) {
-
-            boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
 
             ros_grabber.getImage(&frame);
 
