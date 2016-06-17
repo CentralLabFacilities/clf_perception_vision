@@ -109,8 +109,8 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
     Point org;
     org.x = 1;
     org.y = 3 * fontSize.height * (lineOffsY + 1) / 2;
-    // putText(img, ss, org, fontFace, fontScale, CV_RGB(0,0,0), 5*fontThickness/2, 16);
-    // putText(img, ss, org, fontFace, fontScale, fontColor, fontThickness, 16);
+    putText(img, ss, org, fontFace, fontScale, CV_RGB(0,0,0), 5*fontThickness/2, 16);
+    putText(img, ss, org, fontFace, fontScale, fontColor, fontThickness, 16);
 }
 
 
@@ -127,6 +127,7 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     ss << "[" << canvas.cols << "x" << canvas.rows << "], " <<
         (bLargestFace ? "OneFace, " : "MultiFace, ") <<
         (bFilter ? "Filter:ON" : "Filter:OFF");
+
     matPrint(canvas, 1, fontColorRed, ss.str());
 
     if (bHelp)
