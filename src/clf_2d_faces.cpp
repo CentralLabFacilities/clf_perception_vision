@@ -102,15 +102,15 @@ void convertAndResize(const T& src, T& gray, T& resized, double scale)
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
 {
     int fontFace = FONT_HERSHEY_DUPLEX;
-    double fontScale = 0.8;
+    double fontScale = 0.3;
     int fontThickness = 2;
     Size fontSize = cv::getTextSize("T[]", fontFace, fontScale, fontThickness, 0);
 
     Point org;
     org.x = 1;
     org.y = 3 * fontSize.height * (lineOffsY + 1) / 2;
-    putText(img, ss, org, fontFace, fontScale, CV_RGB(0,0,0), 5*fontThickness/2, 16);
-    putText(img, ss, org, fontFace, fontScale, fontColor, fontThickness, 16);
+    // putText(img, ss, org, fontFace, fontScale, CV_RGB(0,0,0), 5*fontThickness/2, 16);
+    // putText(img, ss, org, fontFace, fontScale, fontColor, fontThickness, 16);
 }
 
 
@@ -120,6 +120,7 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     Scalar fontColorNV  = CV_RGB(118,185,0);
 
     ostringstream ss;
+
     ss << "FPS = " << setprecision(1) << fixed << fps;
     matPrint(canvas, 0, fontColorRed, ss.str());
     ss.str("");
@@ -130,14 +131,14 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
 
     if (bHelp)
     {
-        matPrint(canvas, 3, fontColorNV, "M - switch OneFace / MultiFace");
-        matPrint(canvas, 4, fontColorNV, "F - toggle rectangles Filter");
-        matPrint(canvas, 5, fontColorNV, "H - toggle hotkeys help");
-        matPrint(canvas, 6, fontColorNV, "1/Q - increase/decrease scale");
+        // matPrint(canvas, 3, fontColorNV, "M - switch OneFace / MultiFace");
+        // matPrint(canvas, 4, fontColorNV, "F - toggle rectangles Filter");
+        // matPrint(canvas, 5, fontColorNV, "H - toggle hotkeys help");
+        // matPrint(canvas, 6, fontColorNV, "1/Q - increase/decrease scale");
     }
     else
     {
-        matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
+        // matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
     }
 }
 
@@ -205,7 +206,7 @@ int main(int argc, char *argv[])
 
     bool useGPU = true;
     double scaleFactor = 1.0;
-    bool findLargestObject = false;
+    bool findLargestObject = true;
     bool filterRects = true;
     bool helpScreen = false;
 
