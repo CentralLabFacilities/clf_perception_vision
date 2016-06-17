@@ -58,14 +58,19 @@ the use of this software, even if advised of the possibility of such damage.
 #include "opencv2/gpu/gpu.hpp"
 
 // ROS
-#include "ros_grabber.hpp"
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include "ros_grabber.hpp"
+#include "people_msgs/People.h"
+#include "people_msgs/Person.h"
+#include "geometry_msgs/Point.h"
+#include "geometry_msgs/PointStamped.h"
 
 using namespace std;
 using namespace cv;
 using namespace cv::gpu;
 
+bool toggle = false;
 
 static void help()
 {
@@ -143,11 +148,19 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     }
 }
 
+void toggle_callback(const std_msgs::Bool& _toggle) {
+    toggle = _toggle.data;
+    cout << ">>> I am currently computing? --> " << toggle << endl;
+}
 
 int main(int argc, char *argv[])
 {
 
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
+
+    ros::NodeHandle nh_;
+    ros::Publisher people_pub = nh_.advertise<n.advertise<people_msgs::People>>("clf_2d_detect/people", 20);
+    ros::Subscriber toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
 
     if (argc == 1)
     {
@@ -214,63 +227,96 @@ int main(int argc, char *argv[])
     int detections_num;
 
     for (;;) {
-        ros_grabber.getImage(&frame);
 
-        if (frame.empty())
-        {
-            break;
-        }
+        if(toggle) {
 
-        (image.empty() ? frame : image).copyTo(frame_cpu);
-        frame_gpu.upload(image.empty() ? frame : image);
+            ros_grabber.getImage(&frame);
 
-        convertAndResize(frame_gpu, gray_gpu, resized_gpu, scaleFactor);
-        convertAndResize(frame_cpu, gray_cpu, resized_cpu, scaleFactor);
-
-        TickMeter tm;
-        tm.start();
-
-        cascade_gpu.findLargestObject = findLargestObject;
-
-        detections_num = cascade_gpu.detectMultiScale(resized_gpu, facesBuf_gpu, 1.2, (filterRects || findLargestObject) ? 4 : 0);
-        facesBuf_gpu.colRange(0, detections_num).download(faces_downloaded);
-
-        resized_gpu.download(resized_cpu);
-
-        for (int i = 0; i < detections_num; ++i) {
-           rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
-        }
-
-        tm.stop();
-        double detectionTime = tm.getTimeMilli();
-        double fps = 1000 / detectionTime;
-
-        /*
-
-        // cout << setw(6) << fixed << fps << " FPS, " << detections_num << " det";
-        // cout << setfill(' ') << setprecision(2);
-
-        if ((filterRects || findLargestObject) && detections_num > 0)
-        {
-            Rect *faceRects = useGPU ? faces_downloaded.ptr<Rect>() : &facesBuf_cpu[0];
-            for (int i = 0; i < min(detections_num, 2); ++i)
+            if (frame.empty())
             {
-                cout << ", [" << setw(4) << faceRects[i].x
-                     << ", " << setw(4) << faceRects[i].y
-                     << ", " << setw(4) << faceRects[i].width
-                     << ", " << setw(4) << faceRects[i].height << "]";
+                break;
             }
+
+            (image.empty() ? frame : image).copyTo(frame_cpu);
+            frame_gpu.upload(image.empty() ? frame : image);
+
+            convertAndResize(frame_gpu, gray_gpu, resized_gpu, scaleFactor);
+            convertAndResize(frame_cpu, gray_cpu, resized_cpu, scaleFactor);
+
+            TickMeter tm;
+            tm.start();
+
+            cascade_gpu.findLargestObject = findLargestObject;
+
+            detections_num = cascade_gpu.detectMultiScale(resized_gpu, facesBuf_gpu, 1.2, (filterRects || findLargestObject) ? 4 : 0);
+            facesBuf_gpu.colRange(0, detections_num).download(faces_downloaded);
+
+            resized_gpu.download(resized_cpu);
+
+            for (int i = 0; i < detections_num; ++i) {
+               rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
+            }
+
+            std_msgs::Header h;
+            h.stamp = frame_timestamp;
+            h.frame_id = "0";
+
+            // ROS MSGS
+            people_msgs::People people_msg;
+            people_msgs::Person person_msg;
+
+            for (int i = 0; i < detections_num; ++i) {
+                person_msg.name = "unknown";
+                person_msg.reliability = 0.0;
+                geometry_msgs::Point p;
+                Point center = Point(faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2, faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2);
+                double mid_x = center.x;
+                double mid_y = center.y;
+                p.x = mid_x;
+                p.y = mid_y;
+                p.z = faces_downloaded.ptr<cv::Rect>()[i].size().area();
+                person_msg.position = p;
+                people_msg.people.push_back(person_msg);
+            }
+            if (people_msg.people.size() > 0) {
+                people_msg.header = h;
+            }
+
+            // TODO revert this, this is just for the stupid Floka
+            people_pub.publish(people_msg);
+
+            tm.stop();
+            double detectionTime = tm.getTimeMilli();
+            double fps = 1000 / detectionTime;
+
+            /*
+
+            // cout << setw(6) << fixed << fps << " FPS, " << detections_num << " det";
+            // cout << setfill(' ') << setprecision(2);
+
+            if ((filterRects || findLargestObject) && detections_num > 0)
+            {
+                Rect *faceRects = useGPU ? faces_downloaded.ptr<Rect>() : &facesBuf_cpu[0];
+                for (int i = 0; i < min(detections_num, 2); ++i)
+                {
+                    cout << ", [" << setw(4) << faceRects[i].x
+                         << ", " << setw(4) << faceRects[i].y
+                         << ", " << setw(4) << faceRects[i].width
+                         << ", " << setw(4) << faceRects[i].height << "]";
+                }
+            }
+
+            cout << endl;
+
+            */
+
+            cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
+
+            displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
+
+            imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
+
         }
-
-        cout << endl;
-
-        */
-
-        cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
-
-        displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
-
-        imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
 
         char key = (char)waitKey(5);
 
