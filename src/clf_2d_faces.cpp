@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
         boost::posix_time::time_duration cdiff = c - init;
         duration = std::to_string(cdiff.total_milliseconds());
 
-        cout << "Computation Time: " << duration << endl;
+        // cout << "Computation Time: " << duration << endl;
     }
 
     return 0;
