@@ -142,7 +142,7 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
 }
 
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
 
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
