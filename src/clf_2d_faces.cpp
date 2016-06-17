@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
     namedWindow(":: CLF GPU Face Detect [ROS] ::", 1);
 
-    Mat frame, frame_cpu, gray_cpu, resized_cpu, faces_downloaded, frameDisp, image;
+    Mat frame, gray_cpu, resized_cpu, faces_downloaded, frameDisp, image;
     vector<Rect> facesBuf_cpu;
 
     GpuMat frame_gpu, gray_gpu, resized_gpu, facesBuf_gpu;
@@ -239,11 +239,9 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            (image.empty() ? frame : image).copyTo(frame_cpu);
             frame_gpu.upload(image.empty() ? frame : image);
 
             convertAndResize(frame_gpu, gray_gpu, resized_gpu, scaleFactor);
-            convertAndResize(frame_cpu, gray_cpu, resized_cpu, scaleFactor);
 
             TickMeter tm;
             tm.start();
