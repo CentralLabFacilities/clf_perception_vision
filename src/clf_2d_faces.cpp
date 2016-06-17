@@ -237,6 +237,8 @@ int main(int argc, char *argv[])
 
         if(toggle) {
 
+            boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
+
             ros_grabber.getImage(&frame);
 
             if (frame.empty())
@@ -340,6 +342,12 @@ int main(int argc, char *argv[])
             draw = !draw;
             break;
         }
+
+        boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::time_duration cdiff = c - init;
+        duration = std::to_string(cdiff.total_milliseconds());
+
+        cout << "Computation Time: " << duration << endl;
     }
 
     return 0;
