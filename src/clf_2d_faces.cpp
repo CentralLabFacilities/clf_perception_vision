@@ -279,8 +279,8 @@ int main(int argc, char *argv[])
                 Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width/2.0), (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height/2.0));
                 // double mid_x = center.x;
                 // double mid_y = center.y;
-                p.x = faces_downloaded.ptr<cv::Rect>()[i].x;
-                p.y = faces_downloaded.ptr<cv::Rect>()[i].y;
+                p.x = center.x;
+                p.y = center.y;
                 p.z = faces_downloaded.ptr<cv::Rect>()[i].size().area();
                 face_size = faces_downloaded.ptr<cv::Rect>()[i].size().area();
                 person_msg.position = p;
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
             }
 
             // TODO revert this, this is just for the stupid Floka
-            if (face_size > 4096) {
+            if (face_size > 4096.0) {
                 people_pub.publish(people_msg);
             }
 
