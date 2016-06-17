@@ -28,6 +28,7 @@ public:
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
+    std::string getDuration();
     ros::NodeHandle node_handle_;
 private:
     image_transport::ImageTransport it_;
