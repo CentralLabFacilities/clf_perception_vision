@@ -287,13 +287,13 @@ int main(int argc, char *argv[])
 
             cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
 
-            displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
-
-            imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
-
             tm.stop();
             double detectionTime = tm.getTimeMilli();
             double fps = 1000 / detectionTime;
+
+            displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
+
+            imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
 
         }
 
