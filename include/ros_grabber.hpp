@@ -16,7 +16,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-
 // BOOST
 #include "boost/date_time/posix_time/posix_time.hpp"
 
