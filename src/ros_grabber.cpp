@@ -82,10 +82,10 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
 }
 
 void ROSGrabber::getImage(cv::Mat *mat) {
-    while((timestamp.toSec() - last_frame.toSec()) <= 0) {
-        usleep(5000);
-        ros::spinOnce();
-    }
+    //while((timestamp.toSec() - last_frame.toSec()) <= 0) {
+    //    usleep(5000);
+    //    ros::spinOnce();
+    //}
     mtx.lock();
     *mat = output_frame;
     last_frame = timestamp;
