@@ -139,7 +139,7 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     }
     else
     {
-        matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
+        // matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
     }
 }
 
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
         resized_gpu.download(resized_cpu);
 
         for (int i = 0; i < detections_num; ++i) {
-           rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(250,2016,135));
+           rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
         }
 
         tm.stop();
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
             break;
         case 'h':
         case 'H':
-            helpScreen = !helpScreen;
+            // helpScreen = !helpScreen;
             break;
         }
     }
