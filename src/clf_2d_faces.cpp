@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
 
     ros::NodeHandle nh_;
-    ros::Publisher people_pub = nh_.advertise<people_msgs::People>>("clf_2d_detect/people", 20);
+    ros::Publisher people_pub = nh_.advertise<people_msgs::People>("clf_2d_detect/people", 20);
     ros::Subscriber toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
 
     if (argc == 1)
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
             }
 
             std_msgs::Header h;
-            h.stamp = frame_timestamp;
+            h.stamp = ros_grabber.getTimestamp();
             h.frame_id = "0";
 
             // ROS MSGS
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
                 person_msg.name = "unknown";
                 person_msg.reliability = 0.0;
                 geometry_msgs::Point p;
-                Point center = Point(faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2, faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2);
+                Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2, (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2);
                 double mid_x = center.x;
                 double mid_y = center.y;
                 p.x = mid_x;
