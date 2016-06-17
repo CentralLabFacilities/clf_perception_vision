@@ -161,8 +161,10 @@ int main(int argc, const char *argv[])
     for (int i = 1; i < argc; ++i)
     {
         if (string(argv[i]) == "--cascade")
+        {
             cascadeName = argv[++i];
             cout << ">>> Cascadename " << cascadeName << endl;
+        }
         else if (string(argv[i]) == "--topic")
         {
             topic = argv[++i];
