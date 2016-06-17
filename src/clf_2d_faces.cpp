@@ -67,7 +67,7 @@ using namespace cv::gpu;
 
 static void help()
 {
-    cout << "Usage: ./clf_2d_faces_ros \n\t--cascade <cascade_file>\n\t(--topic <ros_topic>)\n"
+    cout << "Usage: ./clf_2d_faces_ros \n\t--cascade <cascade_file>\n\t--topic <ros_topic>)\n"
             "Using OpenCV version " << CV_VERSION << endl << endl;
 }
 
