@@ -228,6 +228,8 @@ int main(int argc, char *argv[])
 
     for (;;) {
 
+        ros::spinOnce();
+
         if(toggle) {
 
             ros_grabber.getImage(&frame);
@@ -264,12 +266,13 @@ int main(int argc, char *argv[])
             // ROS MSGS
             people_msgs::People people_msg;
             people_msgs::Person person_msg;
+            people_msg.header = h;
 
             for (int i = 0; i < detections_num; ++i) {
                 person_msg.name = "unknown";
                 person_msg.reliability = 0.0;
                 geometry_msgs::Point p;
-                Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2, (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2);
+                Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width)/2.0, (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height)/2.0);
                 double mid_x = center.x;
                 double mid_y = center.y;
                 p.x = mid_x;
@@ -277,9 +280,6 @@ int main(int argc, char *argv[])
                 p.z = faces_downloaded.ptr<cv::Rect>()[i].size().area();
                 person_msg.position = p;
                 people_msg.people.push_back(person_msg);
-            }
-            if (people_msg.people.size() > 0) {
-                people_msg.header = h;
             }
 
             // TODO revert this, this is just for the stupid Floka
