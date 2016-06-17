@@ -258,8 +258,10 @@ int main(int argc, char *argv[])
 
             resized_gpu.download(resized_cpu);
 
-            for (int i = 0; i < detections_num; ++i) {
-               rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
+            if(draw) {
+                for (int i = 0; i < detections_num; ++i) {
+                   rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
+                }
             }
 
             std_msgs::Header h;
@@ -305,7 +307,7 @@ int main(int argc, char *argv[])
 
         }
 
-        char key = (char)waitKey(5);
+        char key = (char)waitKey(1);
 
         if (key == 27)
         {
