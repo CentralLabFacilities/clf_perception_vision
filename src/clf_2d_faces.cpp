@@ -138,7 +138,7 @@ static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, 
     }
     else
     {
-        // matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
+        matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
     }
 }
 
@@ -244,9 +244,11 @@ int main(int argc, char *argv[])
         double detectionTime = tm.getTimeMilli();
         double fps = 1000 / detectionTime;
 
-        //print detections to console
-        cout << setfill(' ') << setprecision(2);
-        cout << setw(6) << fixed << fps << " FPS, " << detections_num << " det";
+        /*
+
+        // cout << setw(6) << fixed << fps << " FPS, " << detections_num << " det";
+        // cout << setfill(' ') << setprecision(2);
+
         if ((filterRects || findLargestObject) && detections_num > 0)
         {
             Rect *faceRects = useGPU ? faces_downloaded.ptr<Rect>() : &facesBuf_cpu[0];
@@ -258,7 +260,10 @@ int main(int argc, char *argv[])
                      << ", " << setw(4) << faceRects[i].height << "]";
             }
         }
+
         cout << endl;
+
+        */
 
         cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
 
