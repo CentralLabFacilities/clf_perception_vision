@@ -296,9 +296,7 @@ int main(int argc, char *argv[])
             }
 
             // TODO revert this, this is just for the stupid Floka
-            if (face_size > 4096.0) {
-                people_pub.publish(people_msg);
-            }
+            people_pub.publish(people_msg);
 
             tm.stop();
             double detectionTime = tm.getTimeMilli();
