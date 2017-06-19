@@ -182,7 +182,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     if (type_descriptor.compare("ORB") == 0) {
         cuda_orb = cuda::ORB::create(max_keypoints);
     } else {
-        cout << "E >>> Sorry, only 5 ORB (for now)" << endl;
+        cout << "E >>> Sorry, only ORB (for now)" << endl;
         exit(EXIT_FAILURE);
     }
 
