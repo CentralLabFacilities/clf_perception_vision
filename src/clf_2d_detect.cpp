@@ -50,6 +50,9 @@ the use of this software, even if advised of the possibility of such damage.
 // SELF
 #include "clf_2d_detect.hpp"
 
+// CUDA
+#include <opencv2/cudaimgproc.hpp>
+
 using namespace std;
 using namespace cv;
 
@@ -177,7 +180,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     target_medians = new cv::Point2d[target_paths.size()];
 
     cuda_orb = cuda::ORB::create(max_keypoints);
-    cuda_bf_matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+    cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 
     for(int i=0; i < target_paths.size(); i++) {
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
@@ -193,7 +196,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         vector<KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
 
-        cuda_orb->operator()(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+        // cuda_orb->operator()(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
         keys_current_target.push_back(tmp_kp);
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
