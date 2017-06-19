@@ -62,6 +62,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudafeatures2d.hpp>
 #include <opencv2/xfeatures2d/cuda.hpp>
+#include <opencv2/cudawarping.hpp>
 
 // BOOST
 #include <boost/date_time/posix_time/posix_time.hpp>
