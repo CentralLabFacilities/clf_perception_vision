@@ -55,7 +55,10 @@ the use of this software, even if advised of the possibility of such damage.
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/gpu/gpu.hpp"
+
+// CUDA
+#include "opencv2/cudafeatures2d.hpp"
+#include "opencv2/xfeatures2d/cuda.hpp"
 
 // ROS
 #include <ros/ros.h>
