@@ -181,6 +181,9 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     if (type_descriptor.compare("ORB") == 0) {
         cuda_orb = cuda::ORB::create(max_keypoints);
+    } else {
+        cout << "E >>> Sorry, only 5 ORB (for now)" << endl;
+        exit(EXIT_FAILURE);
     }
 
     cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
@@ -199,7 +202,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         vector<KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
 
-        // cuda_orb->operator()(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+        cuda_orb->detectAndComputeAsync(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
         keys_current_target.push_back(tmp_kp);
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
@@ -221,13 +224,13 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     }
 
-    //    try {
-    //        cuda_orb->operator()(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
-    //    }
-    //    catch (Exception& e) {
-    //        cout << "E >>> ORB fail O_O" << "\n";
-    //        return;
-    //    }
+    try {
+        cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+    }
+    catch (Exception& e) {
+        cout << "E >>> ORB fail O_O" << "\n";
+        return;
+    }
 
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
