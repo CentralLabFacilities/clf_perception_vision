@@ -51,7 +51,6 @@ the use of this software, even if advised of the possibility of such damage.
 // STD
 #include <iostream>
 #include <iomanip>
-#include "opencv2/contrib/contrib.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -74,7 +73,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 using namespace std;
 using namespace cv;
-using namespace cv::gpu;
+using namespace cv::cuda;
 
 bool toggle = true;
 bool draw = false;
@@ -184,7 +183,7 @@ int main(int argc, char *argv[])
         return cerr << ">>> No GPU found or the library is compiled without GPU support" << endl, -1;
     }
 
-    cv::gpu::printShortCudaDeviceInfo(cv::gpu::getDevice());
+    cv::cuda::printShortCudaDeviceInfo(cv::cuda::getDevice());
 
     string cascadeName;
     string topic;
@@ -213,9 +212,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    CascadeClassifier_GPU cascade_gpu;
+    CascadeClassifier_GPU cascade_cuda;
 
-    if (!cascade_gpu.load(cascadeName))
+    if (!cascade_cuda.load(cascadeName))
     {
         return cerr << ">>> ERROR: Could not load GPU cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
     }
@@ -227,7 +226,7 @@ int main(int argc, char *argv[])
     Mat frame, gray_cpu, resized_cpu, faces_downloaded, frameDisp, image;
     vector<Rect> facesBuf_cpu;
 
-    GpuMat frame_gpu, gray_gpu, resized_gpu, facesBuf_gpu;
+    GpuMat frame_cuda, gray_cuda, resized_cuda, facesBuf_cuda;
 
     bool useGPU = true;
     double scaleFactor = 1.0;
@@ -252,19 +251,19 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            frame_gpu.upload(image.empty() ? frame : image);
+            frame_cuda.upload(image.empty() ? frame : image);
 
-            convertAndResize(frame_gpu, gray_gpu, resized_gpu, scaleFactor);
+            convertAndResize(frame_cuda, gray_cuda, resized_cuda, scaleFactor);
 
             TickMeter tm;
             tm.start();
 
-            cascade_gpu.findLargestObject = findLargestObject;
+            cascade_cuda.findLargestObject = findLargestObject;
 
-            detections_num = cascade_gpu.detectMultiScale(resized_gpu, facesBuf_gpu, 1.2, (filterRects || findLargestObject) ? 4 : 0);
-            facesBuf_gpu.colRange(0, detections_num).download(faces_downloaded);
+            detections_num = cascade_cuda.detectMultiScale(resized_cuda, facesBuf_cuda, 1.2, (filterRects || findLargestObject) ? 4 : 0);
+            facesBuf_cuda.colRange(0, detections_num).download(faces_downloaded);
 
-            resized_gpu.download(resized_cpu);
+            resized_cuda.download(resized_cpu);
 
             if(draw) {
                 for (int i = 0; i < detections_num; ++i) {
