@@ -11,7 +11,7 @@ FIND_PACKAGE(catkin COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_br
 
 SET(OpenCV_MIN_VERSION "3.2.0")
 
-FIND_PACKAGE( OpenCV ${OpenCV_MIN_VERSION} REQUIRED COMPONENTS core features2d imgproc objdetect video highgui flann)
+FIND_PACKAGE( OpenCV ${OpenCV_MIN_VERSION} REQUIRED COMPONENTS core features2d imgproc objdetect video highgui flann cudev cudaarithm cudawarping)
 
 IF(OpenCV_FOUND)
         IF(${OpenCV_VERSION} VERSION_LESS ${OpenCV_MIN_VERSION} AND (SUPPORT_VIDEO OR SUPPORT_IMAGE) )
