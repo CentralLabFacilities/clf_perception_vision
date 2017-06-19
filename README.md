@@ -10,13 +10,9 @@ using OpenCV and CUDA
 ### Installation
 
 Install the latest nvidia cuda toolkit: https://developer.nvidia.com/cuda-toolkit
-This version (master) has been tested with version 7.5
+This version (master) has been tested with version 8.0
 
-    HowTo: http://www.r-tutor.com/gpu-computing/cuda-installation/cuda7.5-ubuntu
-
-Install OpenCV minimum 2.4.12 with CUDA support
-
-    HowTo: http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
+Install OpenCV minimum 3.2.0 with CUDA support
 
 Invoke OpenCV's cmake with:
 
@@ -26,7 +22,7 @@ Then:
 
     git clone https://github.com/CentralLabFacilities/clf_2d_gpu_detect.git
     cd clf_2d_gpu_detect
-    git checkout ros_support
+    git checkout ros_support_cv3
     mkdir build
     cd build
     source /opt/ros/indigo/setup.bash
