@@ -20,6 +20,7 @@ IF(OpenCV_FOUND)
 
         INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 
+        MESSAGE("Found OpenCV ${OpenCV_MIN_VERSION} libraries")
         MESSAGE("Found OpenCV ${OpenCV_VERSION} libraries")
         MESSAGE("Found OpenCV headers ${OpenCV_INCLUDE_DIRS}")
 ELSE()
