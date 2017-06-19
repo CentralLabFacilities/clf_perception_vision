@@ -176,7 +176,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     colors = color_mix();
     target_medians = new cv::Point2d[target_paths.size()];
 
-    cuda_orb = new cuda::ORB(max_keypoints);
+    cuda_orb = cuda::ORB::create(max_keypoints);
     cuda_bf_matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 
     for(int i=0; i < target_paths.size(); i++) {
