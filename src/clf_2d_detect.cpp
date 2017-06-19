@@ -111,7 +111,6 @@ int Detect2D::setup(int argc, char *argv[]) {
     }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
-
     FileStorage fs(argv[1], FileStorage::READ);
 
     if (fs.isOpened()) {\
@@ -244,7 +243,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         vector<DMatch> matches;
 
         try {
-
             try {
 
                 if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
@@ -312,7 +310,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     text_offset_y = 20;
 
     if (do_not_draw == false) {
-
         for (int i=0; i < target_images.size(); i++) {
             try {
                 vector<DMatch>::iterator it;
@@ -362,7 +359,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     for (int i=0; i < target_images.size(); i++) {
-
         if (cum_distance[i] <= detection_threshold && toggle_homography) {
             try {
                 //-- localize the object
