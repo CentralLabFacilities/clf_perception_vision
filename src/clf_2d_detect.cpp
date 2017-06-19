@@ -212,19 +212,19 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     cuda::GpuMat cuda_frame_tmp_img(input_image);
 
     if (scale_factor > 1.0) {
-        cv::cuda::resize(cuda_frame_tmp_img, cuda_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+        cuda::resize(cuda_frame_tmp_img, cuda_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
         cuda::cvtColor(cuda_frame_scaled, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     } else {
         cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     }
 
-    try {
-        cuda_orb->operator()(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
-    }
-    catch (Exception& e) {
-        cout << "E >>> ORB fail O_O" << "\n";
-        return;
-    }
+    //    try {
+    //        cuda_orb->operator()(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+    //    }
+    //    catch (Exception& e) {
+    //        cout << "E >>> ORB fail O_O" << "\n";
+    //        return;
+    //    }
 
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
