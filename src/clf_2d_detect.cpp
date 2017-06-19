@@ -177,7 +177,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     target_medians = new cv::Point2d[target_paths.size()];
 
     cuda_orb = new cuda::ORB_GPU(max_keypoints);
-    cuda_bf_matcher = new cuda::BruteForceMatcher_GPU<Hamming>;
+    cuda_bf_matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 
     for(int i=0; i < target_paths.size(); i++) {
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
