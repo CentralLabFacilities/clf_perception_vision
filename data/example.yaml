@@ -1,8 +1,8 @@
 %YAML:1.0
 targets:
- - /home/fl/milk.png
- - /home/fl/ice_tea.png
- - /home/fl/oil.png
+ - "/home/fl/milk.png"
+ - "/home/fl/ice_tea.png"
+ - "/home/fl/oil.png"
 
 labels:
  - "Milk"
