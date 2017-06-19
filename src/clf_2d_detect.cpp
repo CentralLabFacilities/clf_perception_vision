@@ -416,7 +416,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
                         if (abs(angle) > 80 && abs(angle) < 95) {
                             h.stamp = timestamp;
-                            h.frame_id = "0";
+                            h.frame_id = "camera";
                             msg.header = h;
                             pt.x = target_medians[i].x;
                             pt.y = target_medians[i].y;
@@ -433,9 +433,10 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                 cout << "E >>> Could not derive transform" << endl;
             }
         }
+
         if (cum_distance[i] <= detection_threshold && !toggle_homography){
             h.stamp = timestamp;
-            h.frame_id = "0";
+            h.frame_id = "camera";
             msg.header = h;
             pt.x = target_medians[i].x;
             pt.y = target_medians[i].y;
