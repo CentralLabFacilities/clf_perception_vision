@@ -7,7 +7,7 @@ FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
 
 SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 
-FIND_PACKAGE(catkin COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
+FIND_PACKAGE(catkin COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge cuda)
 
 SET(OpenCV_MIN_VERSION "3.2.0")
 
@@ -20,7 +20,8 @@ IF(OpenCV_FOUND)
 
         INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 
-        MESSAGE("Found OpenCV ${OpenCV_VERSION} libraries ${OpenCV_LIBRARIES} and headers ${OpenCV_INCLUDE_DIRS}")
+        MESSAGE("Found OpenCV ${OpenCV_VERSION} libraries")
+        MESSAGE("Found OpenCV headers ${OpenCV_INCLUDE_DIRS}")
 ELSE()
         MESSAGE(FATAL_ERROR "OpenCV not found.")
 ENDIF()
