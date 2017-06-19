@@ -99,7 +99,7 @@ bool Detect2D::get_silent() {
 }
 
 int Detect2D::setup(int argc, char *argv[]) {
-    cout << ">>> cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
+    cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
 
     if (cuda::getCudaEnabledDeviceCount() == 0)
     {
