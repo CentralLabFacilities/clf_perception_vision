@@ -5,13 +5,11 @@ FIND_PACKAGE(CUDA)
 
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
 
-SET(ENV{ROS_LANG_DISABLE} "genjava")
+SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 
 FIND_PACKAGE(catkin COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
 
 SET(OpenCV_MIN_VERSION "3.2.0")
-
-FIND_PATH(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake OpenCVModules.cmake PATH_SUFFIXES lib/cmake lib)
 
 FIND_PACKAGE( OpenCV ${OpenCV_MIN_VERSION} REQUIRED COMPONENTS core features2d imgproc objdetect video highgui flann)
 
@@ -35,7 +33,7 @@ ENDIF()
 
 SET(ROS_BUILD_TYPE RELEASE)
 SET(CMAKE_BUILD_TYPE RELEASE)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -march=core-avx2 -O3")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
