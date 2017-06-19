@@ -117,8 +117,8 @@ private:
     cv::cuda::GpuMat cuda_camera_tmp_img;
     cv::cuda::GpuMat cuda_desc_camera_image;
 
-    cv::cuda::ORB_GPU *cuda_orb;
-    cv::cuda::BruteForceMatcher_GPU<cv::Hamming> *cuda_bf_matcher;
+    cv::cuda::ORB *cuda_orb;
+    cv::cuda::BruteForceMatcher<cv::Hamming> *cuda_bf_matcher;
 
     ros::NodeHandle node_handle_;
     ros::Publisher object_pub;
