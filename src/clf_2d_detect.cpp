@@ -104,7 +104,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     if (cuda::getCudaEnabledDeviceCount() == 0)
     {
         cout << "E >>> No cuda Enabled Devices" << endl;
-        return -1;
+        exit(EXIT_FAILURE);
     } else {
         cout << ">>> ";
         cuda::printShortCudaDeviceInfo(cuda::getDevice());
