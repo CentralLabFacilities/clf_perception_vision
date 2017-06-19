@@ -58,8 +58,8 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/opencv.hpp>
 
 // GPU
-#include <opencv2/gpu/gpu.hpp>
-#include <opencv2/gpu/gpumat.hpp>
+#include "opencv2/cudafeatures2d.hpp"
+#include "opencv2/xfeatures2d/cuda.hpp"
 
 // BOOST
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -91,7 +91,7 @@ private:
     std::vector<std::string> target_labels;
     std::vector<cv::Mat> target_images;
     std::vector<std::vector<cv::KeyPoint>> keys_current_target;
-    std::vector<cv::gpu::GpuMat> gpu_desc_current_target_image;
+    std::vector<cv::cuda::GpuMat> cuda_desc_current_target_image;
     std::vector<cv::KeyPoint> keys_camera_image;
     cv::Point2d *target_medians;
 
@@ -113,12 +113,12 @@ private:
     std::string draw_homography;
     std::string draw_image;
 
-    cv::gpu::GpuMat gpu_frame_scaled;
-    cv::gpu::GpuMat gpu_camera_tmp_img;
-    cv::gpu::GpuMat gpu_desc_camera_image;
+    cv::cuda::GpuMat cuda_frame_scaled;
+    cv::cuda::GpuMat cuda_camera_tmp_img;
+    cv::cuda::GpuMat cuda_desc_camera_image;
 
-    cv::gpu::ORB_GPU *gpu_orb;
-    cv::gpu::BruteForceMatcher_GPU<cv::Hamming> *gpu_bf_matcher;
+    cv::cuda::ORB_GPU *cuda_orb;
+    cv::cuda::BruteForceMatcher_GPU<cv::Hamming> *cuda_bf_matcher;
 
     ros::NodeHandle node_handle_;
     ros::Publisher object_pub;

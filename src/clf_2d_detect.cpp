@@ -54,7 +54,6 @@ using namespace std;
 using namespace cv;
 
 Detect2D::Detect2D(){}
-
 Detect2D::~Detect2D(){}
 
 vector<Scalar> Detect2D::color_mix() {
@@ -96,15 +95,15 @@ bool Detect2D::get_silent() {
 }
 
 int Detect2D::setup(int argc, char *argv[]) {
-    cout << ">>> gpu Enabled Devices --> " << gpu::getCudaEnabledDeviceCount() << endl;
+    cout << ">>> cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
 
-    if (gpu::getCudaEnabledDeviceCount() == 0)
+    if (cuda::getCudaEnabledDeviceCount() == 0)
     {
-        cout << "E >>> No gpu Enabled Devices" << endl;
+        cout << "E >>> No cuda Enabled Devices" << endl;
         return -1;
     } else {
         cout << ">>> ";
-        gpu::printShortCudaDeviceInfo(gpu::getDevice());
+        cuda::printShortCudaDeviceInfo(cuda::getDevice());
     }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
@@ -177,12 +176,12 @@ int Detect2D::setup(int argc, char *argv[]) {
     colors = color_mix();
     target_medians = new cv::Point2d[target_paths.size()];
 
-    gpu_orb = new gpu::ORB_GPU(max_keypoints);
-    gpu_bf_matcher = new gpu::BruteForceMatcher_GPU<Hamming>;
+    cuda_orb = new cuda::ORB_GPU(max_keypoints);
+    cuda_bf_matcher = new cuda::BruteForceMatcher_GPU<Hamming>;
 
     for(int i=0; i < target_paths.size(); i++) {
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
-        gpu::GpuMat gpu_tmp_img(tmp_img);
+        cuda::GpuMat cuda_tmp_img(tmp_img);
 
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
@@ -192,11 +191,11 @@ int Detect2D::setup(int argc, char *argv[]) {
         target_images.push_back(tmp_img);
 
         vector<KeyPoint> tmp_kp;
-        gpu::GpuMat tmp_gpu_dc;
+        cuda::GpuMat tmp_cuda_dc;
 
-        gpu_orb->operator()(gpu_tmp_img, gpu::GpuMat(), tmp_kp, tmp_gpu_dc);
+        cuda_orb->operator()(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
         keys_current_target.push_back(tmp_kp);
-        gpu_desc_current_target_image.push_back(tmp_gpu_dc);
+        cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
 
     object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>("clf_2d_detect/objects", 1);
@@ -207,17 +206,17 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
 
-    gpu::GpuMat gpu_frame_tmp_img(input_image);
+    cuda::GpuMat cuda_frame_tmp_img(input_image);
 
     if (scale_factor > 1.0) {
-        cv::gpu::resize(gpu_frame_tmp_img, gpu_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
-        gpu::cvtColor(gpu_frame_scaled, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+        cv::cuda::resize(cuda_frame_tmp_img, cuda_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+        cuda::cvtColor(cuda_frame_scaled, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     } else {
-        gpu::cvtColor(gpu_frame_tmp_img, gpu_camera_tmp_img, COLOR_BGR2GRAY);
+        cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     }
 
     try {
-        gpu_orb->operator()(gpu_camera_tmp_img, gpu::GpuMat(), keys_camera_image, gpu_desc_camera_image);
+        cuda_orb->operator()(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
     }
     catch (Exception& e) {
         cout << "E >>> ORB fail O_O" << "\n";
@@ -244,9 +243,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
             try {
 
-                if(!gpu_desc_current_target_image[i].empty() && !gpu_desc_camera_image.empty()) {
+                if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
 
-                    gpu_bf_matcher->match(gpu_desc_current_target_image[i], gpu_desc_camera_image, matches);
+                    cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
 
                     // Keep best matches only to have a nice drawing.
                     // We sort distance between descriptor matches
