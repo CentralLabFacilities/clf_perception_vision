@@ -13,8 +13,8 @@ SET(OpenCV_MIN_VERSION "3.2.0")
 
 FIND_PATH(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake OpenCVModules.cmake PATH_SUFFIXES lib/cmake lib)
 
-FIND_PACKAGE( OpenCV ${OpenCV_MIN_VERSION} REQUIRED COMPONENTS core features2d imgproc objdetect video highgui flann
-              gpu)
+FIND_PACKAGE( OpenCV ${OpenCV_MIN_VERSION} REQUIRED COMPONENTS core features2d imgproc objdetect video highgui flann)
+
 IF(OpenCV_FOUND)
         IF(${OpenCV_VERSION} VERSION_LESS ${OpenCV_MIN_VERSION} AND (SUPPORT_VIDEO OR SUPPORT_IMAGE) )
                 MESSAGE(FATAL_ERROR "OpenCV version (${OpenCV_VERSION} is present, while ${OpenCV_MIN_VERSION}+ is required")
@@ -25,6 +25,12 @@ IF(OpenCV_FOUND)
         MESSAGE("Found OpenCV ${OpenCV_VERSION} libraries ${OpenCV_LIBRARIES} and headers ${OpenCV_INCLUDE_DIRS}")
 ELSE()
         MESSAGE(FATAL_ERROR "OpenCV not found.")
+ENDIF()
+
+IF(OpenCV_CUDA_VERSION)
+	MESSAGE("Found OpenCV_CUDA_VERSION: ${OpenCV_CUDA_VERSION}")
+ELSE()
+	MESSAGE(FATAL_ERROR "OpenCV_CUDA_VERSION NOT FOUND")
 ENDIF()
 
 SET(ROS_BUILD_TYPE RELEASE)
