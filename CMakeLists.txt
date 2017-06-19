@@ -9,7 +9,7 @@ SET(ENV{ROS_LANG_DISABLE} "genjava")
 
 FIND_PACKAGE(catkin COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
 
-SET(OpenCV_MIN_VERSION "2.4.12.2")
+SET(OpenCV_MIN_VERSION "3.2.0")
 
 FIND_PATH(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake OpenCVModules.cmake PATH_SUFFIXES lib/cmake lib)
 
