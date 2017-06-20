@@ -204,6 +204,7 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     if (type_descriptor.compare("ORB") == 0) {
         cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+    }
     if (type_descriptor.compare("SURF") == 0) {
         cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cuda_surf.defaultNorm());
     }
