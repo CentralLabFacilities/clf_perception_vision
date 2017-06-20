@@ -441,7 +441,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        if (abs(angle) > 80 && abs(angle) < 95) {
+                        if (abs(angle) > 70 && abs(angle) < 95) {
                             h.stamp = timestamp;
                             h.frame_id = "camera";
                             msg.header = h;

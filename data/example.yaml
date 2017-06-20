@@ -17,4 +17,4 @@ keypointalgo: ORB
 
 homography: true
 
-silent: true
+silent: false
