@@ -181,7 +181,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     target_medians = new cv::Point2d[target_paths.size()];
 
     if (type_descriptor.compare("ORB") == 0) {
-        cuda_orb = cuda::ORB::create(max_keypoints);
+        cuda_orb = cuda::ORB::create(); #max_keypoints
     } else {
         cout << "E >>> Sorry, only ORB (for now)" << endl;
         exit(EXIT_FAILURE);
