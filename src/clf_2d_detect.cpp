@@ -277,6 +277,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             catch (Exception& e) {
                 cout << "E >>> ORB fail O_O" << "\n";
             }
+    }
+
     if (type_descriptor.compare("SURF") == 0) {
         try {
             cuda_surf(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
