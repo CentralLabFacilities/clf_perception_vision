@@ -276,7 +276,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             }
             catch (Exception& e) {
                 cout << "E >>> ORB fail O_O" << "\n";
-                return -1;
             }
     if (type_descriptor.compare("SURF") == 0) {
         try {
@@ -284,7 +283,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         }
         catch (Exception& e) {
             cout << "E >>> SURF fail O_O" << "\n";
-            return -1;
         }
     }
 
