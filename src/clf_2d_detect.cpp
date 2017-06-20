@@ -238,14 +238,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
     catch (Exception& e) {
         cout << "E >>> ORB fail O_O" << "\n";
-        return;
+        return -1;
     }
 
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
     if (keys_camera_image.empty()) {
         cout << "E >>> Could not derive enough keypoints: " << endl;
-        return;
+        return -1;
     }
 
     vector<double> cum_distance;
