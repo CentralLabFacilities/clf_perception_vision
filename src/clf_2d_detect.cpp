@@ -428,6 +428,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                 vector<Point2f> scene;
 
                 vector<DMatch>::iterator it;
+
                 for (it = cum_matches[i].begin(); it != cum_matches[i].end(); it++) {
                     obj.push_back(keys_current_target[i][it->queryIdx].pt);
                     scene.push_back(keys_camera_image[it->trainIdx].pt);
