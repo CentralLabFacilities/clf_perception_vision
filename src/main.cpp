@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 
         }
 
-        if (cv::waitKey(1) != 255) {
+        if (cv::waitKey(1) == 27) {
             break;
         }
     }
