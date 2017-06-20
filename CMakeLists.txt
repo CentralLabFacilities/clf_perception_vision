@@ -85,8 +85,10 @@ ADD_EXECUTABLE(clf_2d_detect_ros
 #
 #)
 
-TARGET_LINK_LIBRARIES(clf_2d_detect_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS}) # ${catkin_LIBRARIES}
-# TARGET_LINK_LIBRARIES(clf_2d_faces_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS})
+# NO ${catkin_LIBRARIES}
+
+TARGET_LINK_LIBRARIES(clf_2d_detect_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+# TARGET_LINK_LIBRARIES(clf_2d_faces_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_2d_detect_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_2d_faces_ros RUNTIME DESTINATION bin)
