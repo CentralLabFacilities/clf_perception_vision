@@ -424,8 +424,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         if (cum_distance[i] <= detection_threshold && toggle_homography) {
             try {
                 //-- localize the object
-                vector<Point2d> obj;
-                vector<Point2d> scene;
+                vector<Point2f> obj;
+                vector<Point2f> scene;
 
                 vector<DMatch>::iterator it;
                 for (it = cum_matches[i].begin(); it != cum_matches[i].end(); it++) {
@@ -433,20 +433,24 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     scene.push_back(keys_camera_image[it->trainIdx].pt);
                 }
 
-                if( !obj.empty() && !scene.empty() && cum_matches[i].size() >= 4) {
+                if(!obj.empty() && !scene.empty() && cum_matches[i].size() >= 4) {
 
-                    Mat H = findHomography(obj, scene, cv::RANSAC);
+                    Mat H = findHomography(obj, scene, CV_RANSAC);
+
+                    // cout << H << endl;
 
                     // Get the corners from the object to be detected
-                    vector<cv::Point2d> obj_corners(4);
+                    vector<cv::Point2f> obj_corners(4);
                     obj_corners[0] = Point(0, 0);
                     obj_corners[1] = Point(target_images[i].cols, 0);
                     obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
                     obj_corners[3] = Point(0, target_images[i].rows);
 
+                    // cout << obj_corners << endl;
+
                     // vector<Point2f> scene_corners_f(4);
-                    vector<Point2d> scene_corners(4);
-                    vector<Point2d> scene_corners_draw(4);
+                    vector<Point2f> scene_corners(4);
+                    vector<Point2f> scene_corners_draw(4);
 
                     perspectiveTransform(obj_corners, scene_corners, H);
 
