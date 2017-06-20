@@ -36,6 +36,26 @@ SET(ROS_BUILD_TYPE RELEASE)
 SET(CMAKE_BUILD_TYPE RELEASE)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
+# This is a hack :( ROS also provides an OPENCV3 installation
+# without CUDA support. Somehow, catkin enforces the ROS CV
+# and thus, the target is linked against the 'wrong' CV
+
+SET(CUSTOM_ROS_LIBS /opt/ros/kinetic/lib/libroscpp.so
+                    /opt/ros/kinetic/lib/libroscpp.so
+                    /opt/ros/kinetic/lib/libcv_bridge.so
+                    /opt/ros/kinetic/lib/librosconsole.so
+                    /opt/ros/kinetic/lib/libroscpp_serialization.so
+                    /opt/ros/kinetic/lib/librostime.so
+	                /opt/ros/kinetic/lib/libmessage_filters.so
+                    /opt/ros/kinetic/lib/libclass_loader.so
+                    /opt/ros/kinetic/lib/libroslib.so
+                    /opt/ros/kinetic/lib/libxmlrpcpp.so
+                    /opt/ros/kinetic/lib/libcpp_common.so
+                    /opt/ros/kinetic/lib/librosconsole_log4cxx.so
+                    /opt/ros/kinetic/lib/librosconsole_backend_interface.so
+                    /opt/ros/kinetic/lib/librospack.so
+)
+
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
   CATKIN_DEPENDS message_runtime
@@ -62,8 +82,8 @@ ADD_EXECUTABLE(clf_2d_detect_ros
 #
 #)
 
-TARGET_LINK_LIBRARIES(clf_2d_detect_ros ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-# TARGET_LINK_LIBRARIES(clf_2d_faces_ros ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_2d_detect_ros ${OpenCV_LIBRARIES} ${CUSTOM_ROS_LIBS})
+# TARGET_LINK_LIBRARIES(clf_2d_faces_ros ${OpenCV_LIBRARIES} ${CUSTOM_ROS_LIBS})
 
 INSTALL(TARGETS clf_2d_detect_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_2d_faces_ros RUNTIME DESTINATION bin)
