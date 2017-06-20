@@ -134,8 +134,9 @@ int main(int argc, char *argv[]) {
 
         }
 
-        cout << "CV WAIT KEY " << cv::waitKey(1) << endl;
-
+        if (cv::waitKey(1) != 255) {
+            break;
+        }
     }
 
     ros::shutdown();
