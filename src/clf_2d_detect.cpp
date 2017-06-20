@@ -192,7 +192,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     for(int i=0; i < target_paths.size(); i++) {
 
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
-        Mat tmp_img_resize
+        Mat tmp_img_resize;
         cuda::resize(tmp_img, tmp_img_resize, cv::Size(), 2.0, 2.0, cv::INTER_LINEAR);
 
         if (tmp_img_resize.rows*tmp_img_resize.cols <= 0) {
