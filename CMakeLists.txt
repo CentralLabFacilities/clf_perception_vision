@@ -54,7 +54,10 @@ SET(CUSTOM_ROS_LIBS /opt/ros/kinetic/lib/libroscpp.so
                     /opt/ros/kinetic/lib/librosconsole_log4cxx.so
                     /opt/ros/kinetic/lib/librosconsole_backend_interface.so
                     /opt/ros/kinetic/lib/librospack.so
+                    /opt/ros/kinetic/lib/libimage_transport.so
 )
+
+MESSAGE(STATUS "CUSTOM ROS Lib Paths ": ${CUSTOM_ROS_LIBS}")
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
