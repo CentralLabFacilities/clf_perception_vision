@@ -206,7 +206,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
     }
     if (type_descriptor.compare("SURF") == 0) {
-        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cuda_surf.defaultNorm());
+        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(); //detection_threshold
     }
 
     for(int i=0; i < target_paths.size(); i++) {

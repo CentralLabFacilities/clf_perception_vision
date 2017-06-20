@@ -5,13 +5,13 @@ targets:
 labels:
  - "Milk"
 
-maxkeypoints: 1500
+maxkeypoints: 3500
 
 maxmatches: 25
 
 detectionthreshold: 33
 
-scalefactor: 1.0
+scalefactor: 2.0
 
 keypointalgo: ORB
 
