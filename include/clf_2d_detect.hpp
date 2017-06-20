@@ -121,7 +121,7 @@ private:
     cv::cuda::GpuMat cuda_desc_camera_image;
 
     cv::Ptr<cv::cuda::ORB> cuda_orb;
-    cv::Ptr<cv::cuda::SURF_CUDA> cuda_surf;
+    // cv::Ptr<cv::cuda::SURF_CUDA> cuda_surf;
     cv::Ptr<cv::cuda::DescriptorMatcher> cuda_bf_matcher;
 
     ros::NodeHandle node_handle_;

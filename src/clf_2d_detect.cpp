@@ -60,6 +60,8 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
+cuda::SURF_CUDA cuda_surf();
+
 vector<Scalar> Detect2D::color_mix() {
     vector<Scalar> colormix;
     // Blue
