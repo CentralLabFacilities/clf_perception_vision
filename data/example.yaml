@@ -1,17 +1,17 @@
 %YAML:1.0
 targets:
- - "/home/fl/milk.jpg"
+ - "/home/fl/milk.png"
 
 labels:
  - "Milk"
 
-maxkeypoints: 2500
+maxkeypoints: 1500
 
 maxmatches: 25
 
-detectionthreshold: 33
+detectionthreshold: 50
 
-scalefactor: 1.0
+scalefactor: 2.0
 
 keypointalgo: ORB
 

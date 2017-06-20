@@ -438,8 +438,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     Mat H = findHomography(obj, scene, CV_RANSAC);
 
-                    // cout << H << endl;
-
                     // Get the corners from the object to be detected
                     vector<cv::Point2f> obj_corners(4);
                     obj_corners[0] = Point(0, 0);
@@ -447,19 +445,17 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
                     obj_corners[3] = Point(0, target_images[i].rows);
 
-                    // cout << obj_corners << endl;
-
                     // vector<Point2f> scene_corners_f(4);
-                    vector<Point2f> scene_corners(4);
-                    vector<Point2f> scene_corners_draw(4);
+                    vector<Point2f> scene_corners;
+                    vector<Point2f> scene_corners_draw;
 
                     perspectiveTransform(obj_corners, scene_corners, H);
 
                     // TODO: Fix the view for scaled images!
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
                         // scene_corners_f.push_back(cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
-                        double x = scene_corners[i].x/scale_factor;
-                        double y = scene_corners[i].y/scale_factor;
+                        float x = scene_corners[i].x/scale_factor;
+                        float y = scene_corners[i].y/scale_factor;
                         scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
 
@@ -477,7 +473,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        if (abs(angle) > 80 && abs(angle) < 95) {
+                        if (abs(angle) > 85 && abs(angle) < 95) {
                             h.stamp = timestamp;
                             h.frame_id = "camera";
                             msg.header = h;
