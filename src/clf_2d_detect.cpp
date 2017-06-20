@@ -192,8 +192,10 @@ int Detect2D::setup(int argc, char *argv[]) {
                                      31,
                                      20,
                                      true);
+    } else if (type_descriptor.compare("SURF") == 0) {
+        cuda_surf = cuda::CUDA_SURF::create();
     } else {
-        cout << "E >>> Sorry, only ORB (for now)" << endl;
+        cout << "E >>> Unknown Detector Algorithm " << type_descriptor << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -220,12 +222,22 @@ int Detect2D::setup(int argc, char *argv[]) {
         vector<KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
 
-        try {
-            cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
-        }
-        catch (Exception& e) {
-            cout << "E >>> ORB init fail O_O | Maybe not enough keypoints in training image" << "\n";
-            return -1;
+        if (type_descriptor.compare("ORB") == 0) {
+            try {
+                cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+            }
+            catch (Exception& e) {
+                cout << "E >>> ORB init fail O_O | Maybe not enough keypoints in training image" << "\n";
+                return -1;
+            }
+        if (type_descriptor.compare("SURF") == 0) {
+            try {
+                cuda_surf->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+            }
+            catch (Exception& e) {
+                cout << "E >>> SURF init fail O_O | Maybe not enough keypoints in training image" << "\n";
+                return -1;
+            }
         }
 
         keys_current_target.push_back(tmp_kp);
@@ -249,12 +261,22 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     }
 
-    try {
-        cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
-    }
-    catch (Exception& e) {
-        cout << "E >>> ORB fail O_O" << "\n";
-        return;
+    if (type_descriptor.compare("ORB") == 0) {
+            try {
+                cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+            }
+            catch (Exception& e) {
+                cout << "E >>> ORB fail O_O" << "\n";
+                return -1;
+            }
+    if (type_descriptor.compare("SURF") == 0) {
+        try {
+            cuda_surf->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+        }
+        catch (Exception& e) {
+            cout << "E >>> SURF fail O_O" << "\n";
+            return -1;
+        }
     }
 
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();

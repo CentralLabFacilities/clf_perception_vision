@@ -13,7 +13,7 @@ detectionthreshold: 33
 
 scalefactor: 1.0
 
-keypointalgo: ORB
+keypointalgo: SURF
 
 homography: true
 
