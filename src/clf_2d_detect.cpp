@@ -210,7 +210,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda::GpuMat tmp_cuda_dc;
 
         try {
-            cuda_orb->detectAndComputeAsync(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+            cuda_orb->detectAndCompute(cuda_tmp_img, noArray(), tmp_kp, tmp_cuda_dc);
         }
         catch (Exception& e) {
             cout << "E >>> ORB init fail O_O" << "\n";
