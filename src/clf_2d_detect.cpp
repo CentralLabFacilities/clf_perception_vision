@@ -237,6 +237,7 @@ int Detect2D::setup(int argc, char *argv[]) {
                 cout << "E >>> ORB init fail O_O | Maybe not enough keypoints in training image" << "\n";
                 return -1;
             }
+        }
         if (type_descriptor.compare("SURF") == 0) {
             try {
                 cuda_surf(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
