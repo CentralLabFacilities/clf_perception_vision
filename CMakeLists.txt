@@ -57,7 +57,7 @@ SET(CUSTOM_ROS_LIBS /opt/ros/kinetic/lib/libroscpp.so
                     /opt/ros/kinetic/lib/libimage_transport.so
 )
 
-MESSAGE(STATUS "CUSTOM ROS Lib Paths ": ${CUSTOM_ROS_LIBS}")
+MESSAGE(STATUS "CUSTOM_ROS_LIBS ": ${CUSTOM_ROS_LIBS})
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
