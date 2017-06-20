@@ -9,7 +9,7 @@ maxkeypoints: 3500
 
 maxmatches: 25
 
-detectionthreshold: 33
+detectionthreshold: 20
 
 scalefactor: 1.0
 
