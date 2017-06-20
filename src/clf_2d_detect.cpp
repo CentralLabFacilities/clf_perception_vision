@@ -193,13 +193,12 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
 
-        cuda::GpuMat cuda_tmp_img;
-        cuda_tmp_img.upload(tmp_img);
-
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
             return -1;
         }
+
+        cuda::GpuMat cuda_tmp_img(tmp_img);
 
         if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
             cout << "E >>> CUDA Image is empty or cannot be found" << endl;
@@ -212,7 +211,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda::GpuMat tmp_cuda_dc;
 
         try {
-            cuda_orb->detectAndCompute(cuda_tmp_img, noArray(), tmp_kp, tmp_cuda_dc);
+            cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat, tmp_kp, tmp_cuda_dc);
         }
         catch (Exception& e) {
             cout << "E >>> ORB init fail O_O" << "\n";
