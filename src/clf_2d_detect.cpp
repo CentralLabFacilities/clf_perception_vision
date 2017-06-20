@@ -199,6 +199,11 @@ int Detect2D::setup(int argc, char *argv[]) {
             return -1;
         }
 
+        if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
+            cout << "E >>> CUDA Image is empty or cannot be found" << endl;
+            return -1;
+        }
+
         target_images.push_back(tmp_img);
 
         vector<KeyPoint> tmp_kp;
