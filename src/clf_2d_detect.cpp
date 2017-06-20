@@ -60,7 +60,7 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
-cuda::SURF_CUDA cuda_surf;
+cuda::SURF_CUDA cuda_surf(100);
 
 vector<Scalar> Detect2D::color_mix() {
     vector<Scalar> colormix;
@@ -334,7 +334,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     for (int i = 0; i<max_number_matching_points; i++)
                     {
-                        if (matches[index.at<int>(i, 0)].distance <= detection_threshold*1.5) {
+                        if (matches[index.at<int>(i, 0)].distance <= detection_threshold) {
                             bestMatches.push_back(matches[index.at<int>(i, 0)]);
                         }
                     }
@@ -472,7 +472,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        if (abs(angle) > 70 && abs(angle) < 95) {
+                        if (abs(angle) > 80 && abs(angle) < 95) {
                             h.stamp = timestamp;
                             h.frame_id = "camera";
                             msg.header = h;

@@ -5,15 +5,15 @@ targets:
 labels:
  - "Milk"
 
-maxkeypoints: 500
+maxkeypoints: 1500
 
 maxmatches: 25
 
-detectionthreshold: 20
+detectionthreshold: 33
 
 scalefactor: 1.0
 
-keypointalgo: SURF
+keypointalgo: ORB
 
 homography: true
 
