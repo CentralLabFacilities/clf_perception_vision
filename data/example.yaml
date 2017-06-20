@@ -1,13 +1,9 @@
 %YAML:1.0
 targets:
  - "/home/fl/milk.jpg"
- - "/home/fl/ice_tea.jpg"
- - "/home/fl/oil.jpg"
 
 labels:
  - "Milk"
- - "Ice Tea"
- - "Oil"
 
 maxkeypoints: 1500
 
