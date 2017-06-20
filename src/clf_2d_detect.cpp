@@ -192,13 +192,15 @@ int Detect2D::setup(int argc, char *argv[]) {
     for(int i=0; i < target_paths.size(); i++) {
 
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
+        Mat tmp_img_resize
+        cuda::resize(tmp_img, tmp_img_resize, cv::Size(), 2.0, 2.0, cv::INTER_LINEAR);
 
-        if (tmp_img.rows*tmp_img.cols <= 0) {
+        if (tmp_img_resize.rows*tmp_img_resize.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
             return -1;
         }
 
-        cuda::GpuMat cuda_tmp_img(tmp_img);
+        cuda::GpuMat cuda_tmp_img(tmp_img_resize);
 
         if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
             cout << "E >>> CUDA Image is empty or cannot be found" << endl;
