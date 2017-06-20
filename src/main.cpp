@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
     cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     cv::Mat current_image;
 
-    cout << ">>> Press 'q' to exit" << endl;
-    cout << ">>> NOTE Displaying results (silent:false) has a huge impact on the loop rate for large images" << endl;
+    cout << ">>> Press 'ESC' to exit" << endl;
+    cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15 % less)" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
 
     while(true) {
