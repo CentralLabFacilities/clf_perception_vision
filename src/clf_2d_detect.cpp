@@ -209,7 +209,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         }
         catch (Exception& e) {
             cout << "E >>> ORB init fail O_O" << "\n";
-            return;
+            return -1;
         }
 
         keys_current_target.push_back(tmp_kp);
