@@ -5,7 +5,7 @@ targets:
 labels:
  - "Milk"
 
-maxkeypoints: 1500
+maxkeypoints: 3500
 
 maxmatches: 25
 
