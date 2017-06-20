@@ -192,14 +192,19 @@ int Detect2D::setup(int argc, char *argv[]) {
                                      31,
                                      20,
                                      true);
+        cout << ">>> Using: " << type_descriptor << endl;
     } else if (type_descriptor.compare("SURF") == 0) {
-        cuda_surf = cuda::SURF_CUDA::create();
+        cout << ">>> Using: " << type_descriptor << endl;
     } else {
         cout << "E >>> Unknown Detector Algorithm " << type_descriptor << endl;
         exit(EXIT_FAILURE);
     }
 
-    cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+    if (type_descriptor.compare("ORB") == 0) {
+        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+    if (type_descriptor.compare("SURF") == 0) {
+        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cuda_surf.defaultNorm());
+    }
 
     for(int i=0; i < target_paths.size(); i++) {
 
@@ -232,7 +237,7 @@ int Detect2D::setup(int argc, char *argv[]) {
             }
         if (type_descriptor.compare("SURF") == 0) {
             try {
-                cuda_surf->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
+                cuda_surf(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
             catch (Exception& e) {
                 cout << "E >>> SURF init fail O_O | Maybe not enough keypoints in training image" << "\n";
@@ -271,7 +276,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             }
     if (type_descriptor.compare("SURF") == 0) {
         try {
-            cuda_surf->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+            cuda_surf(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
         }
         catch (Exception& e) {
             cout << "E >>> SURF fail O_O" << "\n";
