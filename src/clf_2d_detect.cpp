@@ -193,7 +193,7 @@ int Detect2D::setup(int argc, char *argv[]) {
                                      20,
                                      true);
     } else if (type_descriptor.compare("SURF") == 0) {
-        cuda_surf = cuda::CUDA_SURF::create();
+        cuda_surf = cuda::SURF_CUDA::create();
     } else {
         cout << "E >>> Unknown Detector Algorithm " << type_descriptor << endl;
         exit(EXIT_FAILURE);
