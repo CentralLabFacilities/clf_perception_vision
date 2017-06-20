@@ -99,16 +99,17 @@ bool Detect2D::get_silent() {
 }
 
 int Detect2D::setup(int argc, char *argv[]) {
-//    cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
-//
-//    if (cuda::getCudaEnabledDeviceCount() == 0)
-//    {
-//        cout << "E >>> No cuda Enabled Devices" << endl;
-//        exit(EXIT_FAILURE);
-//    } else {
-//        cout << ">>> ";
-//        cuda::printShortCudaDeviceInfo(cuda::getDevice());
-//    }
+
+    cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
+
+    if (cuda::getCudaEnabledDeviceCount() == 0)
+    {
+        cout << "E >>> No cuda Enabled Devices" << endl;
+        exit(EXIT_FAILURE);
+    } else {
+        cout << ">>> ";
+        cuda::printShortCudaDeviceInfo(cuda::getDevice());
+    }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
     FileStorage fs(argv[1], FileStorage::READ);
