@@ -190,6 +190,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 
     for(int i=0; i < target_paths.size(); i++) {
+
         Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
         cuda::GpuMat cuda_tmp_img(tmp_img);
 
