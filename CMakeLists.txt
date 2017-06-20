@@ -7,6 +7,8 @@ FIND_PACKAGE(CUDA)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
 FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
 
+MESSAGE(STATUS "catkin_LIBRARIES: " ${catkin_LIBRARIES})
+
 SET(OpenCV_MIN_VERSION "3.2.0")
 
 FIND_PACKAGE(OpenCV ${OpenCV_MIN_VERSION} REQUIRED)
@@ -16,10 +18,10 @@ IF(OpenCV_FOUND)
                 MESSAGE(FATAL_ERROR "OpenCV version (${OpenCV_VERSION} is present, while ${OpenCV_MIN_VERSION}+ is required")
         ENDIF()
 
+        MESSAGE(STATUS "OpenCV_VERSION: " ${OpenCV_VERSION})
         MESSAGE(STATUS "OpenCV_INCLUDE_DIRS: " ${OpenCV_INCLUDE_DIRS})
         MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBRARIES})
         MESSAGE(STATUS "OpenCV_LIBRARY_DIRS: " ${OpenCV_LIBRARY_DIRS})
-        MESSAGE(STATUS "OpenCV_VERSION: " ${OpenCV_VERSION})
 ELSE()
         MESSAGE(FATAL_ERROR "OpenCV not found.")
 ENDIF()
