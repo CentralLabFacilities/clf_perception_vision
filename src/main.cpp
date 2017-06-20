@@ -136,8 +136,6 @@ int main(int argc, char *argv[]) {
 
     }
 
-    // This seems to make things worse. Investigate.
-    // cv::destroyAllWindows();
     ros::shutdown();
 
     cout << ">>> Cleaning Up. Goodbye!" << endl;
