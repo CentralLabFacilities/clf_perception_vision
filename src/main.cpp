@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     cv::Mat current_image;
 
     cout << ">>> Press 'ESC' to exit" << endl;
-    cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15 % less)" << endl;
+    cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15% less)" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for comparison" << endl;
 
     while(true) {
