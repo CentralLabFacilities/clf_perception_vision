@@ -1,14 +1,9 @@
 %YAML:1.0
 targets:
- - "/home/fl/ice_tea_left.png"
- - "/home/fl/ice_tea_right.png"
- - "/home/fl/milk.png"
-
+ - "/home/fl/ice_all.png"
 
 labels:
  - "ICE TEA"
- - "ICE TEA"
- - "MILK"
 
 maxkeypoints_orb: 1500
 

@@ -224,6 +224,12 @@ int Detect2D::setup(int argc, char *argv[]) {
         // keypoint detection
 
         Mat init = imread(target_paths[i], IMREAD_GRAYSCALE);
+
+        if (init.rows*init.cols <= 0) {
+            cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
+            exit(EXIT_FAILURE);
+        }
+
         cv::Size size(init.cols*2,init.rows*2);
         cv::Mat tmp_img;
         cv::resize(init, tmp_img, size);
