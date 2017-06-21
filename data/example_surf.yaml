@@ -1,15 +1,11 @@
 %YAML:1.0
 targets:
- - "/home/fl/ice_tea1.png"
- - "/home/fl/ice_tea2.png"
- - "/home/fl/ice_tea3.png"
- - "/home/fl/ice_tea4.png"
+ - "/home/fl/ice_tea_left.png"
+ - "/home/fl/ice_tea_right.png"
  - "/home/fl/milk.png"
 
 
 labels:
- - "ICE TEA"
- - "ICE TEA"
  - "ICE TEA"
  - "ICE TEA"
  - "MILK"
