@@ -523,7 +523,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                 }
 
             } catch (cv::Exception& e) {
-                cout << "E >>> Could not derive transform" << endl;
+                cout << "W >>> Could not derive transform" << endl;
             }
         }
 
