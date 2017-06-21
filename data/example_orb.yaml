@@ -5,13 +5,13 @@ targets:
 labels:
  - "ICE TEA"
 
-maxkeypoints_orb: 2500
+maxkeypoints_orb: 1000
 
 minmatches: 10
 
 maxmatches: 20
 
-detectionthreshold: 1.1
+detectionthreshold: 1.0
 
 scalefactor: 1.0
 
