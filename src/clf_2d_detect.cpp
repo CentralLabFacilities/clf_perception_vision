@@ -335,6 +335,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                         sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
 
+                        // cout << "BF Matches " << (int)matches.size() << endl;
+
                         for (int i = 0; i<(int)matches.size()-1; i++) {
                             if (matches[index.at<int>(i, 0)].distance < detection_threshold*matches[index.at<int>(i+1, 0)].distance) {
                                 bestMatches.push_back(matches[index.at<int>(i, 0)]);
@@ -352,6 +354,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             cout << "E >>> Not enough matches: " << matches.size() << " | " << min_matches << " are required" << endl;
                             continue;
                         }
+
+                        // cout << "KNN Matches " << (int)knn_matches.size() << endl;
 
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )

@@ -5,17 +5,17 @@ targets:
 labels:
  - "ICE TEA"
 
-maxkeypoints: 100
+maxkeypoints: 500
 
 minmatches: 10
 
-detectionthreshold: 1.0
+detectionthreshold: 0.7
 
 scalefactor: 1.0
 
-keypointalgo: ORB
+keypointalgo: SURF
 
-matcher: BF
+matcher: KNN
 
 homography: true
 
