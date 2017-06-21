@@ -3,9 +3,14 @@ targets:
  - "/home/fl/ice_tea.png"
  - "/home/fl/oil.png"
  - "/home/fl/milk.png"
+ - "/home/fl/ice_tea.png"
+ - "/home/fl/oil.png"
+
 
 labels:
  - "ICE TEA"
+ - "OIL"
+ - "MILK"
  - "OIL"
  - "MILK"
 
@@ -17,7 +22,7 @@ maxmatches: 20
 
 detectionthreshold: 0.75
 
-scalefactor: 1.0
+scalefactor: 2.0
 
 keypointalgo: SURF
 
