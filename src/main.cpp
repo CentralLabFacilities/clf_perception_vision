@@ -96,6 +96,8 @@ int main(int argc, char *argv[]) {
     cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15% less)" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for results" << endl;
 
+    ros::Time last_computed_frame = ros::Time::now();
+
     while(true) {
 
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
@@ -105,8 +107,11 @@ int main(int argc, char *argv[]) {
         if(toggle) {
             try {
                 ros_grabber.getImage(&current_image);
-                if (current_image.rows+current_image.cols > 0) {
-                    detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
+                if (current_image.rows*current_image.cols > 0) {
+                    if(last_computed_frame != ros_grabber.getLastFrame()) {
+                        detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
+                        last_computed_frame = ros_grabber.getLastFrame();
+                    }
                 } else {
                     cout << "E >>> Image could not be grabbed" << endl;
                 }
@@ -119,7 +124,7 @@ int main(int argc, char *argv[]) {
             string string_time_main = to_string(diff_main.total_milliseconds());
 
             if (!detect2d.get_silent()) {
-                cv::putText(current_image, "Delta T (Total+nDisplay): "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
+                cv::putText(current_image, "Time Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
                 if (current_image.cols > 1000) {
                     cv::Size size(current_image.cols/2,current_image.rows/2);
                     cv::Mat resize;

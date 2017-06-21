@@ -1,19 +1,21 @@
 %YAML:1.0
 targets:
- - "/home/fl/milk.png"
+ - "/home/fl/ice_tea_2.png"
 
 labels:
- - "Milk"
+ - "ICE TEA"
 
-maxkeypoints: 1500
+maxkeypoints: 100
 
-maxmatches: 25
+minmatches: 10
 
-detectionthreshold: 50
+detectionthreshold: 1.0
 
-scalefactor: 2.0
+scalefactor: 1.0
 
 keypointalgo: ORB
+
+matcher: BF
 
 homography: true
 

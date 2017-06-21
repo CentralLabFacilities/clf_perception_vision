@@ -46,6 +46,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 // STD
 #include <stdlib.h>
+#include <unistd.h>
 
 // CUDA
 #include <opencv2/cudaimgproc.hpp>
@@ -60,7 +61,12 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
-cuda::SURF_CUDA cuda_surf(100);
+const int minhessian = 400;
+const unsigned int microseconds = 1000;
+
+Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
+Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L2);
+cuda::SURF_CUDA cuda_surf(minhessian);
 
 vector<Scalar> Detect2D::color_mix() {
     vector<Scalar> colormix;
@@ -116,18 +122,18 @@ int Detect2D::setup(int argc, char *argv[]) {
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
     FileStorage fs(argv[1], FileStorage::READ);
 
-    if (fs.isOpened()) {\
+    if (fs.isOpened()) {
         fs["keypointalgo"] >> type_descriptor;
         cout << ">>> Keypoint Descriptor --> " << type_descriptor  << endl;
 
-        point_matcher = "BruteForce (Hamming)";
+        fs["matcher"] >> point_matcher;
         cout << ">>> Matching Algorithm --> " << point_matcher  << endl;
 
         fs["maxkeypoints"] >> max_keypoints;
-        cout << ">>> Keypoints: --> " << max_keypoints  << endl;
+        cout << ">>> Max Keypoints: --> " << max_keypoints  << endl;
 
-        max_number_matching_points = fs["maxmatches"];
-        cout << ">>> Maximum number of matching points --> " << max_number_matching_points << endl;
+        fs["minmatches"] >> min_matches;
+        cout << ">>> Min Matches: --> " << min_matches  << endl;
 
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
@@ -194,20 +200,14 @@ int Detect2D::setup(int argc, char *argv[]) {
                                      31,
                                      20,
                                      true);
-        cout << ">>> Using: " << type_descriptor << endl;
     } else if (type_descriptor.compare("SURF") == 0) {
-        cout << ">>> Using: " << type_descriptor << endl;
+        // OK
     } else {
         cout << "E >>> Unknown Detector Algorithm " << type_descriptor << endl;
         exit(EXIT_FAILURE);
     }
 
-    if (type_descriptor.compare("ORB") == 0) {
-        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
-    }
-    if (type_descriptor.compare("SURF") == 0) {
-        cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(); //detection_threshold
-    }
+    cout << ">>> Initialized ---> " << type_descriptor << " Algorithm" << endl;
 
     for(int i=0; i < target_paths.size(); i++) {
 
@@ -215,17 +215,20 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
-            return -1;
+            exit(EXIT_FAILURE);
+        } else {
+            // cout << ">>> Image " << target_paths[i] << " has " << tmp_img.rows << " rows and " << tmp_img.cols << " cols" << endl;
+            target_images.push_back(tmp_img);
         }
 
         cuda::GpuMat cuda_tmp_img(tmp_img);
 
         if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
             cout << "E >>> CUDA Image is empty or cannot be found" << endl;
-            return -1;
+            exit(EXIT_FAILURE);
+        } else {
+            // cout << ">>> CUDA Image " << " has " << cuda_tmp_img.rows << " rows and " << cuda_tmp_img.cols << " cols" << endl;
         }
-
-        target_images.push_back(tmp_img);
 
         vector<KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
@@ -236,16 +239,17 @@ int Detect2D::setup(int argc, char *argv[]) {
             }
             catch (Exception& e) {
                 cout << "E >>> ORB init fail O_O | Maybe not enough keypoints in training image" << "\n";
-                return -1;
+                exit(EXIT_FAILURE);
             }
         }
+
         if (type_descriptor.compare("SURF") == 0) {
             try {
                 cuda_surf(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
             catch (Exception& e) {
                 cout << "E >>> SURF init fail O_O | Maybe not enough keypoints in training image" << "\n";
-                return -1;
+                exit(EXIT_FAILURE);
             }
         }
 
@@ -254,6 +258,8 @@ int Detect2D::setup(int argc, char *argv[]) {
     }
 
     object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>("clf_2d_detect/objects", 1);
+
+    return 0;
 
 }
 
@@ -271,12 +277,12 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     if (type_descriptor.compare("ORB") == 0) {
-            try {
-                cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
-            }
-            catch (Exception& e) {
-                cout << "E >>> ORB fail O_O" << "\n";
-            }
+        try {
+            cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+        }
+        catch (Exception& e) {
+            cout << "E >>> ORB fail O_O" << "\n";
+        }
     }
 
     if (type_descriptor.compare("SURF") == 0) {
@@ -296,50 +302,68 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     vector<double> cum_distance;
-    vector<vector<DMatch>> cum_matches;
+    vector<vector<DMatch>> cum_best_matches;
 
     boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
 
     for(int i=0; i < target_images.size(); i++) {
 
         vector<DMatch> matches;
+        vector<vector<DMatch>> knn_matches;
+        vector<DMatch> bestMatches;
 
         try {
             try {
-
                 if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
 
-                    cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
+                    if (point_matcher.compare("BF") == 0) {
+                        cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
 
-                    // Keep best matches only to have a nice drawing.
-                    // We sort distance between descriptor matches
-                    if (matches.size() <= max_number_matching_points) {
-                        cout << "E >>> Not enough matches: " << matches.size() << endl;
-                        continue;
-                    }
-
-                    Mat index;
-                    int nbMatch=int(matches.size());
-
-                    Mat tab(nbMatch, 1, CV_32F);
-
-                    for (int i = 0; i<nbMatch; i++)
-                    {
-                        tab.at<float>(i, 0) = matches[i].distance;
-                    }
-
-                    sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
-
-                    vector<DMatch> bestMatches;
-
-                    for (int i = 0; i<max_number_matching_points; i++)
-                    {
-                        if (matches[index.at<int>(i, 0)].distance <= detection_threshold) {
-                            bestMatches.push_back(matches[index.at<int>(i, 0)]);
+                        if ((int)matches.size() <= min_matches) {
+                            cout << "E >>> Not enough matches: " << matches.size() << " | " << min_matches << " are required" << endl;
+                            continue;
                         }
+
+                        Mat index;
+                        int nbMatch=int(matches.size());
+
+                        Mat tab(nbMatch, 1, CV_32F);
+
+                        for (int i = 0; i<nbMatch; i++) {
+                            tab.at<float>(i, 0) = matches[i].distance;
+                        }
+
+                        sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
+
+                        for (int i = 0; i<(int)matches.size()-1; i++) {
+                            if (matches[index.at<int>(i, 0)].distance < detection_threshold*matches[index.at<int>(i+1, 0)].distance) {
+                                bestMatches.push_back(matches[index.at<int>(i, 0)]);
+                            }
+                        }
+
+                        cum_best_matches.push_back(bestMatches);
                     }
 
-                    cum_matches.push_back(bestMatches);
+                    if (point_matcher.compare("KNN") == 0) {
+
+	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
+
+                        if ((int)knn_matches.size() <= min_matches) {
+                            cout << "E >>> Not enough matches: " << matches.size() << " | " << min_matches << " are required" << endl;
+                            continue;
+                        }
+
+                        for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
+                            if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )
+                            {
+                                // Take the first result only if its distance is smaller than 0.6*second_best_dist
+                                // that means this descriptor is ignored if the second distance is bigger or of similar
+                                bestMatches.push_back(knn_matches[k][0]);
+                            }
+                        }
+
+                        cum_best_matches.push_back(bestMatches);
+                    }
 
                     vector<DMatch>::iterator it;
                     double raw_distance_sum = 0;
@@ -348,20 +372,18 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         raw_distance_sum = raw_distance_sum + it->distance;
                     }
 
-                    double mean_distance = raw_distance_sum/max_number_matching_points;
+                    double mean_distance = raw_distance_sum/(int)bestMatches.size();
                     cum_distance.push_back(mean_distance);
 
                 } else {
                     do_not_draw = true;
                     cout << "E >>> Descriptors are empty" << endl;
                 }
-            }
-            catch (Exception& e) {
+            } catch (Exception& e) {
                 cout << "E >>> Cumulative distance cannot be computed, next iteration" << endl;
                 continue;
             }
-        }
-        catch (Exception& e) {
+        } catch (Exception& e) {
             cout << "E >>> Matcher is wating for input..." << endl;
             continue;
         }
@@ -371,15 +393,22 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     text_offset_y = 20;
 
+    boost::posix_time::ptime start_fitting = boost::posix_time::microsec_clock::local_time();
+
     if (do_not_draw == false) {
         for (int i=0; i < target_images.size(); i++) {
             try {
+
+                if ((int)cum_best_matches[i].size() <= min_matches) {
+                    // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
+                    continue;
+                }
+
                 vector<DMatch>::iterator it;
                 vector<int> point_list_x;
                 vector<int> point_list_y;
 
-                for (it = cum_matches[i].begin(); it != cum_matches[i].end(); it++) {
-                    // Point2d k_t = keys_current_target[i][it->queryIdx].pt;
+                for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
                     Point2d c_t = keys_camera_image[it->trainIdx].pt;
 
                     point_list_x.push_back(c_t.x);
@@ -403,10 +432,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     target_medians[i] = location;
 
-                    if (cum_distance[i] <= detection_threshold) {
-                        putText(input_image, target_labels[i], draw_location, fontFace, fontScale, colors[i], 2);
-                    }
-
                     string label = target_labels[i]+": ";
                     string distance_raw = to_string(cum_distance[i]);
 
@@ -421,20 +446,25 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     for (int i=0; i < target_images.size(); i++) {
-        if (cum_distance[i] <= detection_threshold && toggle_homography) {
+        if (toggle_homography) {
             try {
-                //-- localize the object
+
+                if ((int)cum_best_matches[i].size() <= min_matches) {
+                    // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
+                    continue;
+                }
+
                 vector<Point2f> obj;
                 vector<Point2f> scene;
 
                 vector<DMatch>::iterator it;
 
-                for (it = cum_matches[i].begin(); it != cum_matches[i].end(); it++) {
+                for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
                     obj.push_back(keys_current_target[i][it->queryIdx].pt);
                     scene.push_back(keys_camera_image[it->trainIdx].pt);
                 }
 
-                if(!obj.empty() && !scene.empty() && cum_matches[i].size() >= 4) {
+                if(!obj.empty() && !scene.empty() && cum_best_matches[i].size() >= 4) {
 
                     Mat H = findHomography(obj, scene, CV_RANSAC);
 
@@ -462,12 +492,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
                     // cornerSubPix(input_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
-                    //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], Scalar(113, 204, 46), 4 );
-                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], Scalar(113, 204, 46), 4 );
-
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
 
@@ -483,7 +507,14 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             msg.pose.position = pt;
                             msg.name = target_labels[i];
                             object_pub.publish(msg);
+
+                            //-- Draw lines between the corners (the mapped object in the scene - image_2 )
+                            line(input_image, scene_corners_draw[0], scene_corners_draw[1], Scalar(113, 204, 46), 4 );
+                            line(input_image, scene_corners_draw[1], scene_corners_draw[2], Scalar(113, 204, 46), 4 );
+                            line(input_image, scene_corners_draw[2], scene_corners_draw[3], Scalar(113, 204, 46), 4 );
+                            line(input_image, scene_corners_draw[3], scene_corners_draw[0], Scalar(113, 204, 46), 4 );
                         }
+
                     }
 
                 }
@@ -493,7 +524,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             }
         }
 
-        if (cum_distance[i] <= detection_threshold && !toggle_homography){
+        if (!toggle_homography) {
             h.stamp = timestamp;
             h.frame_id = "camera";
             msg.header = h;
@@ -506,14 +537,18 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         }
     }
 
+    boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
+
     boost::posix_time::time_duration diff_detect = end_detect - start_detect;
     boost::posix_time::time_duration diff_match = end_match - start_match;
+    boost::posix_time::time_duration diff_fit = end_fitting - start_fitting;
 
     string string_time_detect = to_string(diff_detect.total_milliseconds());
     string string_time_match = to_string(diff_match.total_milliseconds());
+    string string_time_fitting = to_string(diff_fit.total_milliseconds());
 
-    putText(input_image, "Delta T (Capture): "+capture_duration+" ms", Point2d(input_image.cols-280, 20), fontFace, fontScale, Scalar(156, 188, 26), 1);
-    putText(input_image, "Delta T (Detect): "+string_time_detect+" ms", Point2d(input_image.cols-280, 40), fontFace, fontScale, Scalar(43, 57, 192), 1);
-    putText(input_image, "Delta T (Match): "+string_time_match+" ms", Point2d(input_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
+    putText(input_image, "Time Detect: "+string_time_detect+" ms", Point2d(input_image.cols-280, 20), fontFace, fontScale, Scalar(43, 57, 192), 1);
+    putText(input_image, "Time Match: "+string_time_match+" ms", Point2d(input_image.cols-280, 40), fontFace, fontScale, Scalar(34, 126, 230), 1);
+    putText(input_image, "Time Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
 
 }

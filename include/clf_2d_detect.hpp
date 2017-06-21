@@ -82,6 +82,7 @@ public:
     int get_x_resolution();
     int get_y_resolution();
     bool get_silent();
+
     Detect2D();
     ~Detect2D();
 
@@ -100,9 +101,9 @@ private:
 
     const int text_origin = 10;
     int max_keypoints = 0;
-    int max_number_matching_points = 0;
+    int min_matches = 0;
     int text_offset_y = 20;
-    int detection_threshold = 0;
+    float detection_threshold = 0;
     int res_x = 640;
     int res_y = 480;
     double scale_factor = 1.0;
@@ -121,8 +122,6 @@ private:
     cv::cuda::GpuMat cuda_desc_camera_image;
 
     cv::Ptr<cv::cuda::ORB> cuda_orb;
-    // cv::Ptr<cv::cuda::SURF_CUDA> cuda_surf;
-    cv::Ptr<cv::cuda::DescriptorMatcher> cuda_bf_matcher;
 
     ros::NodeHandle node_handle_;
     ros::Publisher object_pub;

@@ -44,59 +44,105 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
-// SELF
-#include "ros_grabber.hpp"
+#include <sstream>
+#include <mutex>
+#include <iostream>
+#include "opencv2/opencv.hpp"
+#include <boost/lexical_cast.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 
+using namespace cv;
+using namespace std;
 
-ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
-    image_sub_ = it_.subscribe(i_scope, 100, &ROSGrabber::imageCallback, this);
-    last_frame = ros::Time::now();
-}
+int drag = 0;
+int select_flag = 0;
 
-ROSGrabber::~ROSGrabber() { }
+Rect rect;
+mutex locker;
+Point point1, point2;
+Mat img, img1 ,roiImg, toExtract;
 
-void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
+const int fontFace = cv::FONT_HERSHEY_PLAIN;
+const double fontScale = 1;
 
-    boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
+void mouseHandler(int event, int x, int y, int flags, void *param)
+{
 
-    cv_bridge::CvImagePtr cv_ptr;
+    locker.lock();
+    img1 = img.clone();
+    locker.unlock();
+    imshow(":: CLF GPU Collect Extract Sample ::", img1);
 
-    try {
-        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    if (event == CV_EVENT_LBUTTONDOWN && !drag)
+    {
+        point1 = Point(x, y);
+        drag = 1;
     }
-    catch (cv_bridge::Exception &e) {
-        ROS_ERROR("E >>> CV_BRIDGE exception: %s", e.what());
-        return;
+
+    if (event == CV_EVENT_MOUSEMOVE && drag)
+    {
+        point2 = Point(x, y);
+        putText(img1, "Saved ROI", Point2d(point1.x-5, point1.y-5), fontFace, fontScale, CV_RGB(255, 0, 0), 1);
+        rectangle(img1, point1, point2, CV_RGB(255, 0, 0), 2, 8, 0);
+        imshow(":: CLF GPU Collect Extract Sample ::", img1);
     }
 
-    ros::Time frame_time = msg->header.stamp;
+    if (event == CV_EVENT_LBUTTONUP && drag)
+    {
+        point2 = Point(x, y);
+        // Remove the rectangle: +- 3 pixels
+        rect = Rect(point1.x+2, point1.y+2, x-2 - point1.x, y-2 - point1.y);
+        locker.lock();
+        roiImg = img1(rect);
+        locker.unlock();
+        roiImg.copyTo(toExtract);
+        time_t seconds;
+        time(&seconds);
+        string ts = boost::lexical_cast<std::string>(seconds);
+        imwrite(ts+".png", toExtract);
+        drag = 0;
+    }
 
-    mtx.lock();
-    timestamp = frame_time;
-    source_frame = cv_ptr->image;
-    output_frame = source_frame;
-    mtx.unlock();
+    if (event == CV_EVENT_LBUTTONUP)
+    {
+        select_flag = 1;
+        drag = 0;
+    }
 
-    boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration cdiff = c - init;
-    duration = std::to_string(cdiff.total_milliseconds());
 }
 
-void ROSGrabber::getImage(cv::Mat *mat) {
-    mtx.lock();
-    *mat = output_frame;
-    last_frame = timestamp;
-    mtx.unlock();
-}
+int main()
+{
 
-std::string ROSGrabber::getDuration() {
-    return duration;
-}
+    VideoCapture cap(0);
+    if (!cap.isOpened())
+      return 1;
 
-ros::Time ROSGrabber::getTimestamp() {
-    return timestamp;
-}
+    locker.lock();
+    cap >> img;
+    locker.unlock();
 
-ros::Time ROSGrabber::getLastFrame() {
-    return last_frame;
+    imshow(":: CLF GPU Collect Live ::", img);
+
+    while (true) {
+
+        locker.lock();
+        cap >> img;
+        locker.unlock();
+
+        if (img.empty())
+            break;
+
+        if (rect.width == 0 && rect.height == 0) {
+            cvSetMouseCallback(":: CLF GPU Collect Live ::", mouseHandler, NULL );
+        }
+
+        imshow(":: CLF GPU Collect Live ::", img);
+
+        if (cv::waitKey(1) == 27) { break; }
+    }
+
+    return 0;
 }

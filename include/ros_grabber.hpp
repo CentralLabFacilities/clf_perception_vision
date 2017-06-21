@@ -28,6 +28,7 @@ public:
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
     std::string getDuration();
+    ros::Time getLastFrame();
     ros::NodeHandle node_handle_;
 private:
     image_transport::ImageTransport it_;
