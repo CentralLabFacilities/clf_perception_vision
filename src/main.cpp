@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
 
     ROSGrabber ros_grabber(argv[2]);
-    cout << ">>> Input Topic --> " << argv[2] << endl;
+    cout << ">>> ROS Input Topic --> " << argv[2] << endl;
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/objects/subscribe", 1, toggle_callback);
 

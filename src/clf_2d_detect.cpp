@@ -65,7 +65,7 @@ const int minhessian = 400;
 const unsigned int microseconds = 1000;
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
-Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L2);
+Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
 cuda::SURF_CUDA cuda_surf(minhessian);
 
 vector<Scalar> Detect2D::color_mix() {
@@ -129,11 +129,14 @@ int Detect2D::setup(int argc, char *argv[]) {
         fs["matcher"] >> point_matcher;
         cout << ">>> Matching Algorithm --> " << point_matcher  << endl;
 
-        fs["maxkeypoints"] >> max_keypoints;
-        cout << ">>> Max Keypoints: --> " << max_keypoints  << endl;
+        fs["maxkeypoints_orb"] >> max_keypoints;
+        cout << ">>> Max Key Points (ORB ONLY): --> " << max_keypoints  << endl;
 
         fs["minmatches"] >> min_matches;
         cout << ">>> Min Matches: --> " << min_matches  << endl;
+
+        fs["maxmatches"] >> max_matches;
+        cout << ">>> Max Matches: --> " << max_matches  << endl;
 
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
@@ -238,7 +241,7 @@ int Detect2D::setup(int argc, char *argv[]) {
                 cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
             catch (Exception& e) {
-                cout << "E >>> ORB init fail O_O | Maybe not enough keypoints in training image" << "\n";
+                cout << "E >>> ORB init fail O_O | Maybe not enough key points in training image" << "\n";
                 exit(EXIT_FAILURE);
             }
         }
@@ -248,7 +251,7 @@ int Detect2D::setup(int argc, char *argv[]) {
                 cuda_surf(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
             catch (Exception& e) {
-                cout << "E >>> SURF init fail O_O | Maybe not enough keypoints in training image" << "\n";
+                cout << "E >>> SURF init fail O_O | Maybe not enough key points in training image" << "\n";
                 exit(EXIT_FAILURE);
             }
         }
@@ -297,7 +300,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
     if (keys_camera_image.empty()) {
-        cout << "E >>> Could not derive enough keypoints: " << endl;
+        cout << "E >>> Could not derive enough key points: " << endl;
         return;
     }
 
@@ -319,11 +322,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     if (point_matcher.compare("BF") == 0) {
                         cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
 
-                        if ((int)matches.size() <= min_matches) {
-                            cout << "E >>> Not enough matches: " << matches.size() << " | " << min_matches << " are required" << endl;
-                            continue;
-                        }
-
                         Mat index;
                         int nbMatch=int(matches.size());
 
@@ -340,33 +338,32 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         for (int i = 0; i<(int)matches.size()-1; i++) {
                             if (matches[index.at<int>(i, 0)].distance < detection_threshold*matches[index.at<int>(i+1, 0)].distance) {
                                 bestMatches.push_back(matches[index.at<int>(i, 0)]);
+                                if(i >= max_matches) {
+                                    break;
+                                }
                             }
                         }
 
                         cum_best_matches.push_back(bestMatches);
+                        // cout << "BF BEST Matches " << (int)bestMatches.size() << endl;
+
                     }
 
                     if (point_matcher.compare("KNN") == 0) {
 
 	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
 
-                        if ((int)knn_matches.size() <= min_matches) {
-                            cout << "E >>> Not enough matches: " << matches.size() << " | " << min_matches << " are required" << endl;
-                            continue;
-                        }
-
                         // cout << "KNN Matches " << (int)knn_matches.size() << endl;
 
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )
                             {
-                                // Take the first result only if its distance is smaller than 0.6*second_best_dist
-                                // that means this descriptor is ignored if the second distance is bigger or of similar
                                 bestMatches.push_back(knn_matches[k][0]);
                             }
                         }
 
                         cum_best_matches.push_back(bestMatches);
+                        // cout << "KNN BEST Matches " << (int)bestMatches.size() << endl;
                     }
 
                     vector<DMatch>::iterator it;
@@ -403,8 +400,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         for (int i=0; i < target_images.size(); i++) {
             try {
 
-                if ((int)cum_best_matches[i].size() <= min_matches) {
-                    // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
+                if ((int)cum_best_matches[i].size() < min_matches) {
+                    // cout << "E >>> " << target_labels[i] <<  " not enough matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
                     continue;
                 }
 
@@ -453,7 +450,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         if (toggle_homography) {
             try {
 
-                if ((int)cum_best_matches[i].size() <= min_matches) {
+                if ((int)cum_best_matches[i].size() < min_matches) {
                     // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
                     continue;
                 }

@@ -102,6 +102,7 @@ private:
     const int text_origin = 10;
     int max_keypoints = 0;
     int min_matches = 0;
+    int max_matches = 0;
     int text_offset_y = 20;
     float detection_threshold = 0;
     int res_x = 640;
