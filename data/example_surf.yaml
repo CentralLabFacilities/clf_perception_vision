@@ -1,9 +1,9 @@
 %YAML:1.0
 targets:
- - "/home/fl/ice_all.png"
+ - "/home/fl/milk.png"
 
 labels:
- - "ICE TEA"
+ - "MILK"
 
 maxkeypoints_orb: 1500
 
@@ -13,7 +13,7 @@ maxmatches: 20
 
 detectionthreshold: 0.75
 
-scalefactor: 2.0
+scalefactor: 1.0
 
 keypointalgo: SURF
 
