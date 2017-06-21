@@ -23,6 +23,4 @@ keypointalgo: SURF
 
 matcher: KNN
 
-homography: true
-
 silent: false

@@ -106,6 +106,12 @@ bool Detect2D::get_silent() {
     return toggle_silent;
 }
 
+int handleError(int status, const char* func_name,
+                 const char* err_msg, const char* file_name,
+                  int line, void* userdata) {
+    return 0;
+}
+
 int Detect2D::setup(int argc, char *argv[]) {
 
     cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
@@ -144,7 +150,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         scale_factor = fs["scalefactor"];
         cout << ">>> Scalefactor --> " << scale_factor << endl;
 
-        fs["homography"] >> draw_homography;
+        draw_homography = "true";
         cout << ">>> Draw Homography --> " << draw_homography << endl;
 
         if (draw_homography == "true") {
@@ -306,7 +312,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
     if (keys_camera_image.empty()) {
-        cout << "E >>> Could not derive enough key points: " << endl;
+        // cout << "E >>> Could not derive enough key points on input image " << endl;
         return;
     }
 
@@ -486,9 +492,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     vector<Point2f> scene_corners;
                     vector<Point2f> scene_corners_draw;
 
-
+                    redirectError(handleError);
                     perspectiveTransform(obj_corners, scene_corners, H);
-
+                    redirectError(nullptr);
 
                     // TODO: Fix the view for scaled images!
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
@@ -506,7 +512,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        if (abs(angle) > 85 && abs(angle) < 95) {
+
+                        if (abs(angle) > 85 && abs(angle) <= 95) {
                             h.stamp = timestamp;
                             h.frame_id = "camera";
                             msg.header = h;
@@ -530,7 +537,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                 }
 
             } catch (cv::Exception& e) {
-                cout << "W >>> Could not derive transform" << endl;
+                cout << "WARNING >>> Could not derive homography" << endl;
             }
         }
 

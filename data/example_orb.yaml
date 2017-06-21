@@ -23,6 +23,4 @@ keypointalgo: ORB
 
 matcher: BF
 
-homography: true
-
 silent: false
