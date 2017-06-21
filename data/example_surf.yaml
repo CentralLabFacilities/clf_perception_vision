@@ -1,9 +1,13 @@
 %YAML:1.0
 targets:
- - "/home/fl/ice_tea_2.png"
+ - "/home/fl/ice_tea.png"
+ - "/home/fl/oil.png"
+ - "/home/fl/milk.png"
 
 labels:
  - "ICE TEA"
+ - "OIL"
+ - "MILK"
 
 maxkeypoints_orb: 1500
 

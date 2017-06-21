@@ -124,7 +124,8 @@ int main(int argc, char *argv[]) {
             string string_time_main = to_string(diff_main.total_milliseconds());
 
             if (!detect2d.get_silent()) {
-                cv::putText(current_image, "Time Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-280, 80), detect2d.fontFace, detect2d.fontScale, cv::Scalar(219, 152, 52), 1);
+                cv::putText(current_image, "Time Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-180, 80),
+                            detect2d.fontFace, detect2d.fontScale, cv::Scalar(43, 57, 192), 1);
                 if (current_image.cols > 1000) {
                     cv::Size size(current_image.cols/2,current_image.rows/2);
                     cv::Mat resize;

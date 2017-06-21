@@ -61,7 +61,7 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
-const int minhessian = 400;
+const int minhessian = 500;
 const unsigned int microseconds = 1000;
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
@@ -214,7 +214,13 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     for(int i=0; i < target_paths.size(); i++) {
 
-        Mat tmp_img = imread(target_paths[i], IMREAD_GRAYSCALE);
+        // Resize target image by 1.5 times in order to improve
+        // keypoint detection
+
+        Mat init = imread(target_paths[i], IMREAD_GRAYSCALE);
+        cv::Size size(init.cols*2,init.rows*2);
+        cv::Mat tmp_img;
+        cv::resize(init, tmp_img, size);
 
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
@@ -511,11 +517,12 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             msg.name = target_labels[i];
                             object_pub.publish(msg);
 
-                            //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-                            line(input_image, scene_corners_draw[0], scene_corners_draw[1], Scalar(113, 204, 46), 4 );
-                            line(input_image, scene_corners_draw[1], scene_corners_draw[2], Scalar(113, 204, 46), 4 );
-                            line(input_image, scene_corners_draw[2], scene_corners_draw[3], Scalar(113, 204, 46), 4 );
-                            line(input_image, scene_corners_draw[3], scene_corners_draw[0], Scalar(113, 204, 46), 4 );
+                            putText(input_image, target_labels[i] , cv::Point2d(scene_corners_draw[0].x, scene_corners_draw[1].y-10), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
+
+                            line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
+                            line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
+                            line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
+                            line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
                         }
 
                     }
@@ -550,8 +557,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     string string_time_match = to_string(diff_match.total_milliseconds());
     string string_time_fitting = to_string(diff_fit.total_milliseconds());
 
-    putText(input_image, "Time Detect: "+string_time_detect+" ms", Point2d(input_image.cols-280, 20), fontFace, fontScale, Scalar(43, 57, 192), 1);
-    putText(input_image, "Time Match: "+string_time_match+" ms", Point2d(input_image.cols-280, 40), fontFace, fontScale, Scalar(34, 126, 230), 1);
-    putText(input_image, "Time Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-280, 60), fontFace, fontScale, Scalar(34, 126, 230), 1);
+    putText(input_image, "Time Detect: "+string_time_detect+" ms", Point2d(input_image.cols-180, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Time Match: "+string_time_match+" ms", Point2d(input_image.cols-180, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Time Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-180, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
 
 }
