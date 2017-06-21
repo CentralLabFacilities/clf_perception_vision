@@ -120,9 +120,7 @@ int main()
     if (!cap.isOpened())
       return 1;
 
-    locker.lock();
     cap >> img;
-    locker.unlock();
 
     imshow(":: CLF GPU Collect Live ::", img);
 
