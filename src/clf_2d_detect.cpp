@@ -480,7 +480,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     vector<Point2f> scene_corners;
                     vector<Point2f> scene_corners_draw;
 
+
                     perspectiveTransform(obj_corners, scene_corners, H);
+
 
                     // TODO: Fix the view for scaled images!
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
@@ -520,7 +522,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                 }
 
-            } catch (Exception& e) {
+            } catch (cv::Exception& e) {
                 cout << "E >>> Could not derive transform" << endl;
             }
         }
