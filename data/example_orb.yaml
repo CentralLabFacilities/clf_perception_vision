@@ -129,7 +129,7 @@ minmatches: 10
 
 maxmatches: 40
 
-detectionthreshold: 0.5
+detectionthreshold: 1.0
 
 keypointalgo: ORB
 
