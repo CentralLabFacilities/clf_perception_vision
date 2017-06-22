@@ -137,4 +137,4 @@ matcher: KNN
 
 silent: false
 
-pyr_up: true
+pyr_up: false
