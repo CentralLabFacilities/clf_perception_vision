@@ -127,7 +127,7 @@ maxkeypoints_orb: 1500
 
 minmatches: 10
 
-maxmatches: 40
+maxmatches: 20
 
 detectionthreshold: 0.5
 

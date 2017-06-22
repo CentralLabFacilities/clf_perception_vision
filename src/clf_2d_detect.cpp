@@ -118,6 +118,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     FileStorage fs(argv[1], FileStorage::READ);
 
     if (fs.isOpened()) {
+
         fs["keypointalgo"] >> type_descriptor;
         cout << ">>> Keypoint Descriptor --> " << type_descriptor  << endl;
 

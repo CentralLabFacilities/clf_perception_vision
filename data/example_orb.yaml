@@ -125,9 +125,9 @@ labels:
 
 maxkeypoints_orb: 1500
 
-minmatches: 10
+minmatches: 15
 
-maxmatches: 40
+maxmatches: 30
 
 detectionthreshold: 1.0
 
