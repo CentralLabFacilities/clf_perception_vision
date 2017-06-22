@@ -77,10 +77,10 @@ vector<Scalar> Detect2D::color_mix(int count) {
     return colormix;
 }
 
-static Scalar randomColor(RNG& rng)
+bool is_file_exist(const char *fileName)
 {
-  int icolor = (unsigned) rng;
-  return Scalar( icolor&255, (icolor>>8)&255, (icolor>>16)&255 );
+    ifstream infile(fileName);
+    return infile.good();
 }
 
 int Detect2D::get_x_resolution() {
@@ -112,6 +112,11 @@ int Detect2D::setup(int argc, char *argv[]) {
     } else {
         cout << ">>> ";
         cuda::printShortCudaDeviceInfo(cuda::getDevice());
+    }
+
+    if (!is_file_exist(argv[1])) {
+        cout << "E >>> File does not exist --> " << argv[1]  << endl;
+        exit(EXIT_FAILURE);
     }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
