@@ -61,6 +61,7 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
+RNG rng(133742);
 const int minhessian = 500;
 const unsigned int microseconds = 1000;
 
@@ -68,30 +69,19 @@ Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBF
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
 cuda::SURF_CUDA cuda_surf(minhessian);
 
-vector<Scalar> Detect2D::color_mix() {
+vector<Scalar> Detect2D::color_mix(int count) {
     vector<Scalar> colormix;
-    // Blue
-    colormix.push_back(Scalar(219, 152, 52));
-    // Cyan
-    colormix.push_back(Scalar(173, 68, 142));
-    // Orange
-    colormix.push_back(Scalar(34, 126, 230));
-    // Turquoise
-    colormix.push_back(Scalar(156, 188, 26));
-    // Pomgranate
-    colormix.push_back(Scalar(43, 57, 192));
-    // Asbestos
-    colormix.push_back(Scalar(141, 140, 127));
-    // Emerald
-    colormix.push_back(Scalar(113, 204, 46));
-    // White
-    colormix.push_back(Scalar(241, 240, 236));
-    // Green Sea
-    colormix.push_back(Scalar(133, 160, 22));
-    // Black
-    colormix.push_back(Scalar(0, 0, 0));
-
+    for (int i=0; i<count; i++) {
+        Scalar color = Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+        colormix.push_back(color);
+    }
     return colormix;
+}
+
+static Scalar randomColor(RNG& rng)
+{
+  int icolor = (unsigned) rng;
+  return Scalar( icolor&255, (icolor>>8)&255, (icolor>>16)&255 );
 }
 
 int Detect2D::get_x_resolution() {
@@ -175,11 +165,6 @@ int Detect2D::setup(int argc, char *argv[]) {
             target_paths.push_back((String)(*it));
         }
 
-        if(idx > 6) {
-            cout << "E >>> Sorry, only 5 targets are allowed (for now)" << endl;
-            exit(EXIT_FAILURE);
-        }
-
         FileNode labels = fs["labels"];
         FileNodeIterator it2 = labels.begin(), it_end2 = labels.end();
 
@@ -190,11 +175,12 @@ int Detect2D::setup(int argc, char *argv[]) {
             cout << (String)(*it2) << endl;
             target_labels.push_back((String)(*it2));
         }
+
+        colors = color_mix(idy);
     }
 
     fs.release();
 
-    colors = color_mix();
     target_medians = new cv::Point2d[target_paths.size()];
 
     if (type_descriptor.compare("ORB") == 0) {
@@ -429,34 +415,13 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                 for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
                     Point2d c_t = keys_camera_image[it->trainIdx].pt;
-
                     point_list_x.push_back(c_t.x);
                     point_list_y.push_back(c_t.y);
-
                     Point2d current_point(c_t.x, c_t.y );
                     Point2d current_point_draw(c_t.x/scale_factor, c_t.y/scale_factor);
-
                     circle(input_image, current_point_draw, 3.0, colors[i], 1, 1 );
                 }
 
-                nth_element(point_list_x.begin(), point_list_x.begin() + point_list_x.size()/2, point_list_x.end());
-                nth_element(point_list_y.begin(), point_list_y.begin() + point_list_y.size()/2, point_list_y.end());
-
-                if (!point_list_x.empty() && !point_list_y.empty()) {
-                    int median_x =  point_list_x[point_list_x.size()/2];
-                    int median_y = point_list_y[point_list_y.size()/2];
-
-                    Point2d location = Point2d(median_x, median_y);
-                    Point2d draw_location = Point2d(median_x/scale_factor, median_y/scale_factor);
-
-                    target_medians[i] = location;
-
-                    string label = target_labels[i]+": ";
-                    string distance_raw = to_string(cum_distance[i]);
-
-                    putText(input_image, label+distance_raw, Point2d(text_origin, text_offset_y), fontFace, fontScale, colors[i], 1);
-                    text_offset_y = text_offset_y+15;
-                }
             } catch (Exception& e) {
                 cout << "E >>> Could not derive median" << endl;
                 continue;
@@ -570,8 +535,11 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     string string_time_match = to_string(diff_match.total_milliseconds());
     string string_time_fitting = to_string(diff_fit.total_milliseconds());
 
-    putText(input_image, "Time Detect: "+string_time_detect+" ms", Point2d(input_image.cols-180, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Time Match: "+string_time_match+" ms", Point2d(input_image.cols-180, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Time Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-180, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    rectangle(input_image, Point2d(input_image.cols-140, 8), Point2d(input_image.cols, 22), CV_RGB(128,128,128), CV_FILLED);
+    rectangle(input_image, Point2d(input_image.cols-140, 28), Point2d(input_image.cols, 42), CV_RGB(128,128,128), CV_FILLED);
+    rectangle(input_image, Point2d(input_image.cols-140, 48), Point2d(input_image.cols, 62), CV_RGB(128,128,128), CV_FILLED);
+    putText(input_image, "Detection: "+string_time_detect+" ms", Point2d(input_image.cols-140, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-140, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-140, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
 
 }

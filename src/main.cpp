@@ -48,6 +48,7 @@ the use of this software, even if advised of the possibility of such damage.
 // STD
 #include <iostream>
 #include <string>
+#include <time.h>
 
 // THREADING
 #include <thread>
@@ -78,6 +79,10 @@ int main(int argc, char *argv[]) {
     }
 
     toggle = true;
+    frame_count = 0;
+    time_spend = 0;
+    average_frames = 0;
+    time_t start, end;
 
     ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
 
@@ -96,21 +101,25 @@ int main(int argc, char *argv[]) {
     cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15% less)" << endl;
     cout << ">>> SEE rostopic hz /clf_2d_detect/objects for results" << endl;
 
-    ros::Time last_computed_frame = ros::Time::now();
+    int last_computed_frame = 0;
+    time(&start);
 
     while(true) {
 
-        boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
-
         ros::spinOnce();
+        boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
         if(toggle) {
             try {
                 ros_grabber.getImage(&current_image);
                 if (current_image.rows*current_image.cols > 0) {
-                    if(last_computed_frame != ros_grabber.getLastFrame()) {
+                    int tmp_frame_nr = ros_grabber.getLastFrameNr();
+                    if(last_computed_frame != tmp_frame_nr) {
                         detect2d.detect(current_image, ros_grabber.getDuration(), ros_grabber.getTimestamp());
-                        last_computed_frame = ros_grabber.getLastFrame();
+                        last_computed_frame = ros_grabber.getLastFrameNr();
+                        frame_count++;
+                    } else {
+                        continue;
                     }
                 } else {
                     cout << "E >>> Image could not be grabbed" << endl;
@@ -124,8 +133,21 @@ int main(int argc, char *argv[]) {
             string string_time_main = to_string(diff_main.total_milliseconds());
 
             if (!detect2d.get_silent()) {
-                cv::putText(current_image, "Time Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-180, 80),
-                            detect2d.fontFace, detect2d.fontScale, cv::Scalar(43, 57, 192), 1);
+
+                cv::rectangle(current_image, cv::Point2d(current_image.cols-140, 68),
+                              cv::Point2d(current_image.cols, 82), CV_RGB(128,128,128), CV_FILLED);
+
+                cv::rectangle(current_image, cv::Point2d(current_image.cols-140, 88),
+                              cv::Point2d(current_image.cols, 102), CV_RGB(128,128,128), CV_FILLED);
+
+
+                cv::putText(current_image, "Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-140, 80),
+                            detect2d.fontFace, detect2d.fontScale, cv::Scalar(235, 206, 135), 1);
+
+
+                cv::putText(current_image, "FPS: "+to_string(average_frames)+" ", cv::Point2d(current_image.cols-140, 100),
+                            detect2d.fontFace, detect2d.fontScale, cv::Scalar(235, 206, 135), 1.2);
+
                 if (current_image.cols > 1000) {
                     cv::Size size(current_image.cols/2,current_image.rows/2);
                     cv::Mat resize;
@@ -135,8 +157,15 @@ int main(int argc, char *argv[]) {
                     cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
                 }
 
-            }
+                if (time_spend >= 1 ) {
+                    average_frames = frame_count;
+                    time(&start);
+                    frame_count = 0;
+                }
 
+                time(&end);
+                time_spend = difftime(end, start);
+            }
         }
 
         if (cv::waitKey(1) == 27) {

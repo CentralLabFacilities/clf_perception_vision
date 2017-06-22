@@ -44,5 +44,8 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
-
+// SELF
 bool toggle;
+double time_spend;
+unsigned int frame_count;
+unsigned int average_frames;

@@ -28,16 +28,17 @@ public:
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
     std::string getDuration();
-    ros::Time getLastFrame();
+    int getLastFrameNr();
     ros::NodeHandle node_handle_;
 private:
+    int frame_nr;
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_sub_;
     cv::Mat output_frame;
     cv::Mat source_frame;
     ros::Time timestamp;
-    ros::Time last_frame;
     std::string duration;
     std::recursive_mutex mtx;
+    ros::Time last_frame;
 };
 

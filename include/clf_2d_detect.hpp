@@ -78,7 +78,7 @@ class Detect2D {
 public:
     int setup(int argc, char *argv[]);
     void detect(cv::Mat i_image, std::string capture_duration, ros::Time timestamp);
-    std::vector<cv::Scalar> color_mix();
+    std::vector<cv::Scalar> color_mix(int count);
     int get_x_resolution();
     int get_y_resolution();
     bool get_silent();
