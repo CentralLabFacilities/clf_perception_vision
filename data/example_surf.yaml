@@ -131,10 +131,10 @@ maxmatches: 40
 
 detectionthreshold: 0.5
 
-scalefactor: 1.0
-
 keypointalgo: SURF
 
 matcher: KNN
 
 silent: false
+
+pyr_up: true

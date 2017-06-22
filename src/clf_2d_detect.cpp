@@ -136,15 +136,15 @@ int Detect2D::setup(int argc, char *argv[]) {
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
 
-        scale_factor = fs["scalefactor"];
-        cout << ">>> Scalefactor --> " << scale_factor << endl;
+        fs["pyr_up"] >> pyr;
 
-        draw_homography = "true";
-        cout << ">>> Draw Homography --> " << draw_homography << endl;
+        cout << ">>> Scaling is --> " << pyr << endl;
 
-        if (draw_homography == "true") {
-            toggle_homography = true;
+        if (pyr == "true") {
+            scale_factor = 2.0;
         }
+
+        toggle_homography = true;
 
         fs["silent"] >> draw_image;
         cout << ">>> Silent --> " << draw_image << endl;
@@ -213,10 +213,9 @@ int Detect2D::setup(int argc, char *argv[]) {
         }
 
         // Resize target images by factor 2 to improve
-        // key point extraction
-        cv::Size size(init.cols*2,init.rows*2);
-        cv::Mat tmp_img;
-        cv::resize(init, tmp_img, size);
+        // PyUp adds blur to the image to reduce noise
+        Mat tmp_img;
+        pyrUp(init, tmp_img, Size(init.cols*2, init.rows*2));
 
         if (tmp_img.rows*tmp_img.cols <= 0) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
@@ -271,7 +270,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     cuda::GpuMat cuda_frame_tmp_img(input_image);
 
     if (scale_factor > 1.0) {
-        cuda::resize(cuda_frame_tmp_img, cuda_frame_scaled, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+        cuda::pyrUp(cuda_frame_tmp_img, cuda_frame_scaled);
         cuda::cvtColor(cuda_frame_scaled, cuda_camera_tmp_img, COLOR_BGR2GRAY);
     } else {
         cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);

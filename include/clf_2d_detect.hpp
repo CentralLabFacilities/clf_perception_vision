@@ -115,6 +115,7 @@ private:
 
     std::string type_descriptor;
     std::string point_matcher;
+    std::string pyr;
     std::string draw_homography;
     std::string draw_image;
 
