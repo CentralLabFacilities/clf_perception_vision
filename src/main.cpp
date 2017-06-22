@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
 
     ROSGrabber ros_grabber(argv[2]);
-    cout << ">>> ROS Input Topic --> " << argv[2] << endl;
+    cout << ">>> ROS In Topic --> " << argv[2] << endl;
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/objects/subscribe", 1, toggle_callback);
 
@@ -98,8 +98,6 @@ int main(int argc, char *argv[]) {
     cv::Mat current_image;
 
     cout << ">>> Press 'ESC' to exit" << endl;
-    cout << ">>> NOTE Displaying results (silent:false) has an impact on CPU consuption (~15% less)" << endl;
-    cout << ">>> SEE rostopic hz /clf_2d_detect/objects for results" << endl;
 
     int last_computed_frame = 0;
     time(&start);

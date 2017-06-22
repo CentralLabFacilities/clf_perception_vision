@@ -63,6 +63,7 @@ Detect2D::~Detect2D(){}
 
 RNG rng(133742);
 const int minhessian = 500;
+string out_topic = "clf_2d_detect/objects";
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
@@ -117,6 +118,11 @@ int Detect2D::setup(int argc, char *argv[]) {
     if (!is_file_exist(argv[1])) {
         cout << "E >>> File does not exist --> " << argv[1]  << endl;
         exit(EXIT_FAILURE);
+    }
+
+    if (argv[3]) {
+        out_topic = argv[3];
+        cout << ">>> ROS Out Topic --> " << argv[3] << endl;
     }
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
@@ -264,7 +270,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
 
-    object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>("clf_2d_detect/objects", 1);
+    object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>(out_topic, 1);
 
     return 0;
 
