@@ -40,4 +40,4 @@ matcher: KNN
 
 silent: false
 
-pyr_up: false
+pyr_up: true
