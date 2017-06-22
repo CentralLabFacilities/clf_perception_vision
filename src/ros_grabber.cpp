@@ -95,7 +95,7 @@ std::string ROSGrabber::getDuration() {
 }
 
 ros::Time ROSGrabber::getTimestamp() {
-    return timestamp;
+    return last_frame;
 }
 
 int ROSGrabber::getLastFrameNr() {

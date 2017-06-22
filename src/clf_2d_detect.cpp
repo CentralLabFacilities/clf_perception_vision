@@ -55,6 +55,12 @@ the use of this software, even if advised of the possibility of such damage.
 // SELF
 #include "clf_2d_detect.hpp"
 
+// ROS
+#include <geometry_msgs/Pose.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <std_msgs/Header.h>
+
 using namespace std;
 using namespace cv;
 
@@ -270,7 +276,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
 
-    object_pub = node_handle_.advertise<visualization_msgs::InteractiveMarkerPose>(out_topic, 1);
+    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 100);
 
     return 0;
 
@@ -280,6 +286,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
     cuda::GpuMat cuda_frame_tmp_img(input_image);
+
+    visualization_msgs::MarkerArray ma;
 
     if (scale_factor > 1.0) {
         cuda::pyrUp(cuda_frame_tmp_img, cuda_frame_scaled);
@@ -459,17 +467,34 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
                         if (abs(angle) > 85 && abs(angle) <= 95) {
                             detected_classes++;
+
+                            double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
+                            double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
+                            double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
+                            double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
+
+                            std_msgs::Header h;
+                            visualization_msgs::Marker m;
+
+                            geometry_msgs::Pose pose;
+                            geometry_msgs::Point pt;
+
                             h.stamp = timestamp;
                             h.frame_id = "camera";
-                            msg.header = h;
-                            pt.x = target_medians[i].x;
-                            pt.y = target_medians[i].y;
-                            pt.z = target_medians[i].x*target_medians[i].y;
-                            msg.pose.position = pt;
-                            msg.name = target_labels[i];
-                            object_pub.publish(msg);
+                            m.header = h;
 
-                            putText(input_image, target_labels[i] , cv::Point2d(scene_corners_draw[0].x, scene_corners_draw[1].y-10), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
+                            m.text = target_labels[i];
+                            m.ns =  target_labels[i];
+
+                            pt.x = mid_x;
+                            pt.y = mid_y;
+                            pt.z = distance_x*distance_y;
+
+                            m.pose.position = pt;
+
+                            ma.markers.push_back(m);
+
+                            putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
 
                             line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
                             line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
@@ -483,6 +508,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
             }
         }
     }
+
+    object_pub.publish(ma);
 
     boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff_detect = end_detect - start_detect;

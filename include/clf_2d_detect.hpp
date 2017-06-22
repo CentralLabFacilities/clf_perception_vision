@@ -69,9 +69,6 @@ the use of this software, even if advised of the possibility of such damage.
 
 // ROS
 #include <ros/ros.h>
-#include <visualization_msgs/InteractiveMarkerPose.h>
-#include <std_msgs/Header.h>
-#include <geometry_msgs/Point.h>
 
 class Detect2D {
 
@@ -127,7 +124,4 @@ private:
 
     ros::NodeHandle node_handle_;
     ros::Publisher object_pub;
-    visualization_msgs::InteractiveMarkerPose msg;
-    std_msgs::Header h;
-    geometry_msgs::Point pt;
 };
