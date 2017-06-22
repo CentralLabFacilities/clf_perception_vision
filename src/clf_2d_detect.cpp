@@ -63,7 +63,6 @@ Detect2D::~Detect2D(){}
 
 RNG rng(133742);
 const int minhessian = 500;
-const unsigned int microseconds = 1000;
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
@@ -206,9 +205,6 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     for(int i=0; i < target_paths.size(); i++) {
 
-        // Resize target image by 1.5 times in order to improve
-        // keypoint detection
-
         Mat init = imread(target_paths[i], IMREAD_GRAYSCALE);
 
         if (init.rows*init.cols <= 0) {
@@ -216,6 +212,8 @@ int Detect2D::setup(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
+        // Resize target images by factor 2 to improve
+        // key point extraction
         cv::Size size(init.cols*2,init.rows*2);
         cv::Mat tmp_img;
         cv::resize(init, tmp_img, size);
@@ -224,7 +222,6 @@ int Detect2D::setup(int argc, char *argv[]) {
             cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
             exit(EXIT_FAILURE);
         } else {
-            // cout << ">>> Image " << target_paths[i] << " has " << tmp_img.rows << " rows and " << tmp_img.cols << " cols" << endl;
             target_images.push_back(tmp_img);
         }
 
@@ -233,9 +230,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
             cout << "E >>> CUDA Image is empty or cannot be found" << endl;
             exit(EXIT_FAILURE);
-        } else {
-            // cout << ">>> CUDA Image " << " has " << cuda_tmp_img.rows << " rows and " << cuda_tmp_img.cols << " cols" << endl;
-        }
+        } else { }
 
         vector<KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
@@ -273,7 +268,6 @@ int Detect2D::setup(int argc, char *argv[]) {
 void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time timestamp) {
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
-
     cuda::GpuMat cuda_frame_tmp_img(input_image);
 
     if (scale_factor > 1.0) {
@@ -304,13 +298,10 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
 
     if (keys_camera_image.empty()) {
-        // cout << "E >>> Could not derive enough key points on input image " << endl;
         return;
     }
 
-    vector<double> cum_distance;
     vector<vector<DMatch>> cum_best_matches;
-
     boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
 
     for(int i=0; i < target_images.size(); i++) {
@@ -337,8 +328,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                         sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
 
-                        // cout << "BF Matches " << (int)matches.size() << endl;
-
                         for (int i = 0; i<(int)matches.size()-1; i++) {
                             if (matches[index.at<int>(i, 0)].distance < detection_threshold*matches[index.at<int>(i+1, 0)].distance) {
                                 bestMatches.push_back(matches[index.at<int>(i, 0)]);
@@ -347,39 +336,19 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                                 }
                             }
                         }
-
                         cum_best_matches.push_back(bestMatches);
-                        // cout << "BF BEST Matches " << (int)bestMatches.size() << endl;
-
                     }
 
                     if (point_matcher.compare("KNN") == 0) {
-
 	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
-
-                        // cout << "KNN Matches " << (int)knn_matches.size() << endl;
-
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )
                             {
                                 bestMatches.push_back(knn_matches[k][0]);
                             }
                         }
-
                         cum_best_matches.push_back(bestMatches);
-                        // cout << "KNN BEST Matches " << (int)bestMatches.size() << endl;
                     }
-
-                    vector<DMatch>::iterator it;
-                    double raw_distance_sum = 0;
-
-                    for (it = bestMatches.begin(); it != bestMatches.end(); it++) {
-                        raw_distance_sum = raw_distance_sum + it->distance;
-                    }
-
-                    double mean_distance = raw_distance_sum/(int)bestMatches.size();
-                    cum_distance.push_back(mean_distance);
-
                 } else {
                     do_not_draw = true;
                     cout << "E >>> Descriptors are empty" << endl;
@@ -440,7 +409,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                 vector<Point2f> obj;
                 vector<Point2f> scene;
-
                 vector<DMatch>::iterator it;
 
                 for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
@@ -452,14 +420,12 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
                     Mat H = findHomography(obj, scene, CV_RANSAC);
 
-                    // Get the corners from the object to be detected
                     vector<cv::Point2f> obj_corners(4);
                     obj_corners[0] = Point(0, 0);
                     obj_corners[1] = Point(target_images[i].cols, 0);
                     obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
                     obj_corners[3] = Point(0, target_images[i].rows);
 
-                    // vector<Point2f> scene_corners_f(4);
                     vector<Point2f> scene_corners;
                     vector<Point2f> scene_corners_draw;
 
@@ -467,23 +433,17 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     perspectiveTransform(obj_corners, scene_corners, H);
                     redirectError(nullptr);
 
-                    // TODO: Fix the view for scaled images!
                     for (size_t i=0 ; i<scene_corners.size(); i++) {
-                        // scene_corners_f.push_back(cv::Point2f((float)scene_corners[i].x, (float)scene_corners[i].y));
                         float x = scene_corners[i].x/scale_factor;
                         float y = scene_corners[i].y/scale_factor;
                         scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
-
-                    // TermCriteria termCriteria = TermCriteria(TermCriteria::MAX_ITER| TermCriteria::EPS, 20, 0.01);
-                    // cornerSubPix(input_image, scene_corners_f, Size(15,15), Size(-1,-1), termCriteria);
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
                     int diff_1 = scene_corners[2].y - scene_corners[1].y;
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-
                         if (abs(angle) > 85 && abs(angle) <= 95) {
                             h.stamp = timestamp;
                             h.frame_id = "camera";
@@ -502,11 +462,8 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
                             line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
                         }
-
                     }
-
                 }
-
             } catch (cv::Exception& e) {
                 cout << "WARNING >>> Could not derive homography" << endl;
             }
@@ -526,7 +483,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
-
     boost::posix_time::time_duration diff_detect = end_detect - start_detect;
     boost::posix_time::time_duration diff_match = end_match - start_match;
     boost::posix_time::time_duration diff_fit = end_fitting - start_fitting;
