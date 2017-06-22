@@ -104,11 +104,12 @@ int main(int argc, char *argv[]) {
 
     while(true) {
 
+        ros::spinOnce();
+
         if (cv::waitKey(1) == 27) {
             break;
         }
 
-        ros::spinOnce();
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
         if(toggle) {
