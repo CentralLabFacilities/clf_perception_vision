@@ -95,6 +95,10 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
         // Remove the rectangle: +- 3 pixels
         rect = Rect(point1.x+2, point1.y+2, x-2 - point1.x, y-2 - point1.y);
         locker.lock();
+        if (rect.width < 5 || rect.height < 5) {
+            drag = 0;
+            return;
+        }
         roiImg = img1(rect);
         locker.unlock();
         roiImg.copyTo(toExtract);
