@@ -104,6 +104,10 @@ int main(int argc, char *argv[]) {
 
     while(true) {
 
+        if (cv::waitKey(1) == 27) {
+            break;
+        }
+
         ros::spinOnce();
         boost::posix_time::ptime start_main = boost::posix_time::microsec_clock::local_time();
 
@@ -164,10 +168,6 @@ int main(int argc, char *argv[]) {
                 time(&end);
                 time_spend = difftime(end, start);
             }
-        }
-
-        if (cv::waitKey(5) == 27) {
-            break;
         }
     }
 
