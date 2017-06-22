@@ -45,6 +45,69 @@ An exemplary config file can be found in the data folder.
 
     rostopic echo /clf_2d_detect/objects
 
-### License
 
-See README.md
+### Usage
+
+The config values.
+
+<pre>
+    %YAML:1.0
+    # Image locations
+    targets:
+     - "/home/fl/coke.png"
+     - "/home/fl/cup.png"
+     - "/home/fl/deo.png"
+     - "/home/fl/gel.png"
+     - "/home/fl/limo.png"
+     - "/home/fl/milk.png"
+     - "/home/fl/paste.png"
+     - "/home/fl/pizza.png"
+     - "/home/fl/soap.png"
+     - "/home/fl/tea.png"
+     - "/home/fl/water.png"
+
+    # Corresponding labels
+    labels:
+     - "coke"
+     - "cup"
+     - "deo"
+     - "gel"
+     - "limo"
+     - "milk"
+     - "paste"
+     - "pizza"
+     - "soap"
+     - "tea"
+     - "water"
+
+    # ORB ONLY, number of maximum keypoints applied to an image
+    # Higher values may result in better detection but slow down
+    # the process
+    maxkeypoints_orb: 1500
+
+    # Number of minimum matches between query image and current camera image
+    # to accept a valid identification
+    minmatches: 10
+
+    # Number of maximum matches. This may affect fitting speed if set too high
+    maxmatches: 20
+
+    # Distance of two consecutive keypoints in an image. Setting this too
+    # high will result in inaccurate results
+    detectionthreshold: 0.5
+
+    # Algorithm to extract keypoints
+    keypointalgo: SURF
+
+    # Matching algorithm. Valid combinations are:
+    # SURF+KNN, SURF+BF (evil slow), ORB+BF
+    matcher: KNN
+
+    # Draw window
+    silent: false
+
+    # Scale up camera image, makes things more robust but slower
+    # Scale factor is 2
+    pyr_up: true
+
+</pre>
