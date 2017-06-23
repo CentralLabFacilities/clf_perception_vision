@@ -292,10 +292,10 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp) {
 
     // START keypoint extraction in actual image //////////////////////////////////////////
 
-    boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
-    cuda::GpuMat cuda_frame_tmp_img(input_image);
-
     visualization_msgs::MarkerArray ma;
+
+    boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
+    cuda_frame_tmp_img.upload(input_image);
 
     if (scale_factor > 1.0) {
         cuda::pyrUp(cuda_frame_tmp_img, cuda_frame_scaled);
