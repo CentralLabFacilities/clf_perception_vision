@@ -52,5 +52,6 @@ matcher: KNN
 silent: false
 
 # Scale up camera image, makes things more robust but slower
-# Scale factor is 2
-pyr_up: true
+# Scale factor is 2. Using a higher resolution of your camera
+# is recommended.
+pyr_up: false
