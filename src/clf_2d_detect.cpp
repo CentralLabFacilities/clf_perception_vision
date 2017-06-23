@@ -236,8 +236,8 @@ int Detect2D::setup(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        // Resize target images by factor 2 to improve
-        // PyUp adds blur to the image to reduce noise
+        // Resize target images by factor 2 to improve keypoint extraction
+        // PyrUp adds blur to the image to reduce noise! Much wow.
         Mat tmp_img;
         pyrUp(init, tmp_img, Size(init.cols*2, init.rows*2));
 
