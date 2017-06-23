@@ -12,7 +12,6 @@ targets:
  - "/home/fl/soap.png"
  - "/home/fl/tea.png"
 
-
 # Corresponding labels
 labels:
  - "coke"
@@ -25,7 +24,6 @@ labels:
  - "pizza"
  - "soap"
  - "tea"
- - "water"
 
 # ORB ONLY, number of maximum keypoints applied to an image
 # Higher values may result in better detection but slow down
@@ -37,11 +35,11 @@ maxkeypoints_orb: 1500
 minmatches: 10
 
 # Number of maximum matches. This may affect fitting speed if set too high
-maxmatches: 30
+maxmatches: 20
 
 # Distance of two consecutive keypoints in an image. Setting this too
 # high will result in inaccurate results
-detectionthreshold: 0.5
+detectionthreshold: 0.6
 
 # Algorithm to extract keypoints
 keypointalgo: SURF
