@@ -379,6 +379,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) &&
                                 ((int)knn_matches[k].size()<=2 && (int)knn_matches[k].size()>0) ) {
                                 bestMatches.push_back(knn_matches[k][0]);
+                                if(k >= max_matches) {
+                                    break;
+                                }
                             }
                         }
 

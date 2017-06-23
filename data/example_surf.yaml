@@ -35,7 +35,7 @@ maxkeypoints_orb: 1500
 minmatches: 10
 
 # Number of maximum matches. This may affect fitting speed if set too high
-maxmatches: 20
+maxmatches: 1000
 
 # Distance of two consecutive keypoints in an image. Setting this too
 # high will result in inaccurate results
