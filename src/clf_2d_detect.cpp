@@ -290,6 +290,8 @@ int Detect2D::setup(int argc, char *argv[]) {
 
 void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time timestamp) {
 
+    // START keypoint extraction in actual image //////////////////////////////////////////
+
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
     cuda::GpuMat cuda_frame_tmp_img(input_image);
 
@@ -326,6 +328,9 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
         return;
     }
 
+    // END keypoint extraction in actual image //////////////////////////////////////////
+
+    // START keypoint matching: actual image and saved descriptor////////////////////////
     vector<vector<DMatch>> cum_best_matches;
     boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
 
@@ -395,6 +400,10 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     boost::posix_time::ptime end_match = boost::posix_time::microsec_clock::local_time();
+
+    // END keypoint matching: actual image and saved descriptor////////////////////////
+
+    // START fitting //////////////////////////////////////////////////////////////////
     text_offset_y = 20;
     boost::posix_time::ptime start_fitting = boost::posix_time::microsec_clock::local_time();
 
@@ -534,4 +543,5 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-140, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-140, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
 
+   // END fitting //////////////////////////////////////////////////////////////////
 }
