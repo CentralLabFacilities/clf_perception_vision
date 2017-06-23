@@ -109,8 +109,8 @@ bool Detect2D::get_silent() {
 }
 
 int handleError(int status, const char* func_name,
-                 const char* err_msg, const char* file_name,
-                  int line, void* userdata) {
+                const char* err_msg, const char* file_name,
+                int line, void* userdata) {
     return 0;
 }
 
@@ -180,8 +180,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         FileNode targets = fs["targets"];
         FileNodeIterator it = targets.begin(), it_end = targets.end();
 
-        int idx = 0;
-
+        unsigned int idx = 0;
         for( ; it != it_end; ++it, idx++ ) {
             cout << ">>> Target " << idx << " --> ";
             cout << (String)(*it) << endl;
@@ -191,14 +190,14 @@ int Detect2D::setup(int argc, char *argv[]) {
         FileNode labels = fs["labels"];
         FileNodeIterator it2 = labels.begin(), it_end2 = labels.end();
 
-        int idy = 0;
-
+        unsigned int idy = 0;
         for( ; it2 != it_end2; ++it2, idy++ ) {
             cout << ">>> Label  " << idy << " --> ";
             cout << (String)(*it2) << endl;
             target_labels.push_back((String)(*it2));
         }
 
+        // Generate Random Colors
         colors = color_mix(idy);
     }
 
