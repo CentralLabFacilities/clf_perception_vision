@@ -371,14 +371,15 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
 
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
-                            if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )
-                            {
+                            if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) &&
+                                ((int)knn_matches[k].size()<=2 && (int)knn_matches[k].size()>0) ) {
                                 bestMatches.push_back(knn_matches[k][0]);
                             }
                         }
 
                         cum_best_matches.push_back(bestMatches);
                     }
+
                 } else {
                     do_not_draw = true;
                     cout << "E >>> Descriptors are empty" << endl;
@@ -471,45 +472,40 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
 
-                    int diff_0 = scene_corners[1].x - scene_corners[0].x;
-                    int diff_1 = scene_corners[2].y - scene_corners[0].y;
+                    detected_classes++;
 
-                    if (diff_0 > 0 && diff_1 > 0) {
-                        int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        detected_classes++;
+                    double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
+                    double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
+                    double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
+                    double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
 
-                        double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
-                        double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
-                        double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
-                        double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
+                    std_msgs::Header h;
+                    visualization_msgs::Marker m;
 
-                        std_msgs::Header h;
-                        visualization_msgs::Marker m;
+                    geometry_msgs::Pose pose;
+                    geometry_msgs::Point pt;
 
-                        geometry_msgs::Pose pose;
-                        geometry_msgs::Point pt;
+                    h.stamp = timestamp;
+                    h.frame_id = "camera";
+                    m.header = h;
 
-                        h.stamp = timestamp;
-                        h.frame_id = "camera";
-                        m.header = h;
+                    m.text = target_labels[i];
+                    m.ns =  target_labels[i];
 
-                        m.text = target_labels[i];
-                        m.ns =  target_labels[i];
+                    pt.x = mid_x;
+                    pt.y = mid_y;
+                    pt.z = distance_x*distance_y;
+                    m.pose.position = pt;
 
-                        pt.x = mid_x;
-                        pt.y = mid_y;
-                        pt.z = distance_x*distance_y;
-                        m.pose.position = pt;
+                    ma.markers.push_back(m);
 
-                        ma.markers.push_back(m);
+                    putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
 
-                        putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
+                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
+                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
+                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
+                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
 
-                        line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
-                        line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
-                        line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
-                        line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
-                    }
                 }
             } catch (cv::Exception& e) {
                 cout << "WARNING >>> Could not derive perspective transform" << endl;

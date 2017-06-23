@@ -1,31 +1,12 @@
 %YAML:1.0
 # Image locations
 targets:
- - "/home/fl/coke.png"
- - "/home/fl/cup.png"
- - "/home/fl/deo.png"
- - "/home/fl/gel.png"
- - "/home/fl/limo.png"
- - "/home/fl/milk.png"
- - "/home/fl/paste.png"
- - "/home/fl/pizza.png"
- - "/home/fl/soap.png"
  - "/home/fl/tea.png"
- - "/home/fl/water.png"
+
 
 # Corresponding labels
 labels:
- - "coke"
- - "cup"
- - "deo"
- - "gel"
- - "limo"
- - "milk"
- - "paste"
- - "pizza"
- - "soap"
  - "tea"
- - "water"
 
 # ORB ONLY, number of maximum keypoints applied to an image
 # Higher values may result in better detection but slow down
