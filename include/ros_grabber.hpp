@@ -37,7 +37,6 @@ private:
     cv::Mat output_frame;
     cv::Mat source_frame;
     ros::Time frame_time;
-    ros::Time last_frame;
     std::recursive_mutex mtx;
 };
 
