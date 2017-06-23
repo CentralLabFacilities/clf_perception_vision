@@ -56,9 +56,6 @@ ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
 ROSGrabber::~ROSGrabber() { }
 
 void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
-
-    boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
-
     cv_bridge::CvImagePtr cv_ptr;
 
     try {
@@ -77,10 +74,6 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
     source_frame = cv_ptr->image;
     output_frame = source_frame;
     mtx.unlock();
-
-    boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration cdiff = c - init;
-    duration = std::to_string(cdiff.total_milliseconds());
 }
 
 void ROSGrabber::getImage(cv::Mat *mat) {
@@ -88,10 +81,6 @@ void ROSGrabber::getImage(cv::Mat *mat) {
     *mat = output_frame;
     last_frame = timestamp;
     mtx.unlock();
-}
-
-std::string ROSGrabber::getDuration() {
-    return duration;
 }
 
 ros::Time ROSGrabber::getTimestamp() {

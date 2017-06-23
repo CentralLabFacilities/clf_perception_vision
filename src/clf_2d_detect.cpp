@@ -288,7 +288,7 @@ int Detect2D::setup(int argc, char *argv[]) {
 
 }
 
-void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time timestamp) {
+void Detect2D::detect(Mat input_image, ros::Time timestamp) {
 
     // START keypoint extraction in actual image //////////////////////////////////////////
 
