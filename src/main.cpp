@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
                 if (current_image.rows*current_image.cols > 0) {
                     int tmp_frame_nr = ros_grabber.getLastFrameNr();
                     if(last_computed_frame != tmp_frame_nr) {
-                        detect2d.detect(current_image, ros_grabber.getTimestamp());
+                        detect2d.detect(current_image, ros_grabber.getTimestamp(), ros_grabber.frame_id);
                         last_computed_frame = ros_grabber.getLastFrameNr();
                         frame_count++;
                     } else {

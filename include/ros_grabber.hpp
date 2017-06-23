@@ -27,6 +27,7 @@ public:
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
+    std::string frame_id;
     int getLastFrameNr();
     ros::NodeHandle node_handle_;
 private:

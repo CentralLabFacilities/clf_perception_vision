@@ -288,7 +288,7 @@ int Detect2D::setup(int argc, char *argv[]) {
 
 }
 
-void Detect2D::detect(Mat input_image, ros::Time timestamp) {
+void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id) {
 
     // START keypoint extraction in actual image //////////////////////////////////////////
 
@@ -484,10 +484,10 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp) {
                         scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
 
-                    double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
-                    double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
-                    double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
-                    double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
+                    int mid_x = ((scene_corners_draw[0].x + scene_corners_draw[2].x)/2)/scale_factor;
+                    int mid_y = ((scene_corners_draw[0].y + scene_corners_draw[3].y)/2)/scale_factor;
+                    int width_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
+                    int width_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
 
                     std_msgs::Header h;
                     visualization_msgs::Marker m;
@@ -496,7 +496,7 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp) {
                     geometry_msgs::Point pt;
 
                     h.stamp = timestamp;
-                    h.frame_id = "camera";
+                    h.frame_id = frame_id;
                     m.header = h;
 
                     m.text = target_labels[i];
@@ -504,7 +504,7 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp) {
 
                     pt.x = mid_x;
                     pt.y = mid_y;
-                    pt.z = distance_x*distance_y;
+                    pt.z = width_x*width_y;
                     m.pose.position = pt;
 
                     ma.markers.push_back(m);
