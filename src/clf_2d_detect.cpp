@@ -486,8 +486,8 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
 
                     int mid_x = ((scene_corners_draw[0].x + scene_corners_draw[2].x)/2)/scale_factor;
                     int mid_y = ((scene_corners_draw[0].y + scene_corners_draw[3].y)/2)/scale_factor;
-                    int width_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
-                    int width_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
+                    int width_x = (cv::norm(scene_corners_draw[0]-scene_corners_draw[1])/scale_factor);
+                    int width_y = (cv::norm(scene_corners_draw[0]-scene_corners_draw[2])/scale_factor);
 
                     std_msgs::Header h;
                     visualization_msgs::Marker m;
