@@ -27,17 +27,17 @@ public:
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
     void getImage(cv::Mat *mat);
     ros::Time getTimestamp();
+    ros::NodeHandle node_handle_;
     std::string frame_id;
     int getLastFrameNr();
-    ros::NodeHandle node_handle_;
 private:
     int frame_nr;
     image_transport::ImageTransport it_;
     image_transport::Subscriber image_sub_;
     cv::Mat output_frame;
     cv::Mat source_frame;
-    ros::Time timestamp;
-    std::recursive_mutex mtx;
+    ros::Time frame_time;
     ros::Time last_frame;
+    std::recursive_mutex mtx;
 };
 
