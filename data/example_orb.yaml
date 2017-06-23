@@ -19,7 +19,7 @@ maxkeypoints_orb: 1500
 
 # Number of minimum matches between query image and current camera image
 # to accept a valid identification
-minmatches: 10
+minmatches: 25
 
 # Number of maximum matches. This may affect fitting speed if set too high
 maxmatches: 50
