@@ -133,18 +133,18 @@ int main(int argc, char *argv[]) {
 
             if (!detect2d.get_silent()) {
 
-                cv::rectangle(current_image, cv::Point2d(current_image.cols-140, 88),
+                cv::rectangle(current_image, cv::Point2d(current_image.cols-160, 88),
                               cv::Point2d(current_image.cols, 102), CV_RGB(128,128,128), CV_FILLED);
 
-                cv::rectangle(current_image, cv::Point2d(current_image.cols-140, 108),
+                cv::rectangle(current_image, cv::Point2d(current_image.cols-160, 108),
                               cv::Point2d(current_image.cols, 122), CV_RGB(128,128,128), CV_FILLED);
 
 
-                cv::putText(current_image, "Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-140, 100),
+                cv::putText(current_image, "Total: "+string_time_main+" ms", cv::Point2d(current_image.cols-160, 100),
                             detect2d.fontFace, detect2d.fontScale, cv::Scalar(235, 206, 135), 1);
 
 
-                cv::putText(current_image, "FPS: "+to_string(average_frames)+" ", cv::Point2d(current_image.cols-140, 120),
+                cv::putText(current_image, "FPS: "+to_string(average_frames)+" ", cv::Point2d(current_image.cols-160, 120),
                             detect2d.fontFace, detect2d.fontScale, cv::Scalar(235, 206, 135), 1.2);
 
                 if (current_image.cols > 1300) {

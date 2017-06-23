@@ -119,6 +119,7 @@ private:
     cv::cuda::GpuMat cuda_frame_scaled;
     cv::cuda::GpuMat cuda_camera_tmp_img;
     cv::cuda::GpuMat cuda_desc_camera_image;
+    cv::cuda::GpuMat cuda_frame_tmp_img;
 
     cv::Ptr<cv::cuda::ORB> cuda_orb;
 
