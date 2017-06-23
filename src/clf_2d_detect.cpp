@@ -329,7 +329,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     vector<vector<DMatch>> cum_best_matches;
     boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
 
-    for(int i=0; i < target_images.size(); i++) {
+    for(unsigned int i=0; i < target_images.size(); i++) {
 
         vector<DMatch> matches;
         vector<vector<DMatch>> knn_matches;
@@ -420,7 +420,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
 
     unsigned int detected_classes = 0;
 
-    for (int i=0; i < target_images.size(); i++) {
+    for (unsigned int i=0; i < target_images.size(); i++) {
         if (toggle_homography) {
             try {
 
@@ -472,8 +472,6 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                         scene_corners_draw.push_back(cv::Point2d(x,y));
                     }
 
-                    detected_classes++;
-
                     double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
                     double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
                     double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
@@ -506,6 +504,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
                     line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
 
+                    detected_classes++;
                 }
             } catch (cv::Exception& e) {
                 cout << "WARNING >>> Could not derive perspective transform" << endl;
