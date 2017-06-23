@@ -147,10 +147,10 @@ int main(int argc, char *argv[]) {
                 cv::putText(current_image, "FPS: "+to_string(average_frames)+" ", cv::Point2d(current_image.cols-140, 120),
                             detect2d.fontFace, detect2d.fontScale, cv::Scalar(235, 206, 135), 1.2);
 
-                if (current_image.cols > 1000) {
-                    cv::Size size(current_image.cols/2,current_image.rows/2);
+                if (current_image.cols > 1300) {
+                    cv::Size size(current_image.cols/1.5,current_image.rows/1.5);
                     cv::Mat resize;
-                    cv::resize(current_image, resize, size);
+                    cv::resize(current_image, resize, size, cv::INTER_NEAREST);
                     cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
                 } else {
                     cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);

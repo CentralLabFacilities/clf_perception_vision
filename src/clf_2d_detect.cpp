@@ -165,6 +165,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cout << ">>> Scaling is --> " << pyr << endl;
 
         if (pyr == "true") {
+            // DONT CHANGE THIS! OR ALL HELL BREAKS LOOSE...
             scale_factor = 2.0;
         }
 
