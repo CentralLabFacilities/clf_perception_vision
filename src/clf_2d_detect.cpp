@@ -537,14 +537,14 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp) {
     string result = to_string(detected_classes);
     string all_classes = to_string((int)target_images.size());
 
-    rectangle(input_image, Point2d(input_image.cols-140, 8), Point2d(input_image.cols, 22), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-140, 28), Point2d(input_image.cols, 42), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-140, 48), Point2d(input_image.cols, 62), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-140, 68), Point2d(input_image.cols, 82), CV_RGB(128,128,128), CV_FILLED);
-    putText(input_image, "Detection: "+string_time_detect+" ms", Point2d(input_image.cols-140, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-140, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-140, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-140, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    rectangle(input_image, Point2d(input_image.cols-160, 8), Point2d(input_image.cols, 22), CV_RGB(128,128,128), CV_FILLED);
+    rectangle(input_image, Point2d(input_image.cols-160, 28), Point2d(input_image.cols, 42), CV_RGB(128,128,128), CV_FILLED);
+    rectangle(input_image, Point2d(input_image.cols-160, 48), Point2d(input_image.cols, 62), CV_RGB(128,128,128), CV_FILLED);
+    rectangle(input_image, Point2d(input_image.cols-160, 68), Point2d(input_image.cols, 82), CV_RGB(128,128,128), CV_FILLED);
+    putText(input_image, "Detection: "+string_time_detect+" ms", Point2d(input_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-160, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-160, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
+    putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-160, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
 
    // END fitting //////////////////////////////////////////////////////////////////
 }
