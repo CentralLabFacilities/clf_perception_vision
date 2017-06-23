@@ -15,18 +15,18 @@ labels:
 # ORB ONLY, number of maximum keypoints applied to an image
 # Higher values may result in better detection but slow down
 # the process
-maxkeypoints_orb: 1500
+maxkeypoints_orb: 1000
 
 # Number of minimum matches between query image and current camera image
 # to accept a valid identification
-minmatches: 25
+minmatches: 30
 
 # Number of maximum matches. This may affect fitting speed if set too high
-maxmatches: 50
+maxmatches: 100
 
 # Distance of two consecutive keypoints in an image. Setting this too
 # high will result in inaccurate results
-detectionthreshold: 1.1
+detectionthreshold: 1.08
 
 # Algorithm to extract keypoints
 keypointalgo: ORB
