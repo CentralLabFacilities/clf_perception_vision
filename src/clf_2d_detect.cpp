@@ -291,7 +291,6 @@ int Detect2D::setup(int argc, char *argv[]) {
 void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id) {
 
     // START keypoint extraction in actual image //////////////////////////////////////////
-
     visualization_msgs::MarkerArray ma;
 
     boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
@@ -327,7 +326,6 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
     if (keys_camera_image.empty()) {
         return;
     }
-
     // END keypoint extraction in actual image //////////////////////////////////////////
 
     // START keypoint matching: actual image and saved descriptor////////////////////////
@@ -403,7 +401,6 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
     }
 
     boost::posix_time::ptime end_match = boost::posix_time::microsec_clock::local_time();
-
     // END keypoint matching: actual image and saved descriptor////////////////////////
 
     // START fitting //////////////////////////////////////////////////////////////////
@@ -545,6 +542,5 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
     putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-160, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-160, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-160, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
-
    // END fitting //////////////////////////////////////////////////////////////////
 }
