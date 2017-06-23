@@ -60,7 +60,7 @@ SET(CUSTOM_ROS_LIBS /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libimage_transport.so
 )
 
-MESSAGE(STATUS "CUSTOM_ROS_LIBS ": ${CUSTOM_ROS_LIBS})
+MESSAGE(STATUS "CUSTOM_ROS_LIBS :" ${CUSTOM_ROS_LIBS})
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
@@ -71,39 +71,36 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${catkin_INCLUD
 
 FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp)
 
-ADD_EXECUTABLE(clf_2d_detect_ros
+ADD_EXECUTABLE(clf_detect_ros
                src/clf_2d_detect.cpp
                src/ros_grabber.cpp
                src/main.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
-
 )
 
-ADD_EXECUTABLE(clf_2d_collect
+ADD_EXECUTABLE(clf_collect
                src/clf_2d_collect.cpp
                src/ros_grabber.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
-
 )
 
-# ADD_EXECUTABLE(clf_2d_faces_ros
-#                src/clf_2d_faces.cpp
-#                src/ros_grabber.cpp
-#                ${CLF_HEADER_LIST}
-#                ${INCLUDE_DIRS}
-#
-# )
+ADD_EXECUTABLE(clf_faces_ros
+               src/clf_2d_faces.cpp
+               src/ros_grabber.cpp
+               ${CLF_HEADER_LIST}
+               ${INCLUDE_DIRS}
+)
 
 # NO ${catkin_LIBRARIES}, see note above !!
 
-TARGET_LINK_LIBRARIES(clf_2d_detect_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_2d_collect ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-# TARGET_LINK_LIBRARIES(clf_2d_faces_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_detect_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_collect ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_faces_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
-INSTALL(TARGETS clf_2d_detect_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_2d_collect RUNTIME DESTINATION bin)
-# INSTALL(TARGETS clf_2d_faces_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_detect_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_collect RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_faces_ros RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_2d_gpu_detect)

@@ -48,25 +48,30 @@ the use of this software, even if advised of the possibility of such damage.
 #pragma warning(disable : 4100)
 #endif
 
+// SELF
+#include "ros_grabber.hpp"
+
 // STD
 #include <iostream>
 #include <iomanip>
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // CUDA
-#include "opencv2/cudafeatures2d.hpp"
-#include "opencv2/xfeatures2d/cuda.hpp"
+#include <opencv2/cudafeatures2d.hpp>
+#include <opencv2/xfeatures2d/cuda.hpp>
+#include <opencv2/cudaobjdetect.hpp>
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudawarping.hpp>
 
 // ROS
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
-#include "ros_grabber.hpp"
-#include "people_msgs/People.h"
-#include "people_msgs/Person.h"
-#include "geometry_msgs/Point.h"
-#include "geometry_msgs/PointStamped.h"
+#include <people_msgs/People.h>
+#include <people_msgs/Person.h>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
 
 // BOOST
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -76,40 +81,14 @@ using namespace cv;
 using namespace cv::cuda;
 
 bool toggle = true;
-bool draw = false;
+bool draw = true;
 
 
 static void help()
 {
-    cout << "Usage: ./clf_2d_faces_ros \n\t--cascade <cascade_file>\n\t--topic <ros_topic>)\n"
+    cout << "Usage: ./clf_faces_ros \n\t--cascade <cascade_file>\n\t--topic <ros_topic>)\n"
             "Using OpenCV version " << CV_VERSION << endl << endl;
 }
-
-
-template<class T>
-void convertAndResize(const T& src, T& gray, T& resized, double scale)
-{
-    if (src.channels() == 3)
-    {
-        cvtColor( src, gray, CV_BGR2GRAY );
-    }
-    else
-    {
-        gray = src;
-    }
-
-    Size sz(cvRound(gray.cols * scale), cvRound(gray.rows * scale));
-
-    if (scale != 1)
-    {
-        resize(gray, resized, sz);
-    }
-    else
-    {
-        resized = gray;
-    }
-}
-
 
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
 {
@@ -126,7 +105,7 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
 }
 
 
-static void displayState(Mat &canvas, bool bHelp, bool bGpu, bool bLargestFace, bool bFilter, double fps)
+static void displayState(Mat &canvas, bool bHelp, bool bLargestFace, bool bFilter, double fps)
 {
     Scalar fontColorWhite = CV_RGB(255,255,255);
     Scalar fontColorNV  = CV_RGB(135,206,250);
@@ -163,14 +142,14 @@ void toggle_callback(const std_msgs::Bool& _toggle) {
 int main(int argc, char *argv[])
 {
 
-    ros::init(argc, argv, "clf_2d_faces", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "clf_faces", ros::init_options::AnonymousName);
 
     ros::NodeHandle nh_;
     ros::Publisher people_pub;
     ros::Subscriber toggle_sub;
 
-    people_pub = nh_.advertise<people_msgs::People>("clf_2d_detect/people", 20);
-    toggle_sub = nh_.subscribe("/clf_2d_detect/people/subscribe", 1, toggle_callback);
+    people_pub = nh_.advertise<people_msgs::People>("clf_faces/people", 20);
+    toggle_sub = nh_.subscribe("/clf_faces/people/subscribe", 1, toggle_callback);
 
     if (argc == 1)
     {
@@ -212,29 +191,20 @@ int main(int argc, char *argv[])
         }
     }
 
-    CascadeClassifier_GPU cascade_cuda;
-
-    if (!cascade_cuda.load(cascadeName))
-    {
-        return cerr << ">>> ERROR: Could not load GPU cascade classifier \"" << cascadeName << "\"" << endl, help(), -1;
-    }
+    Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascadeName);
 
     ROSGrabber ros_grabber(topic);
 
     namedWindow(":: CLF GPU Face Detect [ROS] ::", 1);
 
-    Mat frame, gray_cpu, resized_cpu, faces_downloaded, frameDisp, image;
-    vector<Rect> facesBuf_cpu;
+    Mat frame, frameDisp;
+    GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda;
 
-    GpuMat frame_cuda, gray_cuda, resized_cuda, facesBuf_cuda;
-
-    bool useGPU = true;
-    double scaleFactor = 1.0;
+    double scaleFactor = 1.01;
     bool findLargestObject = true;
     bool filterRects = true;
     bool helpScreen = false;
     std::string duration;
-    int detections_num;
 
     for (;;) {
 
@@ -251,24 +221,24 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            frame_cuda.upload(image.empty() ? frame : image);
+            frameDisp = frame.clone();
+            frame_cuda.upload(frame);
 
-            convertAndResize(frame_cuda, gray_cuda, resized_cuda, scaleFactor);
+            cv::cuda::cvtColor(frame_cuda, frame_cuda_grey, cv::COLOR_BGR2GRAY);
 
             TickMeter tm;
             tm.start();
 
-            cascade_cuda.findLargestObject = findLargestObject;
-
-            detections_num = cascade_cuda.detectMultiScale(resized_cuda, facesBuf_cuda, 1.2, (filterRects || findLargestObject) ? 4 : 0);
-            facesBuf_cuda.colRange(0, detections_num).download(faces_downloaded);
-
-            resized_cuda.download(resized_cpu);
+            cascade_cuda->setMinNeighbors(0);
+            cascade_cuda->setScaleFactor(scaleFactor);
+            cascade_cuda->setFindLargestObject(findLargestObject);
+            cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
+            std::vector<Rect> faces;
+            cascade_cuda->convert(facesBuf_cuda, faces);
 
             if(draw) {
-                for (int i = 0; i < detections_num; ++i) {
-                   rectangle(resized_cpu, faces_downloaded.ptr<cv::Rect>()[i], Scalar(255,191,0));
-                }
+                for(int i = 0; i < faces.size(); ++i)
+                    cv::rectangle(frame, faces[i], cv::Scalar(255));
             }
 
             std_msgs::Header h;
@@ -282,19 +252,21 @@ int main(int argc, char *argv[])
 
             double face_size = 0.0;
 
-            for (int i = 0; i < detections_num; ++i) {
-                person_msg.name = "unknown";
-                person_msg.reliability = 0.0;
-                geometry_msgs::Point p;
-                Point center = Point((faces_downloaded.ptr<cv::Rect>()[i].x + faces_downloaded.ptr<cv::Rect>()[i].width/2.0), (faces_downloaded.ptr<cv::Rect>()[i].y + faces_downloaded.ptr<cv::Rect>()[i].height/2.0));
-                // double mid_x = center.x;
-                // double mid_y = center.y;
-                p.x = center.x;
-                p.y = center.y;
-                p.z = faces_downloaded.ptr<cv::Rect>()[i].size().area();
-                face_size = faces_downloaded.ptr<cv::Rect>()[i].size().area();
-                person_msg.position = p;
-                people_msg.people.push_back(person_msg);
+            for (int i = 0; i < faces.size(); ++i) {
+                  cout << faces[i] << endl;
+//                person_msg.name = "unknown";
+//                person_msg.reliability = 0.0;
+//                geometry_msgs::Point p;
+//                Point center = Point((faces.ptr<cv::Rect>()[i].x + faces.ptr<cv::Rect>()[i].width/2.0),
+//                                     (faces.ptr<cv::Rect>()[i].y + faces.ptr<cv::Rect>()[i].height/2.0));
+//                // double mid_x = center.x;
+//                // double mid_y = center.y;
+//                p.x = center.x;
+//                p.y = center.y;
+//                p.z = faces.ptr<cv::Rect>()[i].size().area();
+//                face_size = faces.ptr<cv::Rect>()[i].size().area();
+//                person_msg.position = p;
+//                people_msg.people.push_back(person_msg);
             }
 
             // TODO revert this, this is just for the stupid Floka
@@ -305,8 +277,7 @@ int main(int argc, char *argv[])
             double fps = 1000 / detectionTime;
 
             if(draw) {
-                cvtColor(resized_cpu, frameDisp, CV_GRAY2BGR);
-                displayState(frameDisp, helpScreen, useGPU, findLargestObject, filterRects, fps);
+                displayState(frameDisp, helpScreen, findLargestObject, filterRects, fps);
                 imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
             }
 
@@ -349,8 +320,6 @@ int main(int argc, char *argv[])
         boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::time_duration cdiff = c - init;
         duration = std::to_string(cdiff.total_milliseconds());
-
-        // cout << "Computation Time: " << duration << endl;
     }
 
     return 0;

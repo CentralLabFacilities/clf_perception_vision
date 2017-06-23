@@ -39,11 +39,11 @@ An exemplary config file can be found in the data folder.
 
     source /opt/ros/indigo/setup.bash
 
-    ./clf_2d_detect_ros /path/to/configfile/example.yaml /camera/input/topic
+    ./clf_detect_ros /path/to/configfile/example.yaml /camera/input/topic /output/topic
 
     source /opt/ros/indigo/setup.bash
 
-    rostopic echo /clf_2d_detect/objects
+    rostopic echo /clf_detect/objects
 
 
 ### Usage
