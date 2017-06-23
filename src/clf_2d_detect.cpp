@@ -67,13 +67,19 @@ using namespace cv;
 Detect2D::Detect2D(){}
 Detect2D::~Detect2D(){}
 
-RNG rng(133742);
-const int minhessian = 500;
+time_t t = time(nullptr);
+char *t_c = asctime(localtime(&t));
+RNG rng(133742+t);
+
+const int minhessian = 400;
+
 string out_topic = "clf_2d_detect/objects";
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
-cuda::SURF_CUDA cuda_surf(minhessian);
+
+// See: http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
+cuda::SURF_CUDA cuda_surf(minhessian, 4, 2, true, true);
 
 vector<Scalar> Detect2D::color_mix(int count) {
     vector<Scalar> colormix;
@@ -334,6 +340,7 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                 if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
 
                     if (point_matcher.compare("BF") == 0) {
+
                         cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
 
                         Mat index;
@@ -355,17 +362,21 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                                 }
                             }
                         }
+
                         cum_best_matches.push_back(bestMatches);
                     }
 
                     if (point_matcher.compare("KNN") == 0) {
+
 	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
+
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) && ((int)knn_matches[k].size() <= 2 && (int)knn_matches[k].size()>0) )
                             {
                                 bestMatches.push_back(knn_matches[k][0]);
                             }
                         }
+
                         cum_best_matches.push_back(bestMatches);
                     }
                 } else {
@@ -383,28 +394,17 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
     }
 
     boost::posix_time::ptime end_match = boost::posix_time::microsec_clock::local_time();
-
     text_offset_y = 20;
-
     boost::posix_time::ptime start_fitting = boost::posix_time::microsec_clock::local_time();
 
     if (do_not_draw == false) {
         for (int i=0; i < target_images.size(); i++) {
             try {
 
-                if ((int)cum_best_matches[i].size() < min_matches) {
-                    // cout << "E >>> " << target_labels[i] <<  " not enough matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
-                    continue;
-                }
-
                 vector<DMatch>::iterator it;
-                vector<int> point_list_x;
-                vector<int> point_list_y;
 
                 for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
                     Point2d c_t = keys_camera_image[it->trainIdx].pt;
-                    point_list_x.push_back(c_t.x);
-                    point_list_y.push_back(c_t.y);
                     Point2d current_point(c_t.x, c_t.y );
                     Point2d current_point_draw(c_t.x/scale_factor, c_t.y/scale_factor);
                     circle(input_image, current_point_draw, 3.0, colors[i], 1, 1 );
@@ -437,9 +437,20 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     scene.push_back(keys_camera_image[it->trainIdx].pt);
                 }
 
-                if(!obj.empty() && !scene.empty() && cum_best_matches[i].size() >= 4) {
+                if(!obj.empty() && !scene.empty()) {
 
+                    // CV_LMEDS --> slower
                     Mat H = findHomography(obj, scene, CV_RANSAC);
+
+                    if (H.empty()) {
+                        continue;
+                    }
+
+                    double quality = determinant(H);
+
+                    if (quality <= 0.195) {
+                        continue;
+                    }
 
                     vector<cv::Point2f> obj_corners(4);
                     obj_corners[0] = Point(0, 0);
@@ -461,50 +472,47 @@ void Detect2D::detect(Mat input_image, std::string capture_duration, ros::Time t
                     }
 
                     int diff_0 = scene_corners[1].x - scene_corners[0].x;
-                    int diff_1 = scene_corners[2].y - scene_corners[1].y;
+                    int diff_1 = scene_corners[2].y - scene_corners[0].y;
 
                     if (diff_0 > 0 && diff_1 > 0) {
                         int angle = int(atan((scene_corners[1].y-scene_corners[2].y)/(scene_corners[0].y-scene_corners[1].y))*180/M_PI);
-                        if (abs(angle) > 85 && abs(angle) <= 95) {
-                            detected_classes++;
+                        detected_classes++;
 
-                            double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
-                            double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
-                            double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
-                            double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
+                        double mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
+                        double mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
+                        double distance_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
+                        double distance_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
 
-                            std_msgs::Header h;
-                            visualization_msgs::Marker m;
+                        std_msgs::Header h;
+                        visualization_msgs::Marker m;
 
-                            geometry_msgs::Pose pose;
-                            geometry_msgs::Point pt;
+                        geometry_msgs::Pose pose;
+                        geometry_msgs::Point pt;
 
-                            h.stamp = timestamp;
-                            h.frame_id = "camera";
-                            m.header = h;
+                        h.stamp = timestamp;
+                        h.frame_id = "camera";
+                        m.header = h;
 
-                            m.text = target_labels[i];
-                            m.ns =  target_labels[i];
+                        m.text = target_labels[i];
+                        m.ns =  target_labels[i];
 
-                            pt.x = mid_x;
-                            pt.y = mid_y;
-                            pt.z = distance_x*distance_y;
+                        pt.x = mid_x;
+                        pt.y = mid_y;
+                        pt.z = distance_x*distance_y;
+                        m.pose.position = pt;
 
-                            m.pose.position = pt;
+                        ma.markers.push_back(m);
 
-                            ma.markers.push_back(m);
+                        putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
 
-                            putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
-
-                            line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
-                            line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
-                            line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
-                            line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
-                        }
+                        line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
+                        line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
+                        line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
+                        line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
                     }
                 }
             } catch (cv::Exception& e) {
-                cout << "WARNING >>> Could not derive homography" << endl;
+                cout << "WARNING >>> Could not derive perspective transform" << endl;
             }
         }
     }
