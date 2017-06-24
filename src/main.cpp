@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
                     }
                 } else {
                     cout << "E >>> Image could not be grabbed" << endl;
+                    continue;
                 }
             } catch (std::exception& e) {
                 cout << "E >>> " << e.what() << endl;
