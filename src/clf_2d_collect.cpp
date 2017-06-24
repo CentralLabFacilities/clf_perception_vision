@@ -44,6 +44,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
+// CV
 #include <sstream>
 #include <mutex>
 #include <iostream>
@@ -52,6 +53,9 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
+
+// ROS
+#include "ros_grabber.hpp"
 
 using namespace cv;
 using namespace std;
@@ -62,7 +66,7 @@ int select_flag = 0;
 Rect rect;
 mutex locker;
 Point point1, point2;
-Mat img, img1 ,roiImg, toExtract;
+Mat img, img1 ,roiImg, toExtract, current_image;
 
 const int fontFace = cv::FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
@@ -120,22 +124,19 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 int main()
 {
 
-    VideoCapture cap(0);
-    if (!cap.isOpened())
-      return 1;
-
-    cap >> img;
+    ROSGrabber ros_grabber(argv[0]);
+    cout << ">>> ROS In Topic --> " << argv[0] << endl;
 
     imshow(":: CLF GPU Collect Live ::", img);
 
-    while (true) {
+    while (cv::waitKey(1) != 27)) {
 
         locker.lock();
-        cap >> img;
+        ros_grabber.getImage(&current_image);
         locker.unlock();
 
-        if (img.empty())
-            break;
+        if (current_image.empty())
+            continue;
 
         if (rect.width == 0 && rect.height == 0) {
             cvSetMouseCallback(":: CLF GPU Collect Live ::", mouseHandler, NULL );
@@ -143,7 +144,6 @@ int main()
 
         imshow(":: CLF GPU Collect Live ::", img);
 
-        if (cv::waitKey(1) == 27) { break; }
     }
 
     return 0;
