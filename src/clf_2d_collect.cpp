@@ -66,7 +66,7 @@ int select_flag = 0;
 Rect rect;
 mutex locker;
 Point point1, point2;
-Mat img, img1 ,roiImg, toExtract, current_image;
+Mat img1, roiImg, toExtract, current_image;
 
 const int fontFace = cv::FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
@@ -74,9 +74,11 @@ const double fontScale = 1;
 void mouseHandler(int event, int x, int y, int flags, void *param)
 {
 
-    locker.lock();
-    img1 = img.clone();
-    locker.unlock();
+    if (current_image.empty()) {
+        return;
+    }
+
+    img1 = current_image.clone();
     imshow(":: CLF GPU Collect Extract Sample ::", img1);
 
     if (event == CV_EVENT_LBUTTONDOWN && !drag)
@@ -121,28 +123,28 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 
-    ROSGrabber ros_grabber(argv[0]);
-    cout << ">>> ROS In Topic --> " << argv[0] << endl;
+    ros::init(argc, argv, "clfcollect", ros::init_options::AnonymousName);
 
-    imshow(":: CLF GPU Collect Live ::", img);
+    ROSGrabber ros_grabber(argv[1]);
+    cout << ">>> ROS In Topic --> " << argv[1] << endl;
 
-    while (cv::waitKey(1) != 27)) {
+    while (cv::waitKey(5) != 27) {
 
-        locker.lock();
+        ros::spinOnce();
+
         ros_grabber.getImage(&current_image);
-        locker.unlock();
 
         if (current_image.empty())
             continue;
 
-        if (rect.width == 0 && rect.height == 0) {
-            cvSetMouseCallback(":: CLF GPU Collect Live ::", mouseHandler, NULL );
-        }
+        imshow(":: CLF GPU Collect Live ::", current_image);
 
-        imshow(":: CLF GPU Collect Live ::", img);
+        if (rect.width == 0 && rect.height == 0) {
+            cvSetMouseCallback(":: CLF GPU Collect Live ::", mouseHandler, NULL);
+        }
 
     }
 
