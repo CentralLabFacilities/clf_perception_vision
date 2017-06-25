@@ -100,6 +100,8 @@ int main(int argc, char *argv[]) {
     Detect2D detect2d;
     detect2d.setup(argc, argv);
 
+    cout << ">>> Let's go..." << endl;
+
     cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     cv::Mat current_image;
 
