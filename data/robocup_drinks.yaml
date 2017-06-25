@@ -63,4 +63,4 @@ silent: false
 # Scale up camera image, makes things more robust but slower
 # Scale factor is 2. Using a higher resolution of your camera
 # is recommended.
-pyr_up: true
+pyr_up: false
