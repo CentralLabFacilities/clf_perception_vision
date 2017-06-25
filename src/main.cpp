@@ -90,10 +90,10 @@ int main(int argc, char *argv[]) {
     cout << ">>> ROS In Topic --> " << argv[2] << endl;
 
     // How many CPUs do we have?
-    cout << ">>> Found : " << cv::getNumberOfCPUs() << " CPUs"<< endl;
+    cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
 
     // Are we using optimized OpenCV Code?
-    cout << ">>> OpenCV was built with optimizations: " << cv::useOptimized() << endl;
+    cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/objects/subscribe", 1, toggle_callback);
 
