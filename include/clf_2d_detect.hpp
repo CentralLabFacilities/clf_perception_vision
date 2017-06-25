@@ -94,7 +94,6 @@ private:
     std::vector<std::vector<cv::KeyPoint>> keys_current_target;
     std::vector<cv::cuda::GpuMat> cuda_desc_current_target_image;
     std::vector<cv::KeyPoint> keys_camera_image;
-    cv::Point2d *target_medians;
 
     const int text_origin = 10;
     int max_keypoints = 0;
