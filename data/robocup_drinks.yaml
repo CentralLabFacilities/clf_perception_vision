@@ -1,0 +1,66 @@
+%YAML:1.0
+# Image locations
+targets:
+ - "/media/local_data/fl/milk1.png"
+ - "/media/local_data/fl/milk3.png"
+ - "/media/local_data/fl/other_milk1.png"
+ - "/media/local_data/fl/other_milk2.png"
+ - "/media/local_data/fl/other_milk3.png"
+ - "/media/local_data/fl/sprite1.png"
+ - "/media/local_data/fl/sprite3.png"
+ - "/media/local_data/fl/sprite4.png"
+ - "/media/local_data/fl/zero1.png"
+ - "/media/local_data/fl/zero2.png"
+ - "/media/local_data/fl/zero3.png"
+ - "/media/local_data/fl/coke1.png"
+ - "/media/local_data/fl/coke2.png"
+ - "/media/local_data/fl/coke3.png"
+
+
+# Corresponding labels
+labels:
+ - "MILK"
+ - "MILK"
+ - "HALF MILK"
+ - "HALF MILK"
+ - "HALF MILK"
+ - "SPRITE"
+ - "SPRITE"
+ - "SPRITE"
+ - "ZERO"
+ - "ZERO"
+ - "ZERO"
+ - "COKE"
+ - "COKE"
+ - "COKE"
+
+# ORB ONLY, number of maximum keypoints applied to an image
+# Higher values may result in better detection but slow down
+# the process
+maxkeypoints_orb: 1500
+
+# Number of minimum matches between query image and current camera image
+# to accept a valid identification
+minmatches: 8
+
+# Number of maximum matches. This may affect fitting speed if set too high
+maxmatches: 1000
+
+# Distance of two consecutive keypoints in an image. Setting this too
+# high will result in inaccurate results
+detectionthreshold: 0.55
+
+# Algorithm to extract keypoints
+keypointalgo: SURF
+
+# Matching algorithm. Valid combinations are:
+# SURF+KNN, SURF+BF (evil slow), ORB+BF
+matcher: KNN
+
+# Draw window
+silent: false
+
+# Scale up camera image, makes things more robust but slower
+# Scale factor is 2. Using a higher resolution of your camera
+# is recommended.
+pyr_up: true
