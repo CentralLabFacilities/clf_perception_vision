@@ -89,6 +89,12 @@ int main(int argc, char *argv[]) {
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> ROS In Topic --> " << argv[2] << endl;
 
+    // How many CPUs do we have?
+    cout << ">>> Found : " << cv::getNumberOfCPUs() << " CPUs"<< endl;
+
+    // Are we using optimized OpenCV Code?
+    cout << ">>> OpenCV was built with optimizations: " << cv::useOptimized() << endl;
+
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/objects/subscribe", 1, toggle_callback);
 
     Detect2D detect2d;
@@ -121,7 +127,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     }
                 } else {
-                    cout << "E >>> Image could not be grabbed" << endl;
+                    // cout << "E >>> Image could not be grabbed" << endl;
                     continue;
                 }
             } catch (std::exception& e) {
