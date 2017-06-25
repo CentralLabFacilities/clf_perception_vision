@@ -225,7 +225,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    cout << ">>> Initialized ---> " << type_descriptor << " Algorithm" << endl;
+    // cout << ">>> Initialized ---> " << type_descriptor << " Algorithm" << endl;
 
     for(int i=0; i < target_paths.size(); i++) {
 
