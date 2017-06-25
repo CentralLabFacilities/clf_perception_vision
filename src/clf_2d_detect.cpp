@@ -508,10 +508,10 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
 
                     putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
 
-                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 2 );
-                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 2 );
-                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 2 );
-                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 2 );
+                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 4);
+                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 4);
+                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 4);
+                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 4);
 
                     detected_classes++;
                 }
@@ -538,6 +538,7 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
     rectangle(input_image, Point2d(input_image.cols-160, 28), Point2d(input_image.cols, 42), CV_RGB(128,128,128), CV_FILLED);
     rectangle(input_image, Point2d(input_image.cols-160, 48), Point2d(input_image.cols, 62), CV_RGB(128,128,128), CV_FILLED);
     rectangle(input_image, Point2d(input_image.cols-160, 68), Point2d(input_image.cols, 82), CV_RGB(128,128,128), CV_FILLED);
+
     putText(input_image, "Detection: "+string_time_detect+" ms", Point2d(input_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-160, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-160, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
