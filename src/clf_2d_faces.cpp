@@ -80,6 +80,9 @@ bool toggle = true;
 bool draw = true;
 bool run = true;
 
+Size minSize(60,60);
+Size maxSize(200,200);
+
 static void help()
 {
     cout << "Usage: ./clf_faces_ros \n\t--cascade <cascade_file>\n\t--topic <ros_topic>)\n"
@@ -212,7 +215,10 @@ int main(int argc, char *argv[])
             cascade_cuda->setMinNeighbors(4);
             cascade_cuda->setScaleFactor(scaleFactor);
             cascade_cuda->setFindLargestObject(true);
+            cascade_cuda->setMinObjectSize(minSize);
+            cascade_cuda->setMaxObjectSize(maxSize);
             cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
+
             std::vector<Rect> faces;
             cascade_cuda->convert(facesBuf_cuda, faces);
 
