@@ -44,10 +44,6 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
-#if defined _MSC_VER && _MSC_VER >= 1400
-#pragma warning(disable : 4100)
-#endif
-
 // SELF
 #include "ros_grabber.hpp"
 
@@ -82,7 +78,7 @@ using namespace cv::cuda;
 
 bool toggle = true;
 bool draw = true;
-
+bool run = true;
 
 static void help()
 {
@@ -105,7 +101,7 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
 }
 
 
-static void displayState(Mat &canvas, bool bHelp, bool bLargestFace, bool bFilter, double fps)
+static void displayState(Mat &canvas, double scaleFactor ,double fps)
 {
     Scalar fontColorWhite = CV_RGB(255,255,255);
     Scalar fontColorNV  = CV_RGB(135,206,250);
@@ -115,23 +111,9 @@ static void displayState(Mat &canvas, bool bHelp, bool bLargestFace, bool bFilte
     ss << "FPS = " << setprecision(1) << fixed << fps;
     matPrint(canvas, 0, fontColorWhite, ss.str());
     ss.str("");
-    ss << "[" << canvas.cols << "x" << canvas.rows << "] | " <<
-        (bLargestFace ? "OneFace | " : "MultiFace | ") <<
-        (bFilter ? "Filter:ON" : "Filter:OFF");
+    ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "ScaleFactor " << scaleFactor;
 
     matPrint(canvas, 1, fontColorWhite, ss.str());
-
-    if (bHelp)
-    {
-        // matPrint(canvas, 3, fontColorNV, "M - switch OneFace / MultiFace");
-        // matPrint(canvas, 4, fontColorNV, "F - toggle rectangles Filter");
-        // matPrint(canvas, 5, fontColorNV, "H - toggle hotkeys help");
-        // matPrint(canvas, 6, fontColorNV, "1/Q - increase/decrease scale");
-    }
-    else
-    {
-        // matPrint(canvas, 2, fontColorNV, "H - toggle hotkeys help");
-    }
 }
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
@@ -195,18 +177,16 @@ int main(int argc, char *argv[])
 
     ROSGrabber ros_grabber(topic);
 
-    namedWindow(":: CLF GPU Face Detect [ROS] ::", 1);
+    namedWindow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", 1);
 
     Mat frame, frameDisp;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda;
 
     double scaleFactor = 1.01;
     bool findLargestObject = true;
-    bool filterRects = true;
-    bool helpScreen = false;
     std::string duration;
 
-    for (;;) {
+    while(run) {
 
         boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
 
@@ -229,9 +209,9 @@ int main(int argc, char *argv[])
             TickMeter tm;
             tm.start();
 
-            cascade_cuda->setMinNeighbors(0);
+            cascade_cuda->setMinNeighbors(4);
             cascade_cuda->setScaleFactor(scaleFactor);
-            cascade_cuda->setFindLargestObject(findLargestObject);
+            cascade_cuda->setFindLargestObject(true);
             cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
             std::vector<Rect> faces;
             cascade_cuda->convert(facesBuf_cuda, faces);
@@ -253,23 +233,19 @@ int main(int argc, char *argv[])
             double face_size = 0.0;
 
             for (int i = 0; i < faces.size(); ++i) {
-                  cout << faces[i] << endl;
-//                person_msg.name = "unknown";
-//                person_msg.reliability = 0.0;
-//                geometry_msgs::Point p;
-//                Point center = Point((faces.ptr<cv::Rect>()[i].x + faces.ptr<cv::Rect>()[i].width/2.0),
-//                                     (faces.ptr<cv::Rect>()[i].y + faces.ptr<cv::Rect>()[i].height/2.0));
-//                // double mid_x = center.x;
-//                // double mid_y = center.y;
-//                p.x = center.x;
-//                p.y = center.y;
-//                p.z = faces.ptr<cv::Rect>()[i].size().area();
-//                face_size = faces.ptr<cv::Rect>()[i].size().area();
-//                person_msg.position = p;
-//                people_msg.people.push_back(person_msg);
+                person_msg.name = "unknown";
+                person_msg.reliability = 0.0;
+                geometry_msgs::Point p;
+                Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
+                double mid_x = center.x;
+                double mid_y = center.y;
+                p.x = center.x;
+                p.y = center.y;
+                p.z = faces[i].size().area();
+                person_msg.position = p;
+                people_msg.people.push_back(person_msg);
             }
 
-            // TODO revert this, this is just for the stupid Floka
             people_pub.publish(people_msg);
 
             tm.stop();
@@ -277,43 +253,31 @@ int main(int argc, char *argv[])
             double fps = 1000 / detectionTime;
 
             if(draw) {
-                displayState(frameDisp, helpScreen, findLargestObject, filterRects, fps);
-                imshow(":: CLF GPU Face Detect [ROS] ::", frameDisp);
+                displayState(frameDisp, scaleFactor, fps);
+                imshow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", frameDisp);
             }
 
         }
 
         char key = (char)waitKey(1);
 
-        if (key == 27)
-        {
-            break;
-        }
-
         switch (key)
         {
-        case 'm':
-        case 'M':
-            findLargestObject = !findLargestObject;
-            break;
-        case 'f':
-        case 'F':
-            filterRects = !filterRects;
-            break;
-        case '1':
+        case '+':
             scaleFactor *= 1.05;
             break;
-        case 'q':
-        case 'Q':
+        case '-':
+            if (scaleFactor <= 1.01) {
+                break;
+            }
             scaleFactor /= 1.05;
-            break;
-        case 'h':
-        case 'H':
-            // helpScreen = !helpScreen;
             break;
         case 's':
         case 'S':
             draw = !draw;
+            break;
+        case 'q':
+            run = !run;
             break;
         }
 
