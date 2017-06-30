@@ -83,14 +83,15 @@ bool run = true;
 unsigned int average_frames = 0;
 unsigned int last_computed_frame = -1;
 unsigned int frame_count = 0;
+unsigned int min_n = 2;
 
-double scaleFactor = 1.2;
+double scaleFactor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
 
-Size minSize(40,40);
-Size maxSize(200,200);
+Size minSize(50,50);
+Size maxSize(100,100);
 
 static void help()
 {
@@ -227,14 +228,14 @@ int main(int argc, char *argv[])
                     TickMeter tm;
                     tm.start();
 
-                    cascade_cuda->setMinNeighbors(4);
+                    cascade_cuda->setMinNeighbors(min_n);
                     cascade_cuda->setScaleFactor(scaleFactor);
                     cascade_cuda->setFindLargestObject(true);
                     cascade_cuda->setMinObjectSize(minSize);
                     cascade_cuda->setMaxObjectSize(maxSize);
                     cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
 
-                    cascade_cuda_profile->setMinNeighbors(4);
+                    cascade_cuda_profile->setMinNeighbors(min_n);
                     cascade_cuda_profile->setScaleFactor(scaleFactor);
                     cascade_cuda_profile->setFindLargestObject(true);
                     cascade_cuda_profile->setMinObjectSize(minSize);
