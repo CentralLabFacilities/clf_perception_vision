@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     Mat frame, frameDisp;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda;
 
-    double scaleFactor = 1.01;
+    double scaleFactor = 1.2;
     bool findLargestObject = true;
     std::string duration;
 
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 
             if(draw) {
                 for(int i = 0; i < faces.size(); ++i)
-                    cv::rectangle(frame, faces[i], cv::Scalar(255));
+                    cv::rectangle(frame, faces[i], cv::Scalar(255), 4);
             }
 
             std_msgs::Header h;
