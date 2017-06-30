@@ -80,12 +80,21 @@ bool toggle = true;
 bool draw = true;
 bool run = true;
 
-Size minSize(60,60);
+unsigned int average_frames = 0;
+unsigned int last_computed_frame = -1;
+unsigned int frame_count = 0;
+
+double scaleFactor = 1.2;
+double time_spend = 0;
+
+bool findLargestObject = true;
+
+Size minSize(40,40);
 Size maxSize(200,200);
 
 static void help()
 {
-    cout << "Usage: ./clf_faces_ros \n\t--cascade <cascade_file>\n\t--topic <ros_topic>)\n"
+    cout << "Usage: ./clf_faces_ros \n\t--cascade <cascade_file>\n\t--cascade-profile <cascade_file>\n\t--topic <ros_topic>)\n"
             "Using OpenCV version " << CV_VERSION << endl << endl;
 }
 
@@ -104,14 +113,14 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
 }
 
 
-static void displayState(Mat &canvas, double scaleFactor ,double fps)
+static void displayState(Mat &canvas, double scaleFactor)
 {
     Scalar fontColorWhite = CV_RGB(255,255,255);
     Scalar fontColorNV  = CV_RGB(135,206,250);
 
     ostringstream ss;
 
-    ss << "FPS = " << setprecision(1) << fixed << fps;
+    ss << "FPS = " << setprecision(1) << fixed << average_frames;
     matPrint(canvas, 0, fontColorWhite, ss.str());
     ss.str("");
     ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "ScaleFactor " << scaleFactor;
@@ -134,7 +143,7 @@ int main(int argc, char *argv[])
     ros::Subscriber toggle_sub;
 
     people_pub = nh_.advertise<people_msgs::People>("clf_faces/people", 20);
-    toggle_sub = nh_.subscribe("/clf_faces/people/subscribe", 1, toggle_callback);
+    toggle_sub = nh_.subscribe("/clf_faces/people/compute", 1, toggle_callback);
 
     if (argc == 1)
     {
@@ -149,7 +158,7 @@ int main(int argc, char *argv[])
 
     cv::cuda::printShortCudaDeviceInfo(cv::cuda::getDevice());
 
-    string cascadeName;
+    string cascadeName, cascadeNameProfile;
     string topic;
 
     for (int i = 1; i < argc; ++i)
@@ -158,6 +167,11 @@ int main(int argc, char *argv[])
         {
             cascadeName = argv[++i];
             cout << ">>> Cascadename " << cascadeName << endl;
+        }
+        else if (string(argv[i]) == "--cascade-profile")
+        {
+            cascadeNameProfile = argv[++i];
+            cout << ">>> Cascadename Profile " << cascadeNameProfile << endl;
         }
         else if (string(argv[i]) == "--topic")
         {
@@ -177,95 +191,142 @@ int main(int argc, char *argv[])
     }
 
     Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascadeName);
+    Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascadeNameProfile);
 
     ROSGrabber ros_grabber(topic);
 
     namedWindow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", 1);
 
     Mat frame, frameDisp;
-    GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda;
+    GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
-    double scaleFactor = 1.2;
-    bool findLargestObject = true;
-    std::string duration;
+    time_t start, end;
+    time(&start);
 
     while(run) {
 
-        boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
-
         ros::spinOnce();
+
+        char key = (char)waitKey(1);
 
         if(toggle) {
 
             ros_grabber.getImage(&frame);
 
-            if (frame.empty())
-            {
-                continue;
+            if (frame.rows*frame.cols > 0) {
+
+                int tmp_frame_nr = ros_grabber.getLastFrameNr();
+
+                if(last_computed_frame != tmp_frame_nr) {
+
+                    frameDisp = frame.clone();
+                    frame_cuda.upload(frame);
+
+                    cv::cuda::cvtColor(frame_cuda, frame_cuda_grey, cv::COLOR_BGR2GRAY);
+
+                    TickMeter tm;
+                    tm.start();
+
+                    cascade_cuda->setMinNeighbors(4);
+                    cascade_cuda->setScaleFactor(scaleFactor);
+                    cascade_cuda->setFindLargestObject(true);
+                    cascade_cuda->setMinObjectSize(minSize);
+                    cascade_cuda->setMaxObjectSize(maxSize);
+                    cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
+
+                    cascade_cuda_profile->setMinNeighbors(4);
+                    cascade_cuda_profile->setScaleFactor(scaleFactor);
+                    cascade_cuda_profile->setFindLargestObject(true);
+                    cascade_cuda_profile->setMinObjectSize(minSize);
+                    cascade_cuda_profile->setMaxObjectSize(maxSize);
+                    cascade_cuda_profile->detectMultiScale(frame_cuda_grey, facesBuf_cuda_profile);
+
+                    std::vector<Rect> faces;
+                    std::vector<Rect> faces_profile;
+
+                    cascade_cuda->convert(facesBuf_cuda, faces);
+
+                    if(draw) {
+                        if (faces.size() > 0) {
+                            for(int i = 0; i < faces.size(); ++i) {
+                                cv::rectangle(frameDisp, faces[i], cv::Scalar(250,206,35), 4);
+                            }
+                        } else {
+                          cascade_cuda_profile->convert(facesBuf_cuda_profile, faces_profile);
+                          if (faces_profile.size() > 0) {
+                              for(int i = 0; i < faces_profile.size(); ++i) {
+                                cv::rectangle(frameDisp, faces_profile[i], cv::Scalar(226,43,138), 4);
+                              }
+                          }
+                        }
+                    }
+
+                    std_msgs::Header h;
+                    h.stamp = ros_grabber.getTimestamp();
+                    h.frame_id = ros_grabber.frame_id;
+
+                    // ROS MSGS
+                    people_msgs::People people_msg;
+                    people_msgs::Person person_msg;
+                    people_msg.header = h;
+                    
+                    if (faces.size() > 0) {
+                        for (int i = 0; i < faces.size(); ++i) {
+                            person_msg.name = "unknown";
+                            person_msg.reliability = 0.0;
+                            geometry_msgs::Point p;
+                            Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
+                            double mid_x = center.x;
+                            double mid_y = center.y;
+                            p.x = center.x;
+                            p.y = center.y;
+                            p.z = faces[i].size().area();
+                            person_msg.position = p;
+                            people_msg.people.push_back(person_msg);
+                        }
+                    } else if (faces_profile.size() > 0) {
+                        for (int i = 0; i < faces_profile.size(); ++i) {
+                            person_msg.name = "unknown";
+                            person_msg.reliability = 0.0;
+                            geometry_msgs::Point p;
+                            Point center = Point(faces_profile[i].x + faces_profile[i].width/2.0, faces_profile[i].y + faces_profile[i].height/2.0);
+                            double mid_x = center.x;
+                            double mid_y = center.y;
+                            p.x = center.x;
+                            p.y = center.y;
+                            p.z = faces_profile[i].size().area();
+                            person_msg.position = p;
+                            people_msg.people.push_back(person_msg);
+                        }
+                    }
+
+                    people_pub.publish(people_msg);
+
+                    frame_count++;
+
+                    tm.stop();
+                    double detectionTime = tm.getTimeMilli();
+                    double fps = 1000 / detectionTime;
+
+                    if(draw) {
+                        displayState(frameDisp, scaleFactor);
+                        imshow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", frameDisp);
+                    }
+
+                    last_computed_frame = ros_grabber.getLastFrameNr();
+                }
             }
 
-            frameDisp = frame.clone();
-            frame_cuda.upload(frame);
-
-            cv::cuda::cvtColor(frame_cuda, frame_cuda_grey, cv::COLOR_BGR2GRAY);
-
-            TickMeter tm;
-            tm.start();
-
-            cascade_cuda->setMinNeighbors(4);
-            cascade_cuda->setScaleFactor(scaleFactor);
-            cascade_cuda->setFindLargestObject(true);
-            cascade_cuda->setMinObjectSize(minSize);
-            cascade_cuda->setMaxObjectSize(maxSize);
-            cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
-
-            std::vector<Rect> faces;
-            cascade_cuda->convert(facesBuf_cuda, faces);
-
-            if(draw) {
-                for(int i = 0; i < faces.size(); ++i)
-                    cv::rectangle(frame, faces[i], cv::Scalar(255), 4);
+            if (time_spend >= 1 ) {
+                average_frames = frame_count;
+                time(&start);
+                frame_count = 0;
             }
 
-            std_msgs::Header h;
-            h.stamp = ros_grabber.getTimestamp();
-            h.frame_id = "0";
-
-            // ROS MSGS
-            people_msgs::People people_msg;
-            people_msgs::Person person_msg;
-            people_msg.header = h;
-
-            double face_size = 0.0;
-
-            for (int i = 0; i < faces.size(); ++i) {
-                person_msg.name = "unknown";
-                person_msg.reliability = 0.0;
-                geometry_msgs::Point p;
-                Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
-                double mid_x = center.x;
-                double mid_y = center.y;
-                p.x = center.x;
-                p.y = center.y;
-                p.z = faces[i].size().area();
-                person_msg.position = p;
-                people_msg.people.push_back(person_msg);
-            }
-
-            people_pub.publish(people_msg);
-
-            tm.stop();
-            double detectionTime = tm.getTimeMilli();
-            double fps = 1000 / detectionTime;
-
-            if(draw) {
-                displayState(frameDisp, scaleFactor, fps);
-                imshow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", frameDisp);
-            }
+            time(&end);
+            time_spend = difftime(end, start);
 
         }
-
-        char key = (char)waitKey(1);
 
         switch (key)
         {
@@ -287,9 +348,6 @@ int main(int argc, char *argv[])
             break;
         }
 
-        boost::posix_time::ptime c = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::time_duration cdiff = c - init;
-        duration = std::to_string(cdiff.total_milliseconds());
     }
 
     return 0;
