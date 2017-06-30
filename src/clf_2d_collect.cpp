@@ -48,7 +48,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <sstream>
 #include <mutex>
 #include <iostream>
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 #include <boost/lexical_cast.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>

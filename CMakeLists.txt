@@ -7,9 +7,9 @@ SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 FIND_PACKAGE(CUDA)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
 FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
-FIND_PACKAGE(OpenCV ${OpenCV_MIN_VERSION} REQUIRED PATHS ${CMAKE_INSTALL_PREFIX} NO_DEFAULT_PATH)
+FIND_PACKAGE(OpenCV REQUIRED)
 
-MESSAGE(STATUS "catkin_LIBRARIES: " ${catkin_LIBRARIES})
+# MESSAGE(STATUS "catkin_LIBRARIES: " ${catkin_LIBRARIES})
 
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
@@ -21,8 +21,7 @@ IF(OpenCV_FOUND)
 
         MESSAGE(STATUS "OpenCV_VERSION: " ${OpenCV_VERSION})
         MESSAGE(STATUS "OpenCV_INCLUDE_DIRS: " ${OpenCV_INCLUDE_DIRS})
-        MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBRARIES})
-        MESSAGE(STATUS "OpenCV_LIBRARY_DIRS: " ${OpenCV_LIBRARY_DIRS})
+        MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBS})
 ELSE()
         MESSAGE(FATAL_ERROR "OpenCV not found.")
 ENDIF()
@@ -39,7 +38,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # This is a hack :( ROS also provides an OPENCV3 installation
 # _without_ CUDA support. Somehow, catkin enforces the ROS CV
-# installation and thus, thise target is linked against the
+# installation and thus, this target is linked against the
 # 'wrong' CV. Set CMAKE_PREFIX_PATH and LD_LIBRARY_PATH doesn't
 # help. If someone finds a nicer solution, let me know.
 
@@ -60,7 +59,14 @@ SET(CUSTOM_ROS_LIBS /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libimage_transport.so
 )
 
-MESSAGE(STATUS "CUSTOM_ROS_LIBS :" ${CUSTOM_ROS_LIBS})
+SET(GENDER_CV_LIBS ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_face.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgproc.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_core.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_highgui.so
+)
+
+MESSAGE(STATUS "CUSTOM_ROS_LIBS: " ${CUSTOM_ROS_LIBS})
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
@@ -93,14 +99,21 @@ ADD_EXECUTABLE(clf_faces_ros
                ${INCLUDE_DIRS}
 )
 
+ADD_EXECUTABLE(clf_2d_gender
+               src/clf_2d_gender.cpp
+               ${OpenCV_INCLUDE_DIRS}
+)
+
 # NO ${catkin_LIBRARIES}, see note above !!
 
+TARGET_LINK_LIBRARIES(clf_2d_gender ${GENDER_CV_LIBS})
 TARGET_LINK_LIBRARIES(clf_detect_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_faces_ros ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_detect_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_collect RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_collect_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_faces_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_gender_ros RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_2d_gpu_detect)
