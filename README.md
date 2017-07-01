@@ -18,7 +18,7 @@ Invoke OpenCV's cmake with:
 <pre>
     -D WITH_CUDA=ON
     -D BUILD_opencv_face=ON
-<pre>
+</pre>
 
 Here's our exact CMAKE invocation
 
@@ -105,7 +105,7 @@ An exemplary config file can be found in the data folder.
     Faces with gender detection
 
     ./clf_detect_faces_ros --cascade <path/to/cascade> --cascade-profile <path/to/cascade> --gender <path/to/fisher_gender.xml> --topic /webcam/image_raw
-<pre>
+</pre>
 
 ### Usage Object Detection
 
