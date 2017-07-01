@@ -100,11 +100,11 @@ An exemplary config file can be found in the data folder.
 
     ./clf_detect_objects_ros /path/to/configfile/example.yaml /camera/input/topic /output/topic
 
-    ./clf_detect_faces_ros --cascade <path/to/cascade> --cascade-profile <path/to/cascade> --topic /webcam/image_raw
+    ./clf_detect_faces_ros --cascade /path/to/cascade.xml --cascade-profile /path/to/cascade.xml --topic /webcam/image_raw
 
-    Faces with gender detection
+    Face detection with gender classification
 
-    ./clf_detect_faces_ros --cascade <path/to/cascade> --cascade-profile <path/to/cascade> --gender <path/to/fisher_gender.xml> --topic /webcam/image_raw
+    ./clf_detect_faces_ros --cascade /path/to/cascade --cascade-profile /path/to/cascade.xml --gender /path/to/fisher_gender.xml --topic /webcam/image_raw
 </pre>
 
 ### Usage Object Detection
