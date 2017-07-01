@@ -47,12 +47,13 @@ void GenderDetector::setup(string saved_model) {
 
 int GenderDetector::detect(Mat input_image) {
 
-    resize(input_image, resized_target, Size(64,64));
+    // Traing data is based on 100x100 patches
+    resize(input_image, resized_target, Size(80,80));
 
     if (!resized_target.empty()) {
         cvtColor(resized_target, resized_grey_target , COLOR_BGR2GRAY);
         model->predict(resized_grey_target, predictedLabel, confidence);
-        if (confidence > 50) {
+        if (confidence > 42) {
             result = predictedLabel;
         } else {
             result = -1;

@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     time_t start, end;
     time(&start);
 
-    while(waitKey(1) != 27) {
+    while(waitKey(5) != 27) {
 
         ros::spinOnce();
 
@@ -268,7 +268,12 @@ int main(int argc, char *argv[])
                             for(int i = 0; i < faces.size(); ++i) {
                                 int result = -1;
                                 if (detect_gender) {
-                                    Mat roi = frame_display(faces[i]);
+                                    Rect reg;
+                                    reg.x = faces[i].x+faces[i].width*0.15;
+                                    reg.y = faces[i].y+faces[i].height*0.15;
+                                    reg.width = faces[i].width*0.7;
+                                    reg.height = faces[i].height*0.7;
+                                    Mat roi = frame_display(reg);
                                     roi.copyTo(to_extract);
                                     imshow(":: CLF GPU Face Detect [ROS] FACE ::", to_extract);
                                     if (!to_extract.empty()) {

@@ -134,14 +134,21 @@ ADD_EXECUTABLE(clf_detect_faces_ros
                ${INCLUDE_DIRS}
 )
 
+ADD_EXECUTABLE(clf_train_gender
+               src/clf_2d_train_gender.cpp
+               ${INCLUDE_DIRS}
+)
+
 # NO ${catkin_LIBRARIES}, see note above !!
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_train_gender ${CV_LIBS})
 
 INSTALL(TARGETS clf_detect_objects_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_train_gender RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_2d_gpu_detect)

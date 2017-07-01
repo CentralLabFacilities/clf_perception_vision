@@ -3,26 +3,20 @@
 import sys
 import os.path
 
-# This is a tiny script to help you creating a CSV file from a face
-# database with a similar hierarchie:
+# This is a tiny script to help you creating a CSV file from a folder structure
 #
-#  philipp@mango:~/facerec/data/at$ tree
 #  .
 #  |-- README
-#  |-- s1
+#  |-- male
 #  |   |-- 1.pgm
 #  |   |-- ...
 #  |   |-- 10.pgm
-#  |-- s2
-#  |   |-- 1.pgm
-#  |   |-- ...
-#  |   |-- 10.pgm
-#  ...
-#  |-- s40
+#  |-- female
 #  |   |-- 1.pgm
 #  |   |-- ...
 #  |   |-- 10.pgm
 #
+
 
 if __name__ == "__main__":
 
