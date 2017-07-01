@@ -29,11 +29,14 @@
 class GenderDetector {
 
 public:
-    static Mat norm_0_255(InputArray _src);
-    static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';')
-    void detect(cv::Mat* input_image);
-    std::string fn_csv
+    void setup(std::string);
+    int detect(cv::Mat* input_image);
+    cv::Mat resized_target;
 
     GenderDetector();
     ~GenderDetector();
+
+private:
+    Ptr<FisherFaceRecognizer> model;
+
 };
