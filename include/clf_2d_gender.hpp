@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2011. Philipp Wagner <bytefish[at]gmx[dot]de>.
+ * Copyright (c) 2017. Florian Lier <fl[at]techfak.uni-bielefeld[dot]de>.
+ *
  * Released to public domain under terms of the BSD Simplified license.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,7 +24,6 @@
 #include <opencv2/imgproc.hpp>
 
 #include <iostream>
-#include <fstream>
 #include <sstream>
 
 
