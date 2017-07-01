@@ -44,10 +44,14 @@ int GenderDetector::detect(Mat input_image) {
     //      model->predict(testSample, predictedLabel, confidence);
     //
     resize(input_image, resized_target, Size(64,64))
+
     int predictedLabel = model->predict(resized_target);
 
-    string result_message = format("Predicted class = %d ", predictedLabel);
-    cout << result_message << endl;
+    if (predictedLabel > 0) {
+        cout << ">>> Male" << endl;
+    } else {
+        cout << ">>> Female" << endl;
+    }
 
     return predictedLabel;
 }
