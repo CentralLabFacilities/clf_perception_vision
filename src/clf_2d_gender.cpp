@@ -26,6 +26,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "clf_2d_gender.hpp"
+
 using namespace cv;
 using namespace cv::face;
 using namespace std;
@@ -33,27 +35,28 @@ using namespace std;
 GenderDetector::GenderDetector(){}
 GenderDetector::~GenderDetector(){}
 
+int predictedLabel = -1;
+double confidence = 0.0;
+int result = -1;
+
 void GenderDetector::setup(string saved_model) {
     model = FisherFaceRecognizer::create();
     model->read(saved_model);
 }
 
 int GenderDetector::detect(Mat input_image) {
-    // To get the confidence of a prediction call the model with:
-    //
-    //      int predictedLabel = -1;
-    //      double confidence = 0.0;
-    //      model->predict(testSample, predictedLabel, confidence);
-    //
-    resize(input_image, resized_target, Size(64,64))
 
-    int predictedLabel = model->predict(resized_target);
+    resize(input_image, resized_target, Size(64,64));
 
-    if (predictedLabel > 0) {
-        cout << ">>> Male" << endl;
-    } else {
-        cout << ">>> Female" << endl;
+    if (!resized_target.empty()) {
+        cvtColor(resized_target, resized_grey_target , COLOR_BGR2GRAY);
+        model->predict(resized_grey_target, predictedLabel, confidence);
+        if (confidence > 50) {
+            result = predictedLabel;
+        } else {
+            result = -1;
+        }
     }
 
-    return predictedLabel;
+    return result;
 }

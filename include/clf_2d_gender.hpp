@@ -31,13 +31,14 @@ class GenderDetector {
 
 public:
     void setup(std::string);
-    int detect(cv::Mat* input_image);
-    cv::Mat resized_target;
+    int detect(cv::Mat input_image);
+
+    cv::Mat resized_target, resized_grey_target;
 
     GenderDetector();
     ~GenderDetector();
 
 private:
-    Ptr<FisherFaceRecognizer> model;
+    cv::Ptr<cv::face::FisherFaceRecognizer> model;
 
 };

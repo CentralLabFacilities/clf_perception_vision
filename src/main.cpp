@@ -73,8 +73,8 @@ void toggle_callback(const std_msgs::Bool& _toggle) {
 int main(int argc, char *argv[]) {
 
     if (argc < 3) {
-        cout << ">>> Usage: clf_2d_detect {path/to/config/file} {input scope}" << endl;
-        cout << ">>> Example: clf_2d_detect /tmp/example.yaml /usb_cam/image_raw" << endl;
+        cout << ">>> Usage: <proc> {path/to/config/file} {input scope}" << endl;
+        cout << ">>> Example: <proc> /tmp/example.yaml /usb_cam/image_raw" << endl;
         return -1;
     }
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     average_frames = 0;
     time_t start, end;
 
-    ros::init(argc, argv, "clf_2d_detect", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "clf_detect_objects", ros::init_options::AnonymousName);
 
     ROSGrabber ros_grabber(argv[2]);
     cout << ">>> ROS In Topic --> " << argv[2] << endl;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     // Are we using optimized OpenCV Code?
     cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
 
-    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_2d_detect/objects/compute", 1, toggle_callback);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_objects/compute", 1, toggle_callback);
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);

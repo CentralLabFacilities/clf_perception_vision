@@ -46,8 +46,11 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
+#include "clf_2d_gender.hpp"
 
 // STD
+#include <iostream>
+#include <string>
 #include <iostream>
 #include <iomanip>
 #include <opencv2/objdetect/objdetect.hpp>
@@ -74,11 +77,11 @@ the use of this software, even if advised of the possibility of such damage.
 
 using namespace std;
 using namespace cv;
-using namespace cv::cuda;
+using namespace cuda;
 
+bool detect_gender = false;
 bool toggle = true;
 bool draw = true;
-bool run = true;
 
 unsigned int average_frames = 0;
 unsigned int last_computed_frame = -1;
@@ -90,13 +93,15 @@ double time_spend = 0;
 
 bool findLargestObject = true;
 
-Size minSize(50,50);
-Size maxSize(100,100);
+Size minSize(70,70);
+Size maxSize(200,200);
+
+const int fontFace = FONT_HERSHEY_PLAIN;
+const double fontScale = 1;
 
 static void help()
 {
-    cout << "Usage: ./clf_faces_ros \n\t--cascade <cascade_file>\n\t--cascade-profile <cascade_file>\n\t--topic <ros_topic>)\n"
-            "Using OpenCV version " << CV_VERSION << endl << endl;
+    cout << "Usage: <proc> \n\t--cascade <cascade_profile_file>\n\t--cascade-profile <cascade_profile_file>\n\t--topic <ros_topic>)\n" << endl;
 }
 
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
@@ -104,7 +109,7 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
     int fontFace = FONT_HERSHEY_DUPLEX;
     double fontScale = 0.45;
     int fontThickness = 0.2;
-    Size fontSize = cv::getTextSize("T[]", fontFace, fontScale, fontThickness, 0);
+    Size fontSize = getTextSize("T[]", fontFace, fontScale, fontThickness, 0);
 
     Point org;
     org.x = 1;
@@ -137,14 +142,13 @@ void toggle_callback(const std_msgs::Bool& _toggle) {
 int main(int argc, char *argv[])
 {
 
-    ros::init(argc, argv, "clf_faces", ros::init_options::AnonymousName);
-
+    ros::init(argc, argv, "clf_detect_faces", ros::init_options::AnonymousName);
     ros::NodeHandle nh_;
     ros::Publisher people_pub;
     ros::Subscriber toggle_sub;
 
-    people_pub = nh_.advertise<people_msgs::People>("clf_faces/people", 20);
-    toggle_sub = nh_.subscribe("/clf_faces/people/compute", 1, toggle_callback);
+    people_pub = nh_.advertise<people_msgs::People>("clf_detect_faces/people", 20);
+    toggle_sub = nh_.subscribe("/clf_detect_faces/compute", 1, toggle_callback);
 
     if (argc == 1)
     {
@@ -154,25 +158,32 @@ int main(int argc, char *argv[])
 
     if (getCudaEnabledDeviceCount() == 0)
     {
-        return cerr << ">>> No GPU found or the library is compiled without GPU support" << endl, -1;
+        return cerr << ">>> No GPU found or OpenCV is compiled without GPU support" << endl, -1;
     }
 
-    cv::cuda::printShortCudaDeviceInfo(cv::cuda::getDevice());
+    cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
+    cout << ">>> ";
+    cuda::printShortCudaDeviceInfo(cuda::getDevice());
 
-    string cascadeName, cascadeNameProfile;
-    string topic;
+    string cascade_frontal_file, cascade_profile_file, gender_fisher_faces, topic;
 
     for (int i = 1; i < argc; ++i)
     {
         if (string(argv[i]) == "--cascade")
         {
-            cascadeName = argv[++i];
-            cout << ">>> Cascadename " << cascadeName << endl;
+            cascade_frontal_file = argv[++i];
+            cout << ">>> Cascade File " << cascade_frontal_file << endl;
         }
         else if (string(argv[i]) == "--cascade-profile")
         {
-            cascadeNameProfile = argv[++i];
-            cout << ">>> Cascadename Profile " << cascadeNameProfile << endl;
+            cascade_profile_file = argv[++i];
+            cout << ">>> Cascade Frontal File " << cascade_profile_file << endl;
+        }
+        else if (string(argv[i]) == "--gender")
+        {
+            gender_fisher_faces = argv[++i];
+            detect_gender = true;
+            cout << ">>> Fisher Faces File " << gender_fisher_faces << endl;
         }
         else if (string(argv[i]) == "--topic")
         {
@@ -191,24 +202,28 @@ int main(int argc, char *argv[])
         }
     }
 
-    Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascadeName);
-    Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascadeNameProfile);
-
     ROSGrabber ros_grabber(topic);
 
-    namedWindow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", 1);
+    Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
+    Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascade_profile_file);
 
-    Mat frame, frameDisp;
+    GenderDetector gd = GenderDetector();
+
+    if (detect_gender) {
+        gd.setup(gender_fisher_faces);
+    }
+
+    namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
+
+    Mat frame, frame_display, to_extract;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
     time_t start, end;
     time(&start);
 
-    while(run) {
+    while(waitKey(1) != 27) {
 
         ros::spinOnce();
-
-        char key = (char)waitKey(1);
 
         if(toggle) {
 
@@ -220,10 +235,10 @@ int main(int argc, char *argv[])
 
                 if(last_computed_frame != tmp_frame_nr) {
 
-                    frameDisp = frame.clone();
+                    frame_display = frame.clone();
                     frame_cuda.upload(frame);
 
-                    cv::cuda::cvtColor(frame_cuda, frame_cuda_grey, cv::COLOR_BGR2GRAY);
+                    cuda::cvtColor(frame_cuda, frame_cuda_grey, COLOR_BGR2GRAY);
 
                     TickMeter tm;
                     tm.start();
@@ -250,13 +265,36 @@ int main(int argc, char *argv[])
                     if(draw) {
                         if (faces.size() > 0) {
                             for(int i = 0; i < faces.size(); ++i) {
-                                cv::rectangle(frameDisp, faces[i], cv::Scalar(250,206,35), 4);
+                                int result = -1;
+                                if (detect_gender) {
+                                    Mat roi = frame_display(faces[i]);
+                                    roi.copyTo(to_extract);
+                                    imshow(":: CLF GPU Face Detect [ROS] FACE ::", to_extract);
+                                    if (!to_extract.empty()) {
+                                        result = gd.detect(to_extract);
+                                    }
+                                }
+                                if(result == -1) {
+                                    putText(frame_display, "UNSURE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
+                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
+                                    rectangle(frame_display, faces[i], Scalar(113,179,60), 3);
+                                }
+                                if(result == 1) {
+                                    putText(frame_display, "MALE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
+                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
+                                    rectangle(frame_display, faces[i], Scalar(250,206,35), 3);
+                                }
+                                if(result == 0) {
+                                    putText(frame_display, "FEMALE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
+                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
+                                    rectangle(frame_display, faces[i], Scalar(180,105,255), 3);
+                                }
                             }
                         } else {
                           cascade_cuda_profile->convert(facesBuf_cuda_profile, faces_profile);
                           if (faces_profile.size() > 0) {
                               for(int i = 0; i < faces_profile.size(); ++i) {
-                                cv::rectangle(frameDisp, faces_profile[i], cv::Scalar(226,43,138), 4);
+                                rectangle(frame_display, faces_profile[i], Scalar(102,255,255), 3);
                               }
                           }
                         }
@@ -310,8 +348,8 @@ int main(int argc, char *argv[])
                     double fps = 1000 / detectionTime;
 
                     if(draw) {
-                        displayState(frameDisp, scaleFactor);
-                        imshow(":: CLF GPU Face Detect [ROS] Press q to Exit ::", frameDisp);
+                        displayState(frame_display, scaleFactor);
+                        imshow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", frame_display);
                     }
 
                     last_computed_frame = ros_grabber.getLastFrameNr();
@@ -329,6 +367,8 @@ int main(int argc, char *argv[])
 
         }
 
+        char key = (char)waitKey(1);
+
         switch (key)
         {
         case '+':
@@ -343,9 +383,6 @@ int main(int argc, char *argv[])
         case 's':
         case 'S':
             draw = !draw;
-            break;
-        case 'q':
-            run = !run;
             break;
         }
 

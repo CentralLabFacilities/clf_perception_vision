@@ -73,13 +73,12 @@ const double fontScale = 1;
 
 void mouseHandler(int event, int x, int y, int flags, void *param)
 {
-
     if (current_image.empty()) {
         return;
     }
 
     img1 = current_image.clone();
-    imshow(":: CLF GPU Collect Extract Sample ::", img1);
+    imshow(":: CLF GPU Collect Extract Sample [ROS] ::", img1);
 
     if (event == CV_EVENT_LBUTTONDOWN && !drag)
     {
@@ -92,16 +91,15 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
         point2 = Point(x, y);
         putText(img1, "Saved ROI", Point2d(point1.x-5, point1.y-5), fontFace, fontScale, CV_RGB(255, 0, 0), 1);
         rectangle(img1, point1, point2, CV_RGB(255, 0, 0), 2, 8, 0);
-        imshow(":: CLF GPU Collect Extract Sample ::", img1);
+        imshow(":: CLF GPU Collect Extract Sample [ROS] ::", img1);
     }
 
     if (event == CV_EVENT_LBUTTONUP && drag)
     {
         point2 = Point(x, y);
-        // Remove the rectangle: +- 3 pixels
         rect = Rect(point1.x+2, point1.y+2, x-2 - point1.x, y-2 - point1.y);
         locker.lock();
-        if (rect.width < 5 || rect.height < 5) {
+        if (rect.width < 3 || rect.height < 3) {
             drag = 0;
             return;
         }
@@ -125,28 +123,19 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 
 int main(int argc, char *argv[])
 {
-
-    ros::init(argc, argv, "clfcollect", ros::init_options::AnonymousName);
-
+    ros::init(argc, argv, "clf_collect_data_ros", ros::init_options::AnonymousName);
     ROSGrabber ros_grabber(argv[1]);
     cout << ">>> ROS In Topic --> " << argv[1] << endl;
 
     while (cv::waitKey(5) != 27) {
-
         ros::spinOnce();
-
         ros_grabber.getImage(&current_image);
-
         if (current_image.empty())
             continue;
-
-        imshow(":: CLF GPU Collect Live ::", current_image);
-
+        imshow(":: CLF GPU Collect Live [ROS] ::", current_image);
         if (rect.width == 0 && rect.height == 0) {
-            cvSetMouseCallback(":: CLF GPU Collect Live ::", mouseHandler, NULL);
+            cvSetMouseCallback(":: CLF GPU Collect Live [ROS] ::", mouseHandler, NULL);
         }
-
     }
-
     return 0;
 }

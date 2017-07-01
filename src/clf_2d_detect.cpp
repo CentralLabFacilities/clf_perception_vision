@@ -73,7 +73,7 @@ RNG rng(133742+t);
 
 const int minhessian = 400;
 
-string out_topic = "clf_detect/objects";
+string out_topic = "clf_detect_objects/objects";
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
