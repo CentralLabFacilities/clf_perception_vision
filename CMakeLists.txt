@@ -157,9 +157,7 @@ TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost
 TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS}
                                            ${CV_LIBS}
                                            ${CUSTOM_ROS_LIBS}
-                                           ${Boost_LIBRARIES}
-                                           ${Caffe_LIBRARIES}
-                                           ${dlib_LIBRARIES})
+                                           ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
 
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
