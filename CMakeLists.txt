@@ -6,6 +6,12 @@ SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
 
+FIND_PACKAGE(dlib)
+
+FIND_PACKAGE(Caffe)
+ADD_DEFINITIONS(${Caffe_DEFINITIONS})
+ADD_DEFINITIONS(-DENABLE_ASSERTS)
+
 FIND_PACKAGE(CUDA)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
 FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
@@ -107,7 +113,12 @@ CATKIN_PACKAGE(
   CATKIN_DEPENDS message_runtime
 )
 
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} include)
+INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
+                    ${catkin_INCLUDE_DIRS}
+                    ${Caffe_INCLUDE_DIRS}
+                    ${dlib_INCLUDE_DIRS}
+                    include)
 
 FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp)
 
@@ -143,7 +154,12 @@ ADD_EXECUTABLE(clf_train_gender_fisher
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS}
+                                           ${CV_LIBS}
+                                           ${CUSTOM_ROS_LIBS}
+                                           ${Boost_LIBRARIES}
+                                           ${Caffe_LIBRARIES}
+                                           ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
 
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
