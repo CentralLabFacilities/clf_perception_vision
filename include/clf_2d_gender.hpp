@@ -18,14 +18,18 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 
+
+#pragma once
+
+// CV
 #include <opencv2/core.hpp>
 #include <opencv2/face.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+// STD
 #include <iostream>
 #include <sstream>
-
 
 class GenderDetector {
 

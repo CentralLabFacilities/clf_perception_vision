@@ -58,9 +58,6 @@ the use of this software, even if advised of the possibility of such damage.
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 
-// BOOST
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 using namespace std;
 using namespace cv;
 using namespace cuda;

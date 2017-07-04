@@ -44,6 +44,9 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
+
+#pragma once
+
 // STD
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
