@@ -93,7 +93,7 @@ SET(CV_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
              ${CMAKE_INSTALL_PREFIX}/lib/libopencv_objdetect.so
 )
 
-SET(CUDA_LIBS ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
+SET(CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
                ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudabgsegm.so
                ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudacodec.so
                ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudafeatures2d.so
