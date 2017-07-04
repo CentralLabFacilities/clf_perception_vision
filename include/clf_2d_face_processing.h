@@ -23,7 +23,7 @@ class CFaceProcessing
 {
 private:
    cv:cuda::GpuMat skinBinImg_gpu, skinBinImg_gpu_t, m_grayImg_gpu, skinSegGrayImg_gpu, m_faces_gpu;
-   Ptr<cuda::CascadeClassifier> cascade_cuda;
+   cv::Ptr<cuda::CascadeClassifier> cascade_cuda;
    cv::CascadeClassifier cascade_glasses;
    cv::CascadeClassifier cascade_eyes;
    std::vector<cv::Rect> m_faces;

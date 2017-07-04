@@ -81,6 +81,7 @@ the use of this software, even if advised of the possibility of such damage.
 using namespace std;
 using namespace cv;
 using namespace cuda;
+using namespace dlib;
 
 bool detect_gender = false;
 bool toggle = true;
@@ -95,6 +96,8 @@ double scaleFactor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
+bool showLandmark = false;
+bool showLandmark = false;
 
 Size minSize(70,70);
 Size maxSize(200,200);
@@ -296,7 +299,6 @@ int main(int argc, char *argv[])
                                Prediction p = predictions[0];
                                if (p.second >= 0.8) // 0.001 ~ 0.002
                                {
-                                  totalCount++;
                                   std::cout<<p.first<<" "<<p.second<<std::endl;
                                   if (p.first == "male")
                                   {
@@ -309,21 +311,9 @@ int main(int argc, char *argv[])
                                      char beliefStr[64] = { 0 };
                                      cv::putText(frame_display, beliefStr, cv::Point(faces[i].x, faces[i].y + faces[i].height + 30), cv::FONT_HERSHEY_COMPLEX, 0.5, CV_RGB(255, 0, 0));
                                      cv::rectangle(frame_display, faces[i], CV_RGB(255, 0, 0), 2);
-                                     falseCount++;
                                   }
                                }
-
-                         char key = (char)cv::waitKey(1);
-
-                         if (key == 27) break;
-
-                         else if (key == 76 || key == 108) // 'l' or 'L'
-                         {
-                            showLandmark = !showLandmark;
-                         }
-                         else if (key == 70 || key == 102) // 'f' or 'F'
-                         {
-                            showCroppedFaceImg = !showCroppedFaceImg;
+                            }
                          }
 
                          fp.CleanFaces();
