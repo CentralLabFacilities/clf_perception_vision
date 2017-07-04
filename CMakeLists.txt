@@ -120,7 +120,7 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${dlib_INCLUDE_DIRS}
                     include)
 
-FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp)
+FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp include/*.h)
 
 ADD_EXECUTABLE(clf_detect_objects_surb_ros
                src/clf_2d_detect_surb.cpp
@@ -137,32 +137,48 @@ ADD_EXECUTABLE(clf_collect_data_ros
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_detect_faces_ros
-               src/clf_2d_faces.cpp
-               src/ros_grabber.cpp
-               src/clf_2d_gender_fisher.cpp
+
+ADD_EXECUTABLE(clf_idfaces_ros
+               src/clf_2d_cv_dlib.cpp
+               src/clf_2d_faceprocessing.cpp
+               src/clf_2d_caffee_classification.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_train_gender_fisher
-               src/clf_2d_train_gender_fisher.cpp
-               ${INCLUDE_DIRS}
-)
+# Deprecated
+# ADD_EXECUTABLE(clf_detect_faces_ros
+#               src/clf_2d_faces.cpp
+#               src/ros_grabber.cpp
+#               src/clf_2d_gender_fisher.cpp
+#               ${CLF_HEADER_LIST}
+#               ${INCLUDE_DIRS}
+# )
+
+# Deprecated
+# ADD_EXECUTABLE(clf_train_gender_fisher
+#                src/clf_2d_train_gender_fisher.cpp
+#                ${INCLUDE_DIRS}
+# )
 
 # NO ${catkin_LIBRARIES}, see note above !!
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS}
-                                           ${CV_LIBS}
-                                           ${CUSTOM_ROS_LIBS}
-                                           ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
+TARGET_LINK_LIBRARIES(clf_idfaces_ros ${CUDA_LIBS}
+                                      ${CV_LIBS}
+                                      ${CUSTOM_ROS_LIBS}
+                                      ${Boost_LIBRARIES})
+
+# TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS}
+#                                            ${CV_LIBS}
+#                                            ${CUSTOM_ROS_LIBS}
+#                                            ${Boost_LIBRARIES})
+# TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
 
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_train_gender_fisher RUNTIME DESTINATION bin)
+# INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
+# INSTALL(TARGETS clf_train_gender_fisher RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_2d_gpu_detect)
