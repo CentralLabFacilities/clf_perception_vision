@@ -80,7 +80,7 @@ bool findLargestObject = true;
 Size minSize(70,70);
 Size maxSize(200,200);
 
-const int fontFace = FONT_HERSHEY_PLAIN;
+const int fontFace = cv::FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
 
 string cascade_frontal_file,
@@ -230,8 +230,8 @@ int main(int argc, char *argv[])
                          {
                             faces = fp.GetFaces();
                             // normalize the face image with landmark
-                            std::vector<cv::Mat> normalizedImg;
-                            fp.AlignFaces2D(normalizedImg, frame);
+                            // std::vector<cv::Mat> normalizedImg;
+                            // fp.AlignFaces2D(normalizedImg, frame);
                             croppedImgs.resize(faceNum);
                             for (int i = 0; i < faceNum; i++)
                             {
@@ -255,14 +255,14 @@ int main(int argc, char *argv[])
                             // ---------------------------------
                             // extraction landmarks on each face
                             // ---------------------------------
-                            fLandmarks.resize(faceNum);
+                            // fLandmarks.resize(faceNum);
 
-                            for (int i = 0; i < faceNum; i++)
-                            {
-                               fLandmarks[i] = fp.GetLandmarks(i);
-                            for (size_t j = 0; j < fLandmarks[i].size(); j++)
-                               cv::circle(frame_display, fLandmarks[i][j], 1, cv::Scalar(255,255,255));
-                            }
+                            // for (int i = 0; i < faceNum; i++)
+                            // {
+                            //    fLandmarks[i] = fp.GetLandmarks(i);
+                            // for (size_t j = 0; j < fLandmarks[i].size(); j++)
+                            //    cv::circle(frame_display, fLandmarks[i][j], 1, cv::Scalar(255,255,255));
+                            // }
                          }
                          // --------------------------------------------
                          // do gender classification and display results
@@ -273,28 +273,28 @@ int main(int argc, char *argv[])
                          {
                             if (status[i])
                             {
-                               cv::imshow("Cropped Images", croppedImgs[i]);
-                               cv::waitKey(1);
+                               // cv::imshow("Cropped Images", croppedImgs[i]);
+                               // cv::waitKey(5);
                                std::vector<Prediction> predictions = classifier.Classify(croppedImgs[i]);
                                Prediction p = predictions[0];
-                               if (p.second >= 0.8) // 0.001 ~ 0.002
+                               if (p.second >= 0.7) // 0.001 ~ 0.002
                                {
-                                  // std::cout<<p.first<<" "<<p.second<<std::endl;
                                   if (p.first == "male")
                                   {
                                      char beliefStr[64] = { 0 };
-                                     cv::putText(frame_display, beliefStr, cv::Point(faces[i].x, faces[i].y + faces[i].height + 30), cv::FONT_HERSHEY_COMPLEX, 0.5, CV_RGB(0, 0, 255));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(0, 0, 255), 2);
+                                     cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
+                                     cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 4);
                                   }
                                   else if(p.first == "female")
                                   {
                                      char beliefStr[64] = { 0 };
-                                     cv::putText(frame_display, beliefStr, cv::Point(faces[i].x, faces[i].y + faces[i].height + 30), cv::FONT_HERSHEY_COMPLEX, 0.5, CV_RGB(255, 0, 0));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(255, 0, 0), 2);
+                                     cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
+                                     cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 4);
                                   }
                                }
                             }
                          }
+
                          fp.CleanFaces();
                     }
 
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 
         }
 
-        char key = (char)waitKey(1);
+        char key = (char)waitKey(5);
 
         switch (key)
         {

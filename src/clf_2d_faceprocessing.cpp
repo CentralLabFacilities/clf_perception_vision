@@ -64,9 +64,9 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
    }
 
    unsigned int min_n = 2;
-   double scaleFactor = 1.4;
-   Size minSize(70,70);
-   Size maxSize(200,200);
+   double scaleFactor = 1.2;
+   Size minSize(40,40);
+   Size maxSize(150,150);
 
    cascade_cuda = cuda::CascadeClassifier::create(faceXml);
    cascade_cuda->setMinNeighbors(min_n);
@@ -118,19 +118,15 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
    // -----------------------------------------------
    std::vector<Rect> faces;
    m_grayImg_gpu.upload(m_grayImg);
-   m_grayImg_gpu.copyTo(skinSegGrayImg_gpu, skinBinImg_gpu_t); 
-
+   m_grayImg_gpu.copyTo(skinSegGrayImg_gpu, skinBinImg_gpu_t);
    cascade_cuda->detectMultiScale(skinSegGrayImg_gpu, m_faces_gpu);
    cascade_cuda->convert(m_faces_gpu, faces);
-
    for(int i = 0; i < faces.size(); ++i) {
       cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
       m_faces.push_back(faces[i]);
    }
-
    // eye detection
    EyeDetection();
-
    return m_faces.size();
 }
 
@@ -142,23 +138,19 @@ std::vector<cv::Rect>& CFaceProcessing::GetFaces()
 int CFaceProcessing::EyeDetection()
 {
    // before calling this function, make sure function "FaceDetection" has been called
-   
    m_faceStatus.resize(m_faces.size(), 0);
 
    for (unsigned int i = 0; i < m_faces.size() || i < 0; i++)
    {
       cv::Mat faceImg;
       m_grayImg(m_faces[i]).copyTo(faceImg);
-
       // histogram equalization on face
       cv::equalizeHist(faceImg, faceImg);
-
       std::vector<cv::Rect> faceFeature;
-      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, 3, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
-
+      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, 2, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
       if (faceFeature.size() != 0)
       {
-         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, 3, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
+         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, 2, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
          if (faceFeature.size() != 0) m_faceStatus[i] = 1;
          else m_faceStatus[i] = 0;
       }
@@ -167,7 +159,6 @@ int CFaceProcessing::EyeDetection()
          m_faceStatus[i] = 0;
       }
    }
-
    return m_faces.size();
 }
 
@@ -224,7 +215,6 @@ int CFaceProcessing::AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat or
    {
       dlib::toMat(faceChips[i]).copyTo(alignedFaces[i]);
    }
-
    return alignedFaces.size();
 }
 
@@ -242,14 +232,12 @@ int CFaceProcessing::GetLargestFace()
          largestArea = area;
       }
    }
-
    return largestIdx;
 }
 
 std::vector<cv::Point>& CFaceProcessing::GetLandmarks(const unsigned int idx)
 {
    // must make sure the idx is valid by yourself before calling this function
-   
    return m_landmarks[idx];
 }
 
@@ -261,7 +249,6 @@ cv::Mat& CFaceProcessing::GetGrayImages()
 int CFaceProcessing::FindLandmarksWhichFaces(const std::vector<cv::Point2f>::iterator& landmark, const int n)
 {
    int faceIdx = -1;
-
    for (unsigned int i = 0; i < m_faces.size(); i++)
    {
       int vote = 0;
@@ -277,7 +264,6 @@ int CFaceProcessing::FindLandmarksWhichFaces(const std::vector<cv::Point2f>::ite
          break;
       }
    }
-   
    return faceIdx;
 }
 
@@ -289,10 +275,8 @@ std::vector<unsigned char> CFaceProcessing::GetFaceStatus()
 bool CFaceProcessing::IncFaceStatus(const int idx, const int val)
 {
    if (m_faceStatus.size() < idx) return false;
-
    m_faceStatus[idx] += val;
    if (m_faceStatus[idx] > 200) m_faceStatus[idx] = 200;
-   
    return true;
 }
 
