@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     Classifier classifier(model_file, trained_file, mean_file, label_file);
 
     // Faces
-    CFaceProcessing fp(cascade_frontal_file, cascade_nose_file, cascade_mouth_file, dlib_shapepredictor);
+    CFaceProcessing fp(cascade_frontal_file, cascade_nose_file, cascade_mouth_file, dlib_shapepredictor, minSize, maxSize, min_n);
 
     namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
 
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
                     std::vector<Rect> faces;
                     if(draw) {
                          int faceNum ;
-                         faceNum = fp.FaceDetection_GPU(frame, min_n, scaleFactor);
+                         faceNum = fp.FaceDetection_GPU(frame, scaleFactor);
                          std::vector<cv::Mat> croppedImgs;
                          if (faceNum > 0)
                          {

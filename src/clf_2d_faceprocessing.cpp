@@ -50,7 +50,7 @@ the use of this software, even if advised of the possibility of such damage.
 using namespace cv;
 using namespace cuda;
 
-CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::string glassXml, std::string landmarkDat) : m_normalFaceSize(128)
+CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::string glassXml, std::string landmarkDat, cv::Size min, cv::Size max, int nei) : m_normalFaceSize(128)
 {
 
    if (!cascade_eyes.load(glassXml))
@@ -63,28 +63,22 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
       printf(">>> Error: cannot load xml file for eye detection in function CFaceProcessing::CFaceProcessing()\n");
    }
 
-   unsigned int min_n = 4;
-   double scaleFactor = 1.4;
-   Size minSize(80,80);
-   Size maxSize(400,400);
-
    cascade_cuda = cuda::CascadeClassifier::create(faceXml);
-   cascade_cuda->setMinNeighbors(min_n);
-   cascade_cuda->setScaleFactor(scaleFactor);
+   cascade_cuda->setMinNeighbors(nei);
+   cascade_cuda->setScaleFactor(1.4);
    cascade_cuda->setFindLargestObject(false);
-   cascade_cuda->setMinObjectSize(minSize);
-   cascade_cuda->setMaxObjectSize(maxSize);
+   cascade_cuda->setMinObjectSize(min);
+   cascade_cuda->setMaxObjectSize(max);
 
    dlib::deserialize(landmarkDat) >> m_shapePredictor;
 }
 
 CFaceProcessing::~CFaceProcessing() { }
 
-int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, int m_nei, double scale_fact)
+int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact)
 {
 
    // Dynamic settings
-   cascade_cuda->setMinNeighbors(m_nei);
    cascade_cuda->setScaleFactor(scale_fact);
 
    // color space conversion
@@ -134,7 +128,7 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, int m_nei, double
    }
 
    // eye detection
-   EyeDetection(m_nei);
+   EyeDetection();
 
    return m_faces.size();
 }
@@ -144,7 +138,7 @@ std::vector<cv::Rect>& CFaceProcessing::GetFaces()
    return m_faces;
 }
 
-int CFaceProcessing::EyeDetection(int min_n)
+int CFaceProcessing::EyeDetection()
 {
    // before calling this function, make sure function "FaceDetection" has been called
    m_faceStatus.resize(m_faces.size(), 0);
@@ -156,10 +150,10 @@ int CFaceProcessing::EyeDetection(int min_n)
       // histogram equalization on face
       cv::equalizeHist(faceImg, faceImg);
       std::vector<cv::Rect> faceFeature;
-      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, min_n, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
+      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, 4, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
       if (faceFeature.size() != 0)
       {
-         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, min_n, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
+         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, 4, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
          if (faceFeature.size() != 0) m_faceStatus[i] = 1;
          else m_faceStatus[i] = 0;
       }

@@ -88,11 +88,11 @@ private:
    cv::Mat m_grayImg;
    dlib::shape_predictor m_shapePredictor;
    unsigned int m_normalFaceSize;
-   int EyeDetection(int min_n);
+   int EyeDetection();
 public:  
-   CFaceProcessing(std::string faceXml, std::string eyeXml, std::string glassXml, std::string landmarkDat);
+   CFaceProcessing(std::string faceXml, std::string eyeXml, std::string glassXml, std::string landmarkDat, cv::Size min, cv::Size max, int nei);
    ~CFaceProcessing();
-   int FaceDetection_GPU(const cv::Mat colorImg, int m_nei, double scale_fact);
+   int FaceDetection_GPU(const cv::Mat colorImg, double scale_fact);
    std::vector<cv::Rect>& GetFaces();   
    int AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat originalbool, bool onlyLargest = false);
    int GetLargestFace();
