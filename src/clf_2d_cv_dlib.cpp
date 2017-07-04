@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
                                Prediction p = predictions[0];
                                if (p.second >= 0.8) // 0.001 ~ 0.002
                                {
-                                  std::cout<<p.first<<" "<<p.second<<std::endl;
+                                  // std::cout<<p.first<<" "<<p.second<<std::endl;
                                   if (p.first == "male")
                                   {
                                      char beliefStr[64] = { 0 };
@@ -381,6 +381,5 @@ int main(int argc, char *argv[])
         }
 
     }
-
     return 0;
 }
