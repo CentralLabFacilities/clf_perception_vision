@@ -225,6 +225,14 @@ int main(int argc, char *argv[])
                     frame_display = frame.clone();
                     std::vector<Rect> faces;
                     if(draw) {
+                         // ROS MSGS
+                         std_msgs::Header h;
+                         h.stamp = ros_grabber.getTimestamp();
+                         h.frame_id = ros_grabber.frame_id;
+                         people_msgs::People people_msg;
+                         people_msgs::Person person_msg;
+                         people_msg.header = h;
+
                          int faceNum ;
                          faceNum = fp.FaceDetection_GPU(frame, scaleFactor);
                          std::vector<cv::Mat> croppedImgs;
@@ -295,53 +303,25 @@ int main(int argc, char *argv[])
                                      cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
                                      cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
                                   }
+
+                                  person_msg.name = p.first;
+                                  person_msg.reliability = p.second;
+                                  geometry_msgs::Point p;
+                                  Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
+                                  double mid_x = center.x;
+                                  double mid_y = center.y;
+                                  p.x = center.x;
+                                  p.y = center.y;
+                                  p.z = faces[i].size().area();
+                                  person_msg.position = p;
+                                  people_msg.people.push_back(person_msg);
                                }
                             }
                          }
 
                          fp.CleanFaces();
+                         people_pub.publish(people_msg);
                     }
-
-                    std_msgs::Header h;
-                    h.stamp = ros_grabber.getTimestamp();
-                    h.frame_id = ros_grabber.frame_id;
-
-                    // ROS MSGS
-                    people_msgs::People people_msg;
-                    people_msgs::Person person_msg;
-                    people_msg.header = h;
-                    
-                    if (faces.size() > 0) {
-                        for (int i = 0; i < faces.size(); ++i) {
-                            person_msg.name = "unknown";
-                            person_msg.reliability = 0.0;
-                            geometry_msgs::Point p;
-                            Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
-                            double mid_x = center.x;
-                            double mid_y = center.y;
-                            p.x = center.x;
-                            p.y = center.y;
-                            p.z = faces[i].size().area();
-                            person_msg.position = p;
-                            people_msg.people.push_back(person_msg);
-                    }
-//                    } else if (faces_profile.size() > 0) {
-//                        for (int i = 0; i < faces_profile.size(); ++i) {
-//                            person_msg.name = "unknown";
-//                            person_msg.reliability = 0.0;
-//                            geometry_msgs::Point p;
-//                            Point center = Point(faces_profile[i].x + faces_profile[i].width/2.0, faces_profile[i].y + faces_profile[i].height/2.0);
-//                            double mid_x = center.x;
-//                            double mid_y = center.y;
-//                            p.x = center.x;
-//                            p.y = center.y;
-//                            p.z = faces_profile[i].size().area();
-//                            person_msg.position = p;
-//                            people_msg.people.push_back(person_msg);
-//                        }
-                    }
-
-                    people_pub.publish(people_msg);
 
                     frame_count++;
 
