@@ -119,12 +119,15 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
    std::vector<Rect> faces;
    m_grayImg_gpu.upload(m_grayImg);
    m_grayImg_gpu.copyTo(skinSegGrayImg_gpu, skinBinImg_gpu_t);
+
    cascade_cuda->detectMultiScale(skinSegGrayImg_gpu, m_faces_gpu);
    cascade_cuda->convert(m_faces_gpu, faces);
+
    for(int i = 0; i < faces.size(); ++i) {
       cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
       m_faces.push_back(faces[i]);
    }
+
    // eye detection
    EyeDetection();
    return m_faces.size();
