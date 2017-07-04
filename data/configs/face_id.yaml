@@ -1,0 +1,11 @@
+%YAML:1.0
+
+cascade_frontal_file: "lbp_frontal.xml"
+cascade_profile_file: "haarcascade_profileface.xml"
+cascade_nose_file: "haarcascade_nose.xml"
+cascade_mouth_file: "haarcascade_mouth.xml"
+dlib_shapepredictor: "shape_predictor_68_face_landmarks.dat"
+model_file: "shape_predictor_68_face_landmarks.dat"
+trained_file: "shape_predictor_68_face_landmarks.dat"
+mean_file: "shape_predictor_68_face_landmarks.dat"
+label_file: "shape_predictor_68_face_landmarks.dat"
