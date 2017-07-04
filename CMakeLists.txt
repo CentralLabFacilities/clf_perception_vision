@@ -5,7 +5,6 @@ PROJECT(clf_2d_gpu_detect)
 SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
 FIND_PACKAGE(dlib REQUIRED)
 
