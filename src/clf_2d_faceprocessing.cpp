@@ -71,7 +71,7 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
    cascade_cuda = cuda::CascadeClassifier::create(faceXml);
    cascade_cuda->setMinNeighbors(min_n);
    cascade_cuda->setScaleFactor(scaleFactor);
-   cascade_cuda->setFindLargestObject(true);
+   cascade_cuda->setFindLargestObject(false);
    cascade_cuda->setMinObjectSize(minSize);
    cascade_cuda->setMaxObjectSize(maxSize);
 
