@@ -89,6 +89,7 @@ SET(CV_LIBS ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_xfeatures2d.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_features2d.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_calib3d.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_objdetect.so
 )
 
 SET(CUDA_LIBS ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
@@ -139,6 +140,7 @@ ADD_EXECUTABLE(clf_collect_data_ros
 
 
 ADD_EXECUTABLE(clf_idfaces_ros
+               src/ros_grabber.cpp
                src/clf_2d_cv_dlib.cpp
                src/clf_2d_faceprocessing.cpp
                src/clf_2d_caffee_classification.cpp
@@ -168,7 +170,9 @@ TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost
 TARGET_LINK_LIBRARIES(clf_idfaces_ros ${CUDA_LIBS}
                                       ${CV_LIBS}
                                       ${CUSTOM_ROS_LIBS}
-                                      ${Boost_LIBRARIES})
+                                      ${Boost_LIBRARIES}
+                                      ${dlib_LIBRARIES}
+                                      ${Caffe_LIBRARIES})
 
 # TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS}
 #                                            ${CV_LIBS}
