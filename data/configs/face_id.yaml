@@ -1,10 +1,10 @@
 %YAML:1.0
 
 input_ros_topic: "/webcam/image_raw"
-cascade_frontal_file: "lbp_frontal.xml"
-cascade_profile_file: "haarcascade_profileface.xml"
-cascade_nose_file: "haarcascade_nose.xml"
-cascade_mouth_file: "haarcascade_mouth.xml"
+cascade_frontal_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/lbp_frontal.xml"
+cascade_profile_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_profileface.xml"
+cascade_nose_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_nose.xml"
+cascade_mouth_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_mouth.xml"
 dlib_shapepredictor: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/dlib/shape_predictor_68_face_landmarks.dat"
 model_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_models/cnn_age_gender/gender_net.caffemodel"
 trained_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_models/cnn_age_gender/deploy_gender.prototxt"
