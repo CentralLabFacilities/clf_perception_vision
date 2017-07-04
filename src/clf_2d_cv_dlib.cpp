@@ -232,8 +232,8 @@ int main(int argc, char *argv[])
                          {
                             faces = fp.GetFaces();
                             // normalize the face image with landmark
-                            // std::vector<cv::Mat> normalizedImg;
-                            // fp.AlignFaces2D(normalizedImg, frame);
+                            std::vector<cv::Mat> normalizedImg;
+                            fp.AlignFaces2D(normalizedImg, frame);
                             croppedImgs.resize(faceNum);
                             for (int i = 0; i < faceNum; i++)
                             {
@@ -257,14 +257,14 @@ int main(int argc, char *argv[])
                             // ---------------------------------
                             // extraction landmarks on each face
                             // ---------------------------------
-                            // fLandmarks.resize(faceNum);
+                             fLandmarks.resize(faceNum);
 
-                            // for (int i = 0; i < faceNum; i++)
-                            // {
-                            //    fLandmarks[i] = fp.GetLandmarks(i);
-                            // for (size_t j = 0; j < fLandmarks[i].size(); j++)
-                            //    cv::circle(frame_display, fLandmarks[i][j], 1, cv::Scalar(255,255,255));
-                            // }
+                             for (int i = 0; i < faceNum; i++)
+                             {
+                                fLandmarks[i] = fp.GetLandmarks(i);
+                             for (size_t j = 0; j < fLandmarks[i].size(); j++)
+                                cv::circle(frame_display, fLandmarks[i][j], 1, cv::Scalar(255,255,255));
+                             }
                          }
                          // --------------------------------------------
                          // do gender classification and display results
