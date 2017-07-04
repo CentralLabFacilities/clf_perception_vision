@@ -7,7 +7,6 @@ SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
 
 FIND_PACKAGE(dlib REQUIRED)
-
 FIND_PACKAGE(Caffe REQUIRED)
 ADD_DEFINITIONS(${Caffe_DEFINITIONS})
 ADD_DEFINITIONS(-DENABLE_ASSERTS)
@@ -88,6 +87,7 @@ SET(CV_LIBS ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_core.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_highgui.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_xfeatures2d.so
+                   ${CMAKE_INSTALL_PREFIX}/lib/libopencv_features2d.so
                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_calib3d.so
 )
 

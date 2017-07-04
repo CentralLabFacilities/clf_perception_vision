@@ -22,7 +22,7 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
    Size maxSize(200,200);
 
    cascade_cuda = cuda::CascadeClassifier::create(faceXml);
-   ascade_cuda->setMinNeighbors(min_n);
+   cascade_cuda->setMinNeighbors(min_n);
    cascade_cuda->setScaleFactor(scaleFactor);
    cascade_cuda->setFindLargestObject(true);
    cascade_cuda->setMinObjectSize(minSize);
@@ -69,18 +69,14 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
    // -----------------------------------------------
    // face detection with OpenCV on skin-color region
    // -----------------------------------------------
-   //cv::Mat skinSegImg;
-   cv::Mat obj_host;
+   std::vector<Rect> faces;
    m_grayImg_gpu.upload(m_grayImg);
    m_grayImg_gpu.copyTo(skinSegGrayImg_gpu, skinBinImg_gpu_t); 
 
-   int detections_num = cascade_cuda->detectMultiScale(skinSegGrayImg_gpu, m_faces_gpu);
+   cascade_cuda->detectMultiScale(skinSegGrayImg_gpu, m_faces_gpu);
+   cascade_cuda->convert(m_faces_gpu, faces);
 
-   m_faces_gpu.colRange(0, detections_num).download(obj_host);
-
-   // download only detected number of rectangles
-   cv::Rect* faces = obj_host.ptr<cv::Rect>();
-   for(int i = 0; i < detections_num; ++i){
+   for(int i = 0; i < faces.size(); ++i) {
       cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
       m_faces.push_back(faces[i]);
    }
@@ -90,7 +86,7 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
 
    return m_faces.size();
 }
-#endif
+
 std::vector<cv::Rect>& CFaceProcessing::GetFaces()
 {
    return m_faces;
@@ -176,6 +172,7 @@ int CFaceProcessing::AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat or
    alignedFaces.resize(faces.size());
    dlib::array<dlib::array2d<unsigned char> > faceChips;
    dlib::extract_image_chips(dlib_img, dlib::get_face_chip_details(shapes, m_normalFaceSize), faceChips);
+
    for (unsigned int i = 0; i < faces.size(); i++)
    {
       dlib::toMat(faceChips[i]).copyTo(alignedFaces[i]);

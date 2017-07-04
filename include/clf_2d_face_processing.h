@@ -6,7 +6,6 @@
 #include <opencv2/cudaobjdetect.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudawarping.hpp>
-#include <opencv2/cudafilters.hpp>
 
 // CV
 #include <opencv2/imgproc/imgproc.hpp>
@@ -22,8 +21,8 @@
 class CFaceProcessing
 {
 private:
-   cv:cuda::GpuMat skinBinImg_gpu, skinBinImg_gpu_t, m_grayImg_gpu, skinSegGrayImg_gpu, m_faces_gpu;
-   cv::Ptr<cuda::CascadeClassifier> cascade_cuda;
+   cv::cuda::GpuMat skinBinImg_gpu, skinBinImg_gpu_t, m_grayImg_gpu, skinSegGrayImg_gpu, m_faces_gpu;
+   cv::Ptr<cv::cuda::CascadeClassifier> cascade_cuda;
    cv::CascadeClassifier cascade_glasses;
    cv::CascadeClassifier cascade_eyes;
    std::vector<cv::Rect> m_faces;

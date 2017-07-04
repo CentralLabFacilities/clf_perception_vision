@@ -47,7 +47,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
-#include "clf_2_caffee_classification.h"
+#include "clf_2d_caffee_classification.h"
 #include "clf_2d_face_processing.h"
 
 
@@ -96,8 +96,6 @@ double scaleFactor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
-bool showLandmark = false;
-bool showLandmark = false;
 
 Size minSize(70,70);
 Size maxSize(200,200);
@@ -225,6 +223,8 @@ int main(int argc, char *argv[])
     Mat frame, frame_display, to_extract;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
+    std::vector<std::vector<cv::Point> > fLandmarks;
+
     time_t start, end;
     time(&start);
 
@@ -240,12 +240,11 @@ int main(int argc, char *argv[])
                     frame_display = frame.clone();
                     TickMeter tm;
                     tm.start();
+                    std::vector<Rect> faces;
                     if(draw) {
-                         std::vector<cv::Rect> faces;
                          int faceNum ;
                          faceNum = fp.FaceDetection_GPU(frame);
                          std::vector<cv::Mat> croppedImgs;
-
                          if (faceNum > 0)
                          {
                             faces = fp.GetFaces();
@@ -341,21 +340,21 @@ int main(int argc, char *argv[])
                             p.z = faces[i].size().area();
                             person_msg.position = p;
                             people_msg.people.push_back(person_msg);
-                        }
-                    } else if (faces_profile.size() > 0) {
-                        for (int i = 0; i < faces_profile.size(); ++i) {
-                            person_msg.name = "unknown";
-                            person_msg.reliability = 0.0;
-                            geometry_msgs::Point p;
-                            Point center = Point(faces_profile[i].x + faces_profile[i].width/2.0, faces_profile[i].y + faces_profile[i].height/2.0);
-                            double mid_x = center.x;
-                            double mid_y = center.y;
-                            p.x = center.x;
-                            p.y = center.y;
-                            p.z = faces_profile[i].size().area();
-                            person_msg.position = p;
-                            people_msg.people.push_back(person_msg);
-                        }
+                    }
+//                    } else if (faces_profile.size() > 0) {
+//                        for (int i = 0; i < faces_profile.size(); ++i) {
+//                            person_msg.name = "unknown";
+//                            person_msg.reliability = 0.0;
+//                            geometry_msgs::Point p;
+//                            Point center = Point(faces_profile[i].x + faces_profile[i].width/2.0, faces_profile[i].y + faces_profile[i].height/2.0);
+//                            double mid_x = center.x;
+//                            double mid_y = center.y;
+//                            p.x = center.x;
+//                            p.y = center.y;
+//                            p.z = faces_profile[i].size().area();
+//                            person_msg.position = p;
+//                            people_msg.people.push_back(person_msg);
+//                        }
                     }
 
                     people_pub.publish(people_msg);
