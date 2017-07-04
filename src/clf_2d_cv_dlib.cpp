@@ -70,15 +70,18 @@ bool draw = true;
 unsigned int average_frames = 0;
 unsigned int last_computed_frame = -1;
 unsigned int frame_count = 0;
-unsigned int min_n = 2;
+// Default
+unsigned int min_n = 4;
 
+// Dynamic
 double scaleFactor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
 
-Size minSize(70,70);
-Size maxSize(200,200);
+// Defaults
+Size minSize(80,80);
+Size maxSize(400,400);
 
 const int fontFace = cv::FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
@@ -103,7 +106,7 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
 {
     int fontFace = FONT_HERSHEY_DUPLEX;
     double fontScale = 0.45;
-    int fontThickness = 0.2;
+    int fontThickness = 0.3;
     Size fontSize = getTextSize("T[]", fontFace, fontScale, fontThickness, 0);
 
     Point org;
@@ -204,14 +207,13 @@ int main(int argc, char *argv[])
     namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
 
     Mat frame, frame_display;
-    GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
     std::vector<std::vector<cv::Point> > fLandmarks;
 
     time_t start, end;
     time(&start);
 
-    while(waitKey(5) != 27) {
+    while(waitKey(2) != 27) {
 
         ros::spinOnce();
 
@@ -224,7 +226,7 @@ int main(int argc, char *argv[])
                     std::vector<Rect> faces;
                     if(draw) {
                          int faceNum ;
-                         faceNum = fp.FaceDetection_GPU(frame);
+                         faceNum = fp.FaceDetection_GPU(frame, min_n, scaleFactor);
                          std::vector<cv::Mat> croppedImgs;
                          if (faceNum > 0)
                          {
@@ -274,22 +276,22 @@ int main(int argc, char *argv[])
                             if (status[i])
                             {
                                // cv::imshow("Cropped Images", croppedImgs[i]);
-                               // cv::waitKey(5);
+                               // cv::waitKey(2);
                                std::vector<Prediction> predictions = classifier.Classify(croppedImgs[i]);
                                Prediction p = predictions[0];
-                               if (p.second >= 0.7) // 0.001 ~ 0.002
+                               if (p.second >= 0.7)
                                {
                                   if (p.first == "male")
                                   {
-                                     char beliefStr[64] = { 0 };
+                                     // char beliefStr[64] = { 0 };
                                      cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 4);
+                                     cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 3);
                                   }
                                   else if(p.first == "female")
                                   {
-                                     char beliefStr[64] = { 0 };
+                                     // char beliefStr[64] = { 0 };
                                      cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 4);
+                                     cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
                                   }
                                }
                             }
@@ -361,7 +363,7 @@ int main(int argc, char *argv[])
 
         }
 
-        char key = (char)waitKey(5);
+        char key = (char)waitKey(2);
 
         switch (key)
         {

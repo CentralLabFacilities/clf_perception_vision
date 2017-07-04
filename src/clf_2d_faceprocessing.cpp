@@ -63,10 +63,10 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
       printf(">>> Error: cannot load xml file for eye detection in function CFaceProcessing::CFaceProcessing()\n");
    }
 
-   unsigned int min_n = 2;
-   double scaleFactor = 1.2;
-   Size minSize(40,40);
-   Size maxSize(150,150);
+   unsigned int min_n = 4;
+   double scaleFactor = 1.4;
+   Size minSize(80,80);
+   Size maxSize(400,400);
 
    cascade_cuda = cuda::CascadeClassifier::create(faceXml);
    cascade_cuda->setMinNeighbors(min_n);
@@ -80,8 +80,13 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
 
 CFaceProcessing::~CFaceProcessing() { }
 
-int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
+int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, int m_nei, double scale_fact)
 {
+
+   // Dynamic settings
+   cascade_cuda->setMinNeighbors(m_nei);
+   cascade_cuda->setScaleFactor(scale_fact);
+
    // color space conversion
    cv::Mat yCbCrImg;
    cv::cvtColor(colorImg, yCbCrImg, CV_RGB2YCrCb);
@@ -124,12 +129,13 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg)
    cascade_cuda->convert(m_faces_gpu, faces);
 
    for(int i = 0; i < faces.size(); ++i) {
-      cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
+      // cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
       m_faces.push_back(faces[i]);
    }
 
    // eye detection
-   EyeDetection();
+   EyeDetection(m_nei);
+
    return m_faces.size();
 }
 
@@ -138,7 +144,7 @@ std::vector<cv::Rect>& CFaceProcessing::GetFaces()
    return m_faces;
 }
 
-int CFaceProcessing::EyeDetection()
+int CFaceProcessing::EyeDetection(int min_n)
 {
    // before calling this function, make sure function "FaceDetection" has been called
    m_faceStatus.resize(m_faces.size(), 0);
@@ -150,10 +156,10 @@ int CFaceProcessing::EyeDetection()
       // histogram equalization on face
       cv::equalizeHist(faceImg, faceImg);
       std::vector<cv::Rect> faceFeature;
-      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, 2, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
+      cascade_eyes.detectMultiScale(faceImg, faceFeature, 1.2, min_n, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
       if (faceFeature.size() != 0)
       {
-         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, 2, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
+         cascade_glasses.detectMultiScale(faceImg, faceFeature, 1.2, min_n, CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(4, 4));
          if (faceFeature.size() != 0) m_faceStatus[i] = 1;
          else m_faceStatus[i] = 0;
       }
