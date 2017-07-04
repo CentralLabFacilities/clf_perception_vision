@@ -45,14 +45,6 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
-// STD
-#include <stdlib.h>
-#include <unistd.h>
-
-// CUDA
-#include <opencv2/cudaimgproc.hpp>
-#include <opencv2/cudawarping.hpp>
-
 // SELF
 #include "clf_2d_detect.hpp"
 

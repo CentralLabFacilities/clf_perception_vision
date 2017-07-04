@@ -18,14 +18,17 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 
+
+// STD
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+// CV
 #include <opencv2/core.hpp>
 #include <opencv2/face.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 using namespace cv;
 using namespace cv::face;

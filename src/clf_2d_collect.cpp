@@ -45,6 +45,9 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
+// ROS
+#include "ros_grabber.hpp"
+
 // CV
 #include <sstream>
 #include <mutex>
@@ -54,9 +57,6 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
-
-// ROS
-#include "ros_grabber.hpp"
 
 using namespace cv;
 using namespace std;

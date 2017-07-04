@@ -1,5 +1,11 @@
 #pragma once
 
+// STD
+#include <iostream>
+#include <string>
+#include <iostream>
+#include <iomanip>
+
 // CUDA
 #include <opencv2/cudafeatures2d.hpp>
 #include <opencv2/xfeatures2d/cuda.hpp>

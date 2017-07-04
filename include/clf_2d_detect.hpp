@@ -47,6 +47,8 @@ the use of this software, even if advised of the possibility of such damage.
 #pragma once
 
 // STD
+#include <stdlib.h>
+#include <unistd.h>
 #include <vector>
 #include <time.h>
 #include <string>

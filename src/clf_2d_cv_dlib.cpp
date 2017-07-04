@@ -50,23 +50,6 @@ the use of this software, even if advised of the possibility of such damage.
 #include "clf_2d_caffee_classification.h"
 #include "clf_2d_face_processing.h"
 
-
-// STD
-#include <iostream>
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-// CUDA
-#include <opencv2/cudafeatures2d.hpp>
-#include <opencv2/xfeatures2d/cuda.hpp>
-#include <opencv2/cudaobjdetect.hpp>
-#include <opencv2/cudaimgproc.hpp>
-#include <opencv2/cudawarping.hpp>
-
 // ROS
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>

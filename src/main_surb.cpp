@@ -45,15 +45,6 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
-// STD
-#include <iostream>
-#include <string>
-#include <time.h>
-
-// THREADING
-#include <thread>
-#include <mutex>
-
 // SELF
 #include "clf_2d_detect.hpp"
 #include "ros_grabber.hpp"
