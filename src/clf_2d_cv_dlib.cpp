@@ -293,13 +293,11 @@ int main(int argc, char *argv[])
                                {
                                   if (p.first == "male")
                                   {
-                                     // char beliefStr[64] = { 0 };
                                      cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
                                      cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 3);
                                   }
                                   else if(p.first == "female")
                                   {
-                                     // char beliefStr[64] = { 0 };
                                      cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
                                      cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
                                   }
