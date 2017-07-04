@@ -182,6 +182,7 @@ TARGET_LINK_LIBRARIES(clf_idfaces_ros ${CUDA_LIBS}
 
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_idfaces_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_train_gender_fisher RUNTIME DESTINATION bin)
 
