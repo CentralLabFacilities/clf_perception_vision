@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 
     namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
 
-    Mat frame, frame_display, to_extract;
+    Mat frame, frame_display;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
     std::vector<std::vector<cv::Point> > fLandmarks;
@@ -221,8 +221,6 @@ int main(int argc, char *argv[])
                 int tmp_frame_nr = ros_grabber.getLastFrameNr();
                 if(last_computed_frame != tmp_frame_nr) {
                     frame_display = frame.clone();
-                    TickMeter tm;
-                    tm.start();
                     std::vector<Rect> faces;
                     if(draw) {
                          int faceNum ;
@@ -342,10 +340,6 @@ int main(int argc, char *argv[])
                     people_pub.publish(people_msg);
 
                     frame_count++;
-
-                    tm.stop();
-                    double detectionTime = tm.getTimeMilli();
-                    double fps = 1000 / detectionTime;
 
                     if(draw) {
                         displayState(frame_display, scaleFactor);
