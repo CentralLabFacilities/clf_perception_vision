@@ -1,5 +1,6 @@
 %YAML:1.0
 
+input_ros_topic: "/webcam/image_raw"
 cascade_frontal_file: "lbp_frontal.xml"
 cascade_profile_file: "haarcascade_profileface.xml"
 cascade_nose_file: "haarcascade_nose.xml"

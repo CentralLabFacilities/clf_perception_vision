@@ -96,7 +96,7 @@ string cascade_frontal_file,
 
 static void help()
 {
-    cout << "Usage: <proc> \n\t--cascade <cascade_profile_file>\n\t--cascade-profile <cascade_profile_file>\n\t--topic <ros_topic>)\n" << endl;
+    cout << "Usage: <proc> \n\t config.yaml\n" << endl;
 }
 
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
@@ -158,6 +158,9 @@ int main(int argc, char *argv[])
     FileStorage fs(argv[1], FileStorage::READ);
 
     if (fs.isOpened()) {
+
+        fs["input_ros_topic"] >> topic;
+        cout << ">>> Input Topic: --> " << topic << endl;
 
         fs["cascade_frontal_file"] >> cascade_frontal_file;
         cout << ">>> Frontal Face: --> " << cascade_frontal_file << endl;
