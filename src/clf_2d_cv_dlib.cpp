@@ -297,7 +297,6 @@ int main(int argc, char *argv[])
                                }
                             }
                          }
-
                          fp.CleanFaces();
                     }
 
