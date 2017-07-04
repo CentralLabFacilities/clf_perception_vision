@@ -233,7 +233,9 @@ int main(int argc, char *argv[])
                             faces = fp.GetFaces();
                             // normalize the face image with landmark
                             std::vector<cv::Mat> normalizedImg;
-                            fp.AlignFaces2D(normalizedImg, frame);
+                            if (faces.size() > 0) {
+                                fp.AlignFaces2D(normalizedImg, frame, false);
+                            }
                             croppedImgs.resize(faceNum);
                             for (int i = 0; i < faceNum; i++)
                             {
