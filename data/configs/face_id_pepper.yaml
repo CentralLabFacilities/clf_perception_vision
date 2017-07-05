@@ -1,0 +1,13 @@
+%YAML:1.0
+
+input_ros_topic: "/webcam/image_raw"
+#cascade_frontal_file: "/vol/pepper/systems/pepper-robocup-nightly//share/clf_detect/data/haar/haarcascade_frontalface_alt2.xml"
+cascade_frontal_file: "/vol/pepper/systems/pepper-robocup-nightly//share/clf_detect/data/haar/lbp_frontal.xml"
+cascade_profile_file: "/vol/pepper/systems/pepper-robocup-nightly//share/clf_detect/data/haar/haarcascade_profileface.xml"
+cascade_nose_file: "/vol/pepper/systems/pepper-robocup-nightly//share/clf_detect/data/haar/haarcascade_nose.xml"
+cascade_mouth_file: "/vol/pepper/systems/pepper-robocup-nightly//share/clf_detect/data/haar/haarcascade_mouth.xml"
+dlib_shapepredictor: "/vol/pepper/systems/pepper-robocup-nightly//share/dlib/shape_predictor_68_face_landmarks.dat"
+model_file: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/deploy_gender.prototxt"
+trained_file: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/gender_net.caffemodel"
+mean_file: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/mean.binaryproto"
+label_file: "/home/salt/labels.txt"
