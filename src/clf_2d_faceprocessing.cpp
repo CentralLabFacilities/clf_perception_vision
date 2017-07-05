@@ -78,7 +78,7 @@ CFaceProcessing::~CFaceProcessing() { }
 int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact)
 {
 
-   // Dynamic settings
+   // dynamic settings
    cascade_cuda->setScaleFactor(scale_fact);
 
    // color space conversion
@@ -130,14 +130,13 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact
    // eye detection
    // EyeDetection();
 
-   // Implementens EyeDetection function without executing it
-
+   // start remove if you want eye detection
    m_faceStatus.resize(m_faces.size(), 0);
 
    for(int i = 0; i < m_faces.size(); ++i) {
-      // cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
       m_faceStatus[i] = 1;
    }
+   // end remove if you want eye detection
 
    return m_faces.size();
 }
@@ -177,7 +176,6 @@ int CFaceProcessing::EyeDetection()
 int CFaceProcessing::AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat original, bool onlyLargest)
 {
    // before calling this function, make sure function "FaceDetection" has been called
-
    std::vector<cv::Rect> faces;
    
    // find the largest face
@@ -208,7 +206,6 @@ int CFaceProcessing::AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat or
       if(h + faces[i].y > original.rows)
          h = original.rows - faces[i].y ;
       shapes[i] = m_shapePredictor(dlib_img, dlib::rectangle(x, y, x + w, y + h));
-      // [20151214_Curtis] retrieve facial landmarks
       int partsNum = shapes[i].num_parts();
       m_landmarks[i].resize(partsNum);
       for (int j = 0; j < partsNum; j++)
@@ -270,7 +267,7 @@ int CFaceProcessing::FindLandmarksWhichFaces(const std::vector<cv::Point2f>::ite
          if (m_faces[i].contains(pt) == true) vote++;
       }
 
-      if (vote >= (n >> 1)) // (TBD) 1/2 landmaks must be tracked for now
+      if (vote >= (n >> 1)) // (TBD) 1/2 landmarks must be tracked for now
       {
          faceIdx = (int)i;
          break;

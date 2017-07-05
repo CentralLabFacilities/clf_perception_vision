@@ -247,9 +247,6 @@ int main(int argc, char *argv[])
                             croppedImgs.resize(faceNum);
                             for (int i = 0; i < faceNum; i++)
                             {
-                               // ------------------------------
-                               // Sylar 20160308 to use RGBscale
-                               // ------------------------------
                                int x = faces[i].x - (faces[i].width / 4);
                                int y = faces[i].y - (faces[i].height / 4);
                                if (x < 0)
@@ -285,8 +282,6 @@ int main(int argc, char *argv[])
                          {
                             if (status[i])
                             {
-                               // cv::imshow("Cropped Images", croppedImgs[i]);
-                               // cv::waitKey(2);
                                std::vector<Prediction> predictions = classifier.Classify(croppedImgs[i]);
                                Prediction p = predictions[0];
                                if (p.second >= 0.7)
