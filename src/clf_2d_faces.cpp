@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     people_pub = nh_.advertise<people_msgs::People>("clf_detect_faces/people", 20);
     toggle_sub = nh_.subscribe("/clf_detect_faces/compute", 1, toggle_callback);
 
-    if (argc == 1)
+    if (argc < 1)
     {
         help();
         return -1;
@@ -198,17 +198,11 @@ int main(int argc, char *argv[])
     time(&start);
 
     while(waitKey(5) != 27) {
-
         ros::spinOnce();
-
         if(toggle) {
-
             ros_grabber.getImage(&frame);
-
             if (frame.rows*frame.cols > 0) {
-
                 int tmp_frame_nr = ros_grabber.getLastFrameNr();
-
                 if(last_computed_frame != tmp_frame_nr) {
 
                     frame_display = frame.clone();
@@ -293,9 +287,7 @@ int main(int argc, char *argv[])
                     }
 
                     people_pub.publish(people_msg);
-
                     frame_count++;
-
                     tm.stop();
                     double detectionTime = tm.getTimeMilli();
                     double fps = 1000 / detectionTime;
