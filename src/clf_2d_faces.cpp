@@ -47,7 +47,6 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
-#include "clf_2d_gender.hpp"
 
 // STD
 #include <iostream>
@@ -80,7 +79,6 @@ using namespace std;
 using namespace cv;
 using namespace cuda;
 
-bool detect_gender = false;
 bool toggle = true;
 bool draw = true;
 
@@ -102,7 +100,7 @@ const double fontScale = 1;
 
 static void help()
 {
-    cout << "Usage: <proc> \n\t--cascade <cascade_profile_file>\n\t--cascade-profile <cascade_profile_file>\n\t--topic <ros_topic>)\n" << endl;
+    cout << "Usage: <proc> \n\t config.yaml\n" << endl;
 }
 
 static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss)
@@ -166,53 +164,30 @@ int main(int argc, char *argv[])
     cout << ">>> ";
     cuda::printShortCudaDeviceInfo(cuda::getDevice());
 
-    string cascade_frontal_file, cascade_profile_file, gender_fisher_faces, topic;
+    string cascade_frontal_file, cascade_profile_file, topic;
 
-    for (int i = 1; i < argc; ++i)
-    {
-        if (string(argv[i]) == "--cascade")
-        {
-            cascade_frontal_file = argv[++i];
-            cout << ">>> Cascade File " << cascade_frontal_file << endl;
-        }
-        else if (string(argv[i]) == "--cascade-profile")
-        {
-            cascade_profile_file = argv[++i];
-            cout << ">>> Cascade Frontal File " << cascade_profile_file << endl;
-        }
-        else if (string(argv[i]) == "--gender")
-        {
-            gender_fisher_faces = argv[++i];
-            detect_gender = true;
-            cout << ">>> Fisher Faces File " << gender_fisher_faces << endl;
-        }
-        else if (string(argv[i]) == "--topic")
-        {
-            topic = argv[++i];
-            cout << ">>> Input Topic " << topic << endl;
-        }
-        else if (string(argv[i]) == "--help")
-        {
-            help();
-            return -1;
-        }
-        else
-        {
-            cout << ">>> Unknown key: " << argv[i] << endl;
-            return -1;
-        }
+    CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
+    FileStorage fs(argv[1], FileStorage::READ);
+
+    if (fs.isOpened()) {
+
+        fs["input_ros_topic"] >> topic;
+        cout << ">>> Input Topic: --> " << topic << endl;
+
+        fs["cascade_frontal_file"] >> cascade_frontal_file;
+        cout << ">>> Frontal Face: --> " << cascade_frontal_file << endl;
+
+        fs["cascade_profile_file"] >> cascade_profile_file;
+        cout << ">>> Profile Face: --> " << cascade_profile_file << endl;
+
     }
+
+    fs.release();
 
     ROSGrabber ros_grabber(topic);
 
     Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
     Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascade_profile_file);
-
-    GenderDetector gd = GenderDetector();
-
-    if (detect_gender) {
-        gd.setup(gender_fisher_faces);
-    }
 
     namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
 
@@ -266,35 +241,7 @@ int main(int argc, char *argv[])
                     if(draw) {
                         if (faces.size() > 0) {
                             for(int i = 0; i < faces.size(); ++i) {
-                                int result = -1;
-                                if (detect_gender) {
-                                    Rect reg;
-                                    reg.x = faces[i].x+faces[i].width*0.15;
-                                    reg.y = faces[i].y+faces[i].height*0.15;
-                                    reg.width = faces[i].width*0.7;
-                                    reg.height = faces[i].height*0.7;
-                                    Mat roi = frame_display(reg);
-                                    roi.copyTo(to_extract);
-                                    imshow(":: CLF GPU Face Detect [ROS] FACE ::", to_extract);
-                                    if (!to_extract.empty()) {
-                                        result = gd.detect(to_extract);
-                                    }
-                                }
-                                if(result == -1) {
-                                    putText(frame_display, "UNSURE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
-                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
-                                    rectangle(frame_display, faces[i], Scalar(113,179,60), 3);
-                                }
-                                if(result == 1) {
-                                    putText(frame_display, "MALE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
-                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
-                                    rectangle(frame_display, faces[i], Scalar(250,206,35), 3);
-                                }
-                                if(result == 0) {
-                                    putText(frame_display, "FEMALE", Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0),
-                                                                           fontFace, fontScale, Scalar(255, 255, 255), 1);
-                                    rectangle(frame_display, faces[i], Scalar(180,105,255), 3);
-                                }
+                                rectangle(frame_display, faces[i], Scalar(113,179,60), 3);
                             }
                         } else {
                           cascade_cuda_profile->convert(facesBuf_cuda_profile, faces_profile);
