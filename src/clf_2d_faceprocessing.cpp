@@ -128,7 +128,16 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact
    }
 
    // eye detection
-   EyeDetection();
+   // EyeDetection();
+
+   // Implementens EyeDetection function without executing it
+
+   m_faceStatus.resize(m_faces.size(), 0);
+
+   for(int i = 0; i < m_faces.size(); ++i) {
+      // cv::rectangle(m_grayImg, faces[i], cv::Scalar(255));
+      m_faceStatus[i] = 1;
+   }
 
    return m_faces.size();
 }
