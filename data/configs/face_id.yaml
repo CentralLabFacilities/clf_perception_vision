@@ -1,6 +1,7 @@
 %YAML:1.0
 
-input_ros_topic: "/webcam/image_raw"
+# input_ros_topic: "/webcam/image_raw"
+input_ros_topic: "/usb_cam/image_raw"
 cascade_frontal_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_frontalface_alt2.xml"
 # cascade_frontal_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/lbp_frontal.xml"
 cascade_profile_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_profileface.xml"
