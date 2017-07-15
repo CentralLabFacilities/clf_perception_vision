@@ -28,7 +28,7 @@
 *.app
 
 build
-.idea
 *.user
-
-build
+.idea
+.idea*
+.idea/*
