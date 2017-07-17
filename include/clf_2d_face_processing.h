@@ -92,7 +92,7 @@ private:
 public:  
    CFaceProcessing(std::string faceXml, std::string eyeXml, std::string glassXml, std::string landmarkDat, cv::Size min, cv::Size max, int nei);
    ~CFaceProcessing();
-   int FaceDetection_GPU(const cv::Mat colorImg, double scale_fact);
+   int FaceDetection_GPU(const cv::Mat colorImg, double scale_fact, bool pyr);
    std::vector<cv::Rect>& GetFaces();   
    int AlignFaces2D(std::vector<cv::Mat>& alignedFaces, cv::Mat originalbool, bool onlyLargest = false);
    int GetLargestFace();
