@@ -75,18 +75,8 @@ CFaceProcessing::CFaceProcessing(std::string faceXml, std::string eyeXml, std::s
 
 CFaceProcessing::~CFaceProcessing() { }
 
-int CFaceProcessing::FaceDetection_GPU(const cv::Mat origin, double scale_fact, bool pyr)
+int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact, bool pyr)
 {
-
-   cv::Mat colorImg;
-   colorImg = origin.clone();
-
-//   if (pyr == true) {
-//    cv::pyrUp(origin, colorImg, cv::Size(origin.cols*2, origin.rows*2));
-//   } else {
-//    colorImg = origin.clone();
-//   }
-
    // dynamic settings
    cascade_cuda->setScaleFactor(scale_fact);
 

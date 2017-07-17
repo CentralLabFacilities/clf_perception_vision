@@ -73,10 +73,12 @@ public:
     ~ROSGrabber();
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
     void getImage(cv::Mat *mat);
+    void setPyr(bool pyr);
     ros::Time getTimestamp();
     ros::NodeHandle node_handle_;
     std::string frame_id;
     int getLastFrameNr();
+    bool pyr;
 private:
     int frame_nr;
     image_transport::ImageTransport it_;

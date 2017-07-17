@@ -201,6 +201,7 @@ int main(int argc, char *argv[])
 
     // ROS
     ROSGrabber ros_grabber(topic);
+    ros_grabber.setPyr(pyr);
 
     // Caffee
     Classifier classifier(model_file, trained_file, mean_file, label_file);
