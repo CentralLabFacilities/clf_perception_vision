@@ -78,6 +78,7 @@ double scaleFactor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
+bool pyr = false;
 
 // Defaults
 Size minSize(80,80);
@@ -189,6 +190,9 @@ int main(int argc, char *argv[])
         fs["mean_file"] >> mean_file;
         cout << ">>> Caffe Mean: --> " << mean_file << endl;
 
+        fs["pyr"] >> pyr;
+        cout << ">>> PyrUP: --> " << pyr << endl;
+
         fs["label_file"] >> label_file;
         cout << ">>> Labels: --> " << label_file << endl;
     }
@@ -234,7 +238,7 @@ int main(int argc, char *argv[])
                          people_msg.header = h;
 
                          int faceNum ;
-                         faceNum = fp.FaceDetection_GPU(frame, scaleFactor);
+                         faceNum = fp.FaceDetection_GPU(frame, scaleFactor, pyr);
                          std::vector<cv::Mat> croppedImgs;
                          if (faceNum > 0)
                          {
