@@ -81,7 +81,7 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat origin, double scale_fact, 
    cv::Mat colorImg;
 
    if (pyr == true) {
-    cv::pyrUp(origin, colorImg, cv::Size(origin.cols*2, origin.rows*2);
+    cv::pyrUp(origin, colorImg, cv::Size(origin.cols*2, origin.rows*2));
    } else {
     colorImg = origin.clone();
    }
