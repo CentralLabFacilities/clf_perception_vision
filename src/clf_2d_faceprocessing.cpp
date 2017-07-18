@@ -98,16 +98,13 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact
 
    // erode and dilate to remove small segmentation
    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-   // erode(skinBinImg_gpu, skinBinImg_gpu_t, kernel, cv::Point(-1, -1), 2);
-   // dilate(skinBinImg_gpu_t, skinBinImg_gpu, kernel, cv::Point(-1, -1), 2);
+
    cv::Ptr<cv::cuda::Filter> erode = cv::cuda::createMorphologyFilter(cv::MORPH_ERODE, skinBinImg_gpu.type(), kernel);
    erode->apply(skinBinImg_gpu, skinBinImg_gpu_t);
-
    cv::Ptr<cuda::Filter> dilateFilter = cv::cuda::createMorphologyFilter(cv::MORPH_ERODE, skinBinImg_gpu_t.type(), kernel);
    dilateFilter->apply(skinBinImg_gpu_t, skinBinImg_gpu);
 
    // apply GaussianBlur to have a complete segmentation
-   // cv::gpu::GaussianBlur(skinBinImg_gpu, skinBinImg_gpu_t, cv::Size(0, 0), 3.0);
    cv::Ptr<cv::cuda::Filter> blur = cv::cuda::createGaussianFilter(skinBinImg_gpu.type(), skinBinImg_gpu_t.type(), cv::Size(0, 0), 3.0);
    blur->apply(skinBinImg_gpu, skinBinImg_gpu_t);
 
@@ -126,16 +123,16 @@ int CFaceProcessing::FaceDetection_GPU(const cv::Mat colorImg, double scale_fact
       m_faces.push_back(faces[i]);
    }
 
-   // eye detection
-   // EyeDetection();
-
-   // start remove if you want eye detection
+   // START remove if you want eye detection
    m_faceStatus.resize(m_faces.size(), 0);
 
    for(int i = 0; i < m_faces.size(); ++i) {
       m_faceStatus[i] = 1;
    }
-   // end remove if you want eye detection
+   // END remove if you want eye detection
+
+   // eye detection
+   // EyeDetection();
 
    return m_faces.size();
 }

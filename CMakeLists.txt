@@ -140,22 +140,23 @@ ADD_EXECUTABLE(clf_collect_data_ros
 )
 
 
-ADD_EXECUTABLE(clf_idfaces_ros
+ADD_EXECUTABLE(clf_detect_people_ros
                src/ros_grabber.cpp
-               src/clf_2d_cv_dlib.cpp
+               src/clf_2d_cv_dlib_people.cpp
                src/clf_2d_faceprocessing.cpp
                src/clf_2d_caffee_classification.cpp
+               src/clf_2d_people.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
 # Deprecated
-ADD_EXECUTABLE(clf_detect_faces_ros
-               src/clf_2d_faces.cpp
-               src/ros_grabber.cpp
-               ${CLF_HEADER_LIST}
-               ${INCLUDE_DIRS}
-)
+# ADD_EXECUTABLE(clf_detect_faces_ros
+#               src/clf_2d_faces.cpp
+#               src/ros_grabber.cpp
+#               ${CLF_HEADER_LIST}
+#               ${INCLUDE_DIRS}
+# )
 
 # Deprecated
 # ADD_EXECUTABLE(clf_train_gender_fisher
@@ -164,16 +165,16 @@ ADD_EXECUTABLE(clf_detect_faces_ros
 # )
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_detect_people_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES} ${Caffe_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_idfaces_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES} ${Caffe_LIBRARIES})
 
-TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CUSTOM_ROS_LIBS} ${CV_LIBS} ${Boost_LIBRARIES})
+# TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CUSTOM_ROS_LIBS} ${CV_LIBS} ${Boost_LIBRARIES})
 # TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
 
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_idfaces_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_detect_people_ros RUNTIME DESTINATION bin)
+# INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_train_gender_fisher RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_detect)

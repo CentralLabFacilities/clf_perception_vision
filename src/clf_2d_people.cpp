@@ -45,47 +45,51 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
-#pragma once
+// SELF
+#include "clf_2d_people.hpp"
 
-// STD
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <algorithm>
-#include <iosfwd>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
-#include <fstream>
 
-// Caffee
-#include <caffe/caffe.hpp>
+PeopleDetector::PeopleDetector() { }
+PeopleDetector::~PeopleDetector() { }
 
-using namespace caffe;
-using std::string;
+void PeopleDetector::setup() {
+    win_stride_width = 8;
+    win_stride_height = 8;
+    win_width = 48;
+    block_width = 16;
+    block_stride_width = 8;
+    block_stride_height = 8;
+    cell_width = 8;
+    nbins = 9;
 
-typedef std::pair<string, float> Prediction;
+    scale = 1.05;
+    nlevels = 13;
+    gr_threshold = 8;
+    hit_threshold = 1.4;
+    hit_threshold_auto = true;
 
-class Classifier {
- public:
-  Classifier(const string& model_file,
-             const string& trained_file,
-             const string& mean_file,
-             const string& label_file);
+    cv::Size win_stride(win_stride_width, win_stride_height);
+    cv::Size win_size(win_width, win_width * 2);
+    cv::Size block_size(block_width, block_width);
+    cv::Size block_stride(block_stride_width, block_stride_height);
+    cv::Size cell_size(cell_width, cell_width);
 
-  std::vector<Prediction> Classify(const cv::Mat& img, int N = 5);
+    cuda_hog = cv::cuda::HOG::create(win_size, block_size, block_stride, cell_size, nbins);
+    people_detector = cuda_hog->getDefaultPeopleDetector();
+    cuda_hog->setSVMDetector(people_detector);
 
- private:
-  void SetMean(const string& mean_file);
-  std::vector<float> Predict(const cv::Mat& img);
-  void WrapInputLayer(std::vector<cv::Mat>* input_channels);
-  void Preprocess(const cv::Mat& img, std::vector<cv::Mat>* input_channels);
+    std::cout << "CUDA HOG Descriptor Size: --> " << cuda_hog->getDescriptorSize() << std::endl;
 
- private:
-  shared_ptr<Net<float> > net_;
-  cv::Size input_geometry_;
-  int num_channels_;
-  cv::Mat mean_;
-  std::vector<string> labels_;
-};
+    cuda_hog->setNumLevels(nlevels);
+    cuda_hog->setHitThreshold(hit_threshold);
+    cuda_hog->setWinStride(win_stride);
+    cuda_hog->setScaleFactor(scale);
+    cuda_hog->setGroupThreshold(gr_threshold);
+}
+
+std::vector<cv::Rect> PeopleDetector::detect(cv::Mat img) {
+    people_cuda_img.upload(img);
+    cv::cuda::cvtColor(people_cuda_img, people_cuda_img_grey, cv::COLOR_BGR2GRAY);
+    cuda_hog->detectMultiScale(people_cuda_img_grey, people_found);
+    return people_found;
+}

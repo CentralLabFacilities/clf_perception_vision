@@ -47,25 +47,20 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
+#include "clf_2d_people.hpp"
 #include "clf_2d_caffee_classification.h"
 #include "clf_2d_face_processing.h"
-
-// ROS
-#include <ros/ros.h>
-#include <std_msgs/Bool.h>
-#include <people_msgs/People.h>
-#include <people_msgs/Person.h>
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/PointStamped.h>
+#include "clf_2d_cv_dlib_people.hpp"
 
 using namespace std;
 using namespace cv;
 using namespace cuda;
 using namespace dlib;
 
-bool detect_gender = false;
 bool toggle = true;
 bool draw = true;
+bool people = true;
+bool gender = true;
 
 unsigned int average_frames = 0;
 unsigned int last_computed_frame = -1;
@@ -84,7 +79,7 @@ bool pyr = false;
 Size minSize(80,80);
 Size maxSize(400,400);
 
-const int fontFace = cv::FONT_HERSHEY_PLAIN;
+const int fontFace = FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
 
 string cascade_frontal_file,
@@ -190,11 +185,17 @@ int main(int argc, char *argv[])
         fs["mean_file"] >> mean_file;
         cout << ">>> Caffe Mean: --> " << mean_file << endl;
 
-        fs["pyr"] >> pyr;
-        cout << ">>> PyrUP: --> " << pyr << endl;
-
         fs["label_file"] >> label_file;
         cout << ">>> Labels: --> " << label_file << endl;
+
+        fs["gender"] >> gender;
+        cout << ">>> Gender Detection: --> " << gender << endl;
+
+        fs["people"] >> people;
+        cout << ">>> People Detection: --> " << people << endl;
+
+        fs["pyr"] >> pyr;
+        cout << ">>> PyrUP: --> " << pyr << endl;
     }
 
     fs.release();
@@ -204,16 +205,24 @@ int main(int argc, char *argv[])
     ros_grabber.setPyr(pyr);
 
     // Caffee
-    Classifier classifier(model_file, trained_file, mean_file, label_file);
+    if (gender == true) {
+        cl = new Classifier(model_file, trained_file, mean_file, label_file);
+    }
+
+    // People Detection
+    if (people == true) {
+        pd = new PeopleDetector();
+        pd->setup();
+    }
 
     // Faces
     CFaceProcessing fp(cascade_frontal_file, cascade_nose_file, cascade_mouth_file, dlib_shapepredictor, minSize, maxSize, min_n);
 
     namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
 
-    Mat frame, frame_display;
+    Mat frame, frame_display, frame_people;
 
-    std::vector<std::vector<cv::Point> > fLandmarks;
+    std::vector<std::vector<Point> > fLandmarks;
 
     time_t start, end;
     time(&start);
@@ -228,6 +237,9 @@ int main(int argc, char *argv[])
                 int tmp_frame_nr = ros_grabber.getLastFrameNr();
                 if(last_computed_frame != tmp_frame_nr) {
                     frame_display = frame.clone();
+                    if (people == true) {
+                        frame_people = frame.clone();
+                    }
                     std::vector<Rect> faces;
                     if(draw) {
                          // ROS MSGS
@@ -240,12 +252,12 @@ int main(int argc, char *argv[])
 
                          int faceNum ;
                          faceNum = fp.FaceDetection_GPU(frame, scaleFactor, pyr);
-                         std::vector<cv::Mat> croppedImgs;
+                         std::vector<Mat> croppedImgs;
                          if (faceNum > 0)
                          {
                             faces = fp.GetFaces();
                             // normalize the face image with landmark
-                            std::vector<cv::Mat> normalizedImg;
+                            std::vector<Mat> normalizedImg;
                             if (faces.size() > 0) {
                                fp.AlignFaces2D(normalizedImg, frame, false);
                             }
@@ -264,7 +276,7 @@ int main(int argc, char *argv[])
                                   w = frame.cols - x ;
                                if(h + y > frame.rows)
                                   h = frame.rows - y ;
-                               croppedImgs[i] = frame(cv::Rect(x, y, w, h)).clone();
+                               croppedImgs[i] = frame(Rect(x, y, w, h)).clone();
                             }
                             // ---------------------------------
                             // extraction landmarks on each face
@@ -275,46 +287,62 @@ int main(int argc, char *argv[])
                             {
                                 fLandmarks[i] = fp.GetLandmarks(i);
                             for (size_t j = 0; j < fLandmarks[i].size(); j++)
-                                cv::circle(frame_display, fLandmarks[i][j], 1, cv::Scalar(255,255,255));
+                                circle(frame_display, fLandmarks[i][j], 1, Scalar(255,255,255));
                             }
                          }
-                         // --------------------------------------------
-                         // do gender classification and display results
-                         // --------------------------------------------
-                         std::vector<unsigned char> status = fp.GetFaceStatus();
 
-                         for (int i = 0; i < faceNum; i++)
-                         {
-                            if (status[i])
+                         // --------------------------------------------
+                         // do people detecttion, if enabled and display results
+                         // --------------------------------------------
+                         if (people == true) {
+
+                            pd->detect(frame_people);
+                            // Draw positive classified windows
+                            for (size_t i = 0; i < pd->people_found.size(); i++)
                             {
-                               std::vector<Prediction> predictions = classifier.Classify(croppedImgs[i]);
-                               Prediction p = predictions[0];
-                               if (p.second >= 0.7)
-                               {
-                                  if (p.first == "male")
-                                  {
-                                     cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 3);
-                                  }
-                                  else if(p.first == "female")
-                                  {
-                                     cv::putText(frame_display, p.first, cv::Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
-                                     cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
-                                  }
-
-                                  person_msg.name = p.first;
-                                  person_msg.reliability = p.second;
-                                  geometry_msgs::Point p;
-                                  Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
-                                  double mid_x = center.x;
-                                  double mid_y = center.y;
-                                  p.x = center.x;
-                                  p.y = center.y;
-                                  p.z = faces[i].size().area();
-                                  person_msg.position = p;
-                                  people_msg.people.push_back(person_msg);
-                               }
+                                Rect r = pd->people_found[i];
+                                cv::rectangle(frame_display, r.tl(), r.br(), Scalar(0, 255, 0), 3);
                             }
+                         }
+
+                         // --------------------------------------------
+                         // do gender classification, if enabled and display results
+                         // --------------------------------------------
+                         if (gender == true) {
+                             std::vector<unsigned char> status = fp.GetFaceStatus();
+                             for (int i = 0; i < faceNum; i++)
+                             {
+                                if (status[i])
+                                {
+                                   std::vector<Prediction> predictions = cl->Classify(croppedImgs[i]);
+                                   Prediction p = predictions[0];
+                                   if (p.second >= 0.7)
+                                   {
+                                      if (p.first == "male")
+                                      {
+                                         putText(frame_display, p.first, Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
+                                         cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 3);
+                                      }
+                                      else if(p.first == "female")
+                                      {
+                                         putText(frame_display, p.first, Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
+                                         cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
+                                      }
+
+                                      person_msg.name = p.first;
+                                      person_msg.reliability = p.second;
+                                      geometry_msgs::Point p;
+                                      Point center = Point(faces[i].x + faces[i].width/2.0, faces[i].y + faces[i].height/2.0);
+                                      double mid_x = center.x;
+                                      double mid_y = center.y;
+                                      p.x = center.x;
+                                      p.y = center.y;
+                                      p.z = faces[i].size().area();
+                                      person_msg.position = p;
+                                      people_msg.people.push_back(person_msg);
+                                   }
+                                }
+                             }
                          }
 
                          fp.CleanFaces();
@@ -356,8 +384,8 @@ int main(int argc, char *argv[])
             }
             scaleFactor /= 1.05;
             break;
-        case 's':
-        case 'S':
+        case 'd':
+        case 'D':
             draw = !draw;
             break;
         }
