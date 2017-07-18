@@ -42,32 +42,33 @@ static string WIN_NAME = "CMT";
 
 string topic = "/usb_cam/image_raw";
 bool pyr = false;
+float UPPER_I = 0;
 
 
-int display(Mat im, CMT & cmt)
+int display(Mat im, CMT & cmt, int result)
 {
-    //Visualize the output
-    //It is ok to draw on im itself, as CMT only uses the grayscale image
-    for(size_t i = 0; i < cmt.points_active.size(); i++)
-    {
-        circle(im, cmt.points_active[i], 2, Scalar(255,0,0));
-    }
+    if(result > UPPER_I-(UPPER_I/100)*5 && result <= UPPER_I+(UPPER_I/100)*5) {
+        for(size_t i = 0; i < cmt.points_active.size(); i++)
+        {
+            circle(im, cmt.points_active[i], 2, Scalar(255,0,0));
+        }
 
-    Point2f vertices[4];
-    cmt.bb_rot.points(vertices);
-    for (int i = 0; i < 4; i++)
-    {
-        line(im, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
+        Point2f vertices[4];
+        cmt.bb_rot.points(vertices);
+        for (int i = 0; i < 4; i++)
+        {
+            line(im, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
+        }
     }
 
     imshow(WIN_NAME, im);
-
     return waitKey(5);
 }
 
 int main(int argc, char **argv)
 {
     // ROS
+    // FILELog::ReportingLevel() = logDEBUG;
     FILELog::ReportingLevel() = logINFO;
 
     ros::init(argc, argv, "clf_cmt", ros::init_options::AnonymousName);
@@ -114,10 +115,10 @@ int main(int argc, char **argv)
 
     //Initialize CMT
     cv::Rect rect;
-    rect.x = 28;
-    rect.y = 27;
-    rect.width = 100;
-    rect.height = 100;
+    rect.x = 320-50;
+    rect.y = 240-50;
+    rect.width = 50;
+    rect.height = 50;
 
     Mat im0, im0_gray;
 
@@ -128,9 +129,11 @@ int main(int argc, char **argv)
 
     cvtColor(im0, im0_gray, CV_BGR2GRAY);
     cmt.initialize(im0_gray, rect);
+    UPPER_I = (float) cmt.points_active.size();
 
     //The image
     Mat im;
+    float result = 0;
 
     //Main loop
     while (true)
@@ -148,11 +151,11 @@ int main(int argc, char **argv)
             }
             // Let CMT process the frame
             cmt.processFrame(im_gray);
-            cout << cmt.classes_active.size() << endl;
+            result = (float)cmt.points_active.size();
         }
         last_computed_frame = ros_grabber.getLastFrameNr();
-        //Display image and then quit if requested.
-        char key = display(im, cmt);
+        // Display image and then quit if requested.
+        char key = display(im, cmt, result);
         if(key == 'q') break;
     }
 
