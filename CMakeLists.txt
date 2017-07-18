@@ -150,17 +150,19 @@ ADD_EXECUTABLE(clf_detect_people_ros
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE (clf_cmt src/cmt/common.cpp
-                src/cmt/gui.cpp
-                src/cmt/main.cpp
-                src/cmt/CMT.cpp
-                src/cmt/Consensus.cpp
-                src/cmt/Fusion.cpp
-                src/cmt/Matcher.cpp
-                src/cmt/Tracker.cpp
-                src/cmt/fastcluster.cpp
-                ${CLF_HEADER_LIST}
-#               ${INCLUDE_DIRS}
+ADD_EXECUTABLE(clf_cmt
+               src/cmt/common.cpp
+               src/cmt/gui.cpp
+               src/cmt/main.cpp
+               src/cmt/CMT.cpp
+               src/cmt/Consensus.cpp
+               src/cmt/Fusion.cpp
+               src/cmt/Matcher.cpp
+               src/cmt/Tracker.cpp
+               src/cmt/fastcluster.cpp
+               src/ros_grabber.cpp
+               ${CLF_HEADER_LIST}
+               ${INCLUDE_DIRS}
 )
 
 # Deprecated
