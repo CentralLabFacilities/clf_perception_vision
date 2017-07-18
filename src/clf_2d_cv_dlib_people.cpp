@@ -77,8 +77,8 @@ bool findLargestObject = true;
 bool pyr = false;
 
 // Defaults
-Size minSize(80,80);
-Size maxSize(400,400);
+Size minSize(60,60);
+Size maxSize(800,800);
 
 const int fontFace = FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
