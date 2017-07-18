@@ -47,7 +47,7 @@ float UPPER_I = 0;
 
 int display(Mat im, CMT & cmt, int result)
 {
-    if(result > UPPER_I-(UPPER_I/100)*5 && result <= UPPER_I+(UPPER_I/100)*5) {
+    if(result > UPPER_I-(UPPER_I/100)*10 && result <= UPPER_I+(UPPER_I/100)*10) {
         for(size_t i = 0; i < cmt.points_active.size(); i++)
         {
             circle(im, cmt.points_active[i], 2, Scalar(255,0,0));
