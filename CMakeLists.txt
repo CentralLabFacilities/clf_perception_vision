@@ -145,7 +145,7 @@ ADD_EXECUTABLE(clf_detect_people_ros
                src/clf_2d_cv_dlib_people.cpp
                src/clf_2d_faceprocessing.cpp
                src/clf_2d_caffee_classification.cpp
-               src/clf_2d_people.cpp
+               src/clf_2d_body.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )

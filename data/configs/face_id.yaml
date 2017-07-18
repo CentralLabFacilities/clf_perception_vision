@@ -3,7 +3,8 @@
 # input_ros_topic: "/webcam/image_raw"
 input_ros_topic: "/usb_cam/image_raw"
 cascade_frontal_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_frontalface_alt2.xml"
-cascade_profile_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_profileface.xml"
+# cascade_frontal_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_upperbody.xml"
+cascade_body_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_upperbody.xml"
 cascade_nose_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_nose.xml"
 cascade_mouth_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/clf_detect/data/haar/haarcascade_mouth.xml"
 dlib_shapepredictor: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/dlib/shape_predictor_68_face_landmarks.dat"
@@ -12,5 +13,5 @@ trained_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_mod
 mean_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_models/cnn_age_gender/mean.binaryproto"
 label_file: "/home/fl/labels.txt"
 pyr: 0
-gender: 1
-people: 0
+gender: 0
+people: 1

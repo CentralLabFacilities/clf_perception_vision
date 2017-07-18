@@ -47,7 +47,8 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
-#include "clf_2d_people.hpp"
+// #include "clf_2d_people.hpp"
+#include "clf_2d_body.hpp"
 #include "clf_2d_caffee_classification.h"
 #include "clf_2d_face_processing.h"
 #include "clf_2d_cv_dlib_people.hpp"
@@ -69,7 +70,7 @@ unsigned int frame_count = 0;
 unsigned int min_n = 4;
 
 // Dynamic
-double scaleFactor = 1.4;
+double scale_factor = 1.4;
 double time_spend = 0;
 
 bool findLargestObject = true;
@@ -83,7 +84,7 @@ const int fontFace = FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
 
 string cascade_frontal_file,
-       cascade_profile_file,
+       cascade_body_file,
        cascade_nose_file,
        cascade_mouth_file,
        dlib_shapepredictor,
@@ -113,7 +114,7 @@ static void matPrint(Mat &img, int lineOffsY, Scalar fontColor, const string &ss
 }
 
 
-static void displayState(Mat &canvas, double scaleFactor)
+static void displayState(Mat &canvas, double scale_factor)
 {
     Scalar fontColorWhite = CV_RGB(255,255,255);
     Scalar fontColorNV  = CV_RGB(135,206,250);
@@ -123,7 +124,7 @@ static void displayState(Mat &canvas, double scaleFactor)
     ss << "FPS = " << setprecision(1) << fixed << average_frames;
     matPrint(canvas, 0, fontColorWhite, ss.str());
     ss.str("");
-    ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "ScaleFactor " << scaleFactor;
+    ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "scale_factor " << scale_factor;
 
     matPrint(canvas, 1, fontColorWhite, ss.str());
 }
@@ -164,8 +165,8 @@ int main(int argc, char *argv[])
         fs["cascade_frontal_file"] >> cascade_frontal_file;
         cout << ">>> Frontal Face: --> " << cascade_frontal_file << endl;
 
-        fs["cascade_profile_file"] >> cascade_profile_file;
-        cout << ">>> Profile Face: --> " << cascade_profile_file << endl;
+        fs["cascade_body_file"] >> cascade_body_file;
+        cout << ">>> Profile Face: --> " << cascade_body_file << endl;
 
         fs["cascade_nose_file"] >> cascade_nose_file;
         cout << ">>> Nose: --> " << cascade_nose_file << endl;
@@ -211,8 +212,8 @@ int main(int argc, char *argv[])
 
     // People Detection
     if (people == true) {
-        pd = new PeopleDetector();
-        pd->setup();
+        bd = new BodyDetector();
+        bd->setup(cascade_body_file, scale_factor, minSize, maxSize, min_n);
     }
 
     // Faces
@@ -251,7 +252,7 @@ int main(int argc, char *argv[])
                          people_msg.header = h;
 
                          int faceNum ;
-                         faceNum = fp.FaceDetection_GPU(frame, scaleFactor, pyr);
+                         faceNum = fp.FaceDetection_GPU(frame, scale_factor, pyr);
                          std::vector<Mat> croppedImgs;
                          if (faceNum > 0)
                          {
@@ -292,17 +293,13 @@ int main(int argc, char *argv[])
                          }
 
                          // --------------------------------------------
-                         // do people detecttion, if enabled and display results
+                         // do people detection, if enabled and display results
                          // --------------------------------------------
                          if (people == true) {
-
-                            pd->detect(frame_people);
-                            // Draw positive classified windows
-                            // cout << pd->people_found.size() << endl;
-                            for (size_t i = 0; i < pd->people_found.size(); i++)
-                            {
-                                Rect r = pd->people_found[i];
-                                cv::rectangle(frame_display, r.tl(), r.br(), Scalar(0, 255, 0), 3);
+                             bd->tune(scale_factor, minSize, maxSize, min_n);
+                             bd->detect(frame_people);
+                             for(int i = 0; i < bd->bodies_found.size(); ++i) {
+                                cv::rectangle(frame_display, bd->bodies_found[i], Scalar(0, 255, 0), 3);
                             }
                          }
 
@@ -353,7 +350,7 @@ int main(int argc, char *argv[])
                     frame_count++;
 
                     if(draw) {
-                        displayState(frame_display, scaleFactor);
+                        displayState(frame_display, scale_factor);
                         imshow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", frame_display);
                     }
 
@@ -377,13 +374,13 @@ int main(int argc, char *argv[])
         switch (key)
         {
         case '+':
-            scaleFactor *= 1.05;
+            scale_factor *= 1.05;
             break;
         case '-':
-            if (scaleFactor <= 1.01) {
+            if (scale_factor <= 1.01) {
                 break;
             }
-            scaleFactor /= 1.05;
+            scale_factor /= 1.05;
             break;
         case 'd':
         case 'D':

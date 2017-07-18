@@ -60,4 +60,5 @@ the use of this software, even if advised of the possibility of such damage.
 #include <geometry_msgs/PointStamped.h>
 
 Classifier *cl;
-PeopleDetector *pd;
+BodyDetector *bd;
+// PeopleDetector *pd;

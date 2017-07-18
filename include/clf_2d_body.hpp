@@ -74,39 +74,16 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/cudawarping.hpp>
 
 
-class PeopleDetector {
+class BodyDetector {
 
 public:
-    PeopleDetector();
-    ~PeopleDetector();
-
-    cv::Mat people_detector;
-
-    cv::Ptr<cv::cuda::HOG> cuda_hog;
-    cv::cuda::GpuMat people_cuda_img, people_cuda_img_grey;
-
-    cv::Size win_size;
-    cv::Size block_size;
-    cv::Size block_stride;
-    cv::Size cell_size;
-
-    int nbins;
-    int win_stride_width;
-    int win_stride_height;
-    int win_width;
-    int block_width;
-    int block_stride_width;
-    int block_stride_height;
-    int cell_width;
-
-    double scale;
-    double hit_threshold;
-    int nlevels;
-    int gr_threshold;
-    bool hit_threshold_auto;
-
-    std::vector<cv::Rect> people_found;
-    void setup();
+    BodyDetector();
+    ~BodyDetector();
+    cv::Ptr<cv::cuda::CascadeClassifier> cascade_cuda_body;
+    cv::cuda::GpuMat body_cuda_img, body_cuda_img_grey, body_buf_cuda;
+    std::vector<cv::Rect> bodies_found;
+    void setup(std::string cascade_body_file, double scale_factor, cv::Size min_size, cv::Size max_size, int min_n);
+    void tune(double scale_factor, cv::Size min_size, cv::Size max_size, int min_n);
     std::vector<cv::Rect> detect(cv::Mat img);
 private:
     bool toggle;

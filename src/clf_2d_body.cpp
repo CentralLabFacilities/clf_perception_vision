@@ -45,69 +45,34 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
-#pragma once
-
-// ROS
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-
-// STD
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <mutex>
-#include <fstream>
-#include <string>
-#include <iomanip>
-
-// CV
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/utility.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
-
-// CUDA
-#include <opencv2/cudaobjdetect.hpp>
-#include <opencv2/cudaimgproc.hpp>
-#include <opencv2/cudawarping.hpp>
+// SELF
+#include "clf_2d_body.hpp"
 
 
-class PeopleDetector {
+BodyDetector::BodyDetector() { }
+BodyDetector::~BodyDetector() { }
 
-public:
-    PeopleDetector();
-    ~PeopleDetector();
+void BodyDetector::setup(std::string cascade_body_file, double scale_factor, cv::Size min_size, cv::Size max_size, int min_n) {
+    cascade_cuda_body = cv::cuda::CascadeClassifier::create(cascade_body_file);
+    cascade_cuda_body->setMinNeighbors(min_n);
+    cascade_cuda_body->setScaleFactor(scale_factor);
+    cascade_cuda_body->setFindLargestObject(true);
+    cascade_cuda_body->setMinObjectSize(min_size);
+    cascade_cuda_body->setMaxObjectSize(max_size);
+}
 
-    cv::Mat people_detector;
+void BodyDetector::tune(double scale_factor, cv::Size min_size, cv::Size max_size, int min_n) {
+    cascade_cuda_body->setMinNeighbors(min_n);
+    cascade_cuda_body->setScaleFactor(scale_factor);
+    cascade_cuda_body->setFindLargestObject(true);
+    cascade_cuda_body->setMinObjectSize(min_size);
+    cascade_cuda_body->setMaxObjectSize(max_size);
+}
 
-    cv::Ptr<cv::cuda::HOG> cuda_hog;
-    cv::cuda::GpuMat people_cuda_img, people_cuda_img_grey;
-
-    cv::Size win_size;
-    cv::Size block_size;
-    cv::Size block_stride;
-    cv::Size cell_size;
-
-    int nbins;
-    int win_stride_width;
-    int win_stride_height;
-    int win_width;
-    int block_width;
-    int block_stride_width;
-    int block_stride_height;
-    int cell_width;
-
-    double scale;
-    double hit_threshold;
-    int nlevels;
-    int gr_threshold;
-    bool hit_threshold_auto;
-
-    std::vector<cv::Rect> people_found;
-    void setup();
-    std::vector<cv::Rect> detect(cv::Mat img);
-private:
-    bool toggle;
-};
+std::vector<cv::Rect> BodyDetector::detect(cv::Mat img) {
+    body_cuda_img.upload(img);
+    cv::cuda::cvtColor(body_cuda_img, body_cuda_img_grey, cv::COLOR_BGR2GRAY);
+    cascade_cuda_body->detectMultiScale(body_cuda_img_grey, body_buf_cuda);
+    cascade_cuda_body->convert(body_buf_cuda, bodies_found);
+    return bodies_found;
+}
