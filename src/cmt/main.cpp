@@ -68,6 +68,8 @@ int display(Mat im, CMT & cmt)
 int main(int argc, char **argv)
 {
     // ROS
+    FILELog::ReportingLevel() = logINFO;
+
     ros::init(argc, argv, "clf_cmt", ros::init_options::AnonymousName);
 
     //Create a CMT object
@@ -146,7 +148,7 @@ int main(int argc, char **argv)
             }
             // Let CMT process the frame
             cmt.processFrame(im_gray);
-            // cmt.points_active.size()
+            cout << cmt.classes_active.size() << endl;
         }
         last_computed_frame = ros_grabber.getLastFrameNr();
         //Display image and then quit if requested.

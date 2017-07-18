@@ -119,7 +119,7 @@ void CMT::processFrame(Mat im_gray) {
 
     FILE_LOG(logDEBUG) << points_tracked.size() << " tracked points.";
 
-    //keep only successful classes
+    // keep only successful classes
     vector<int> classes_tracked;
     for (size_t i = 0; i < classes_active.size(); i++)
     {

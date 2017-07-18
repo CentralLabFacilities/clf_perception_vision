@@ -31,6 +31,8 @@ public:
     Tracker tracker;
     Consensus consensus;
 
+    vector<int> classes_active;
+
     string str_detector;
     string str_descriptor;
 
@@ -42,8 +44,6 @@ private:
     Ptr<DescriptorExtractor> descriptor;
 
     Size2f size_initial;
-
-    vector<int> classes_active;
 
     float theta;
 
