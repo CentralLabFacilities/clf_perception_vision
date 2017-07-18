@@ -65,7 +65,7 @@ void PeopleDetector::setup() {
     scale = 1.05;
     nlevels = 13;
     gr_threshold = 8;
-    hit_threshold = 1.4;
+    hit_threshold = 1.0;
     hit_threshold_auto = true;
 
     cv::Size win_stride(win_stride_width, win_stride_height);

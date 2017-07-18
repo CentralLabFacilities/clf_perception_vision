@@ -298,6 +298,7 @@ int main(int argc, char *argv[])
 
                             pd->detect(frame_people);
                             // Draw positive classified windows
+                            // cout << pd->people_found.size() << endl;
                             for (size_t i = 0; i < pd->people_found.size(); i++)
                             {
                                 Rect r = pd->people_found[i];
