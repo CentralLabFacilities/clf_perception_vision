@@ -12,6 +12,6 @@ model_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_model
 trained_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_models/cnn_age_gender/gender_net.caffemodel"
 mean_file: "/home/fl/citk/systems/clf-gpu-object-detect-nightly/share/cnn_models/cnn_age_gender/mean.binaryproto"
 label_file: "/home/fl/labels.txt"
-pyr: 0
+pyr: 1
 gender: 0
-people: 1
+people: 0
