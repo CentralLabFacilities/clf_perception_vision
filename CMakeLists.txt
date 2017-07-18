@@ -150,6 +150,19 @@ ADD_EXECUTABLE(clf_detect_people_ros
                ${INCLUDE_DIRS}
 )
 
+ADD_EXECUTABLE (clf_cmt src/cmt/common.cpp
+                src/cmt/gui.cpp
+                src/cmt/main.cpp
+                src/cmt/CMT.cpp
+                src/cmt/Consensus.cpp
+                src/cmt/Fusion.cpp
+                src/cmt/Matcher.cpp
+                src/cmt/Tracker.cpp
+                src/cmt/fastcluster.cpp
+                ${CLF_HEADER_LIST}
+#               ${INCLUDE_DIRS}
+)
+
 # Deprecated
 # ADD_EXECUTABLE(clf_detect_faces_ros
 #               src/clf_2d_faces.cpp
@@ -167,6 +180,8 @@ ADD_EXECUTABLE(clf_detect_people_ros
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_detect_people_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES} ${Caffe_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 # TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CUSTOM_ROS_LIBS} ${CV_LIBS} ${Boost_LIBRARIES})
 # TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
@@ -174,6 +189,8 @@ TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_detect_people_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_cmt RUNTIME DESTINATION bin)
+
 # INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
 # INSTALL(TARGETS clf_train_gender_fisher RUNTIME DESTINATION bin)
 
