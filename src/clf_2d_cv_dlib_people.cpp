@@ -78,7 +78,7 @@ bool pyr = false;
 
 // Defaults
 Size minSize(50,50);
-Size maxSize(300,300);
+Size maxSize(200,200);
 
 const int fontFace = FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
