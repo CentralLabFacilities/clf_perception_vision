@@ -10,6 +10,6 @@ model_file: "/vol/pepper/systems/pepper-robocup-nightly/share/cnn_models/cnn_age
 trained_file: "/vol/pepper/systems/pepper-robocup-nightly/share/cnn_models/cnn_age_gender/gender_net.caffemodel"
 mean_file: "/vol/pepper/systems/pepper-robocup-nightly/share/cnn_models/cnn_age_gender/mean.binaryproto"
 label_file: "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/configs/labels.txt"
-pyr: 1
+pyr: 0
 gender: 0
 people: 0

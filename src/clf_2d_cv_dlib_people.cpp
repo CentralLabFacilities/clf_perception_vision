@@ -77,7 +77,7 @@ bool findLargestObject = true;
 bool pyr = false;
 
 // Defaults
-Size minSize(40,40);
+Size minSize(60,60);
 Size maxSize(300,300);
 
 const int fontFace = FONT_HERSHEY_PLAIN;
@@ -278,6 +278,7 @@ int main(int argc, char *argv[])
                                if(h + y > frame.rows)
                                   h = frame.rows - y ;
                                croppedImgs[i] = frame(Rect(x, y, w, h)).clone();
+                               cv::rectangle(frame_display, faces[i], Scalar(255, 178, 102), 2);
                             }
                             // ---------------------------------
                             // extraction landmarks on each face
@@ -288,7 +289,7 @@ int main(int argc, char *argv[])
                             {
                                 fLandmarks[i] = fp.GetLandmarks(i);
                             for (size_t j = 0; j < fLandmarks[i].size(); j++)
-                                circle(frame_display, fLandmarks[i][j], 1, Scalar(255,255,255));
+                                circle(frame_display, fLandmarks[i][j], 1, Scalar(102, 178, 255));
                             }
                          }
 
@@ -299,7 +300,7 @@ int main(int argc, char *argv[])
                              bd->tune(scale_factor, minSize, maxSize, min_n);
                              bd->detect(frame_people);
                              for(int i = 0; i < bd->bodies_found.size(); ++i) {
-                                cv::rectangle(frame_display, bd->bodies_found[i], Scalar(0, 255, 0), 3);
+                                cv::rectangle(frame_display, bd->bodies_found[i], Scalar(255, 102, 102), 2);
                             }
                          }
 
@@ -319,12 +320,12 @@ int main(int argc, char *argv[])
                                       if (p.first == "male")
                                       {
                                          putText(frame_display, p.first, Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(70,130,180));
-                                         cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 3);
+                                         cv::rectangle(frame_display, faces[i], CV_RGB(70,130,180), 2);
                                       }
                                       else if(p.first == "female")
                                       {
                                          putText(frame_display, p.first, Point(faces[i].x, faces[i].y + faces[i].height + 20), fontFace, fontScale, CV_RGB(221,160,221));
-                                         cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 3);
+                                         cv::rectangle(frame_display, faces[i], CV_RGB(221,160,221), 2);
                                       }
 
                                       person_msg.name = p.first;
