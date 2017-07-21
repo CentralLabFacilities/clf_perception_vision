@@ -60,6 +60,8 @@ unsigned int frame_count = 0;
 unsigned int average_frames = 0;
 double time_spend = 0;
 unsigned int microseconds = 1000;
+const int fontFace = cv::FONT_HERSHEY_PLAIN;
+const double fontScale = 1;
 
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toggle = _toggle.data;
@@ -176,8 +178,6 @@ int main(int argc, char *argv[]) {
                 cout << "E >>> " << e.what() << endl;
             }
 
-            cv::imshow(":: CLF DLIB Face Detect [ROS] ::", display_image);
-
             if (time_spend >= 1 ) {
                 average_frames = frame_count;
                 time(&start);
@@ -186,6 +186,9 @@ int main(int argc, char *argv[]) {
 
             time(&end);
             time_spend = difftime(end, start);
+            string fps = to_string((int)average_frames);
+            putText(display_image, "FPS: "+fps, Point2d(display_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
+            cv::imshow(":: CLF DLIB Face Detect [ROS] ::", display_image);
         }
     }
 
