@@ -8,6 +8,12 @@ SET(OpenCV_MIN_VERSION "3.2.0")
 
 SET(ROS_VERSION "kinetic")
 
+SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
+
+SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
+
+MESSAGE(STATUS "CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+
 FIND_PACKAGE(dlib REQUIRED)
 
 FIND_PACKAGE(Caffe REQUIRED)
@@ -150,6 +156,14 @@ ADD_EXECUTABLE(clf_detect_people_ros
                ${INCLUDE_DIRS}
 )
 
+ADD_EXECUTABLE(clf_detect_faces_dlib_ros
+               src/ros_grabber.cpp
+               src/clf_2d_dlib_faces.cpp
+               src/main_dlib_faces.cpp
+               ${CLF_HEADER_LIST}
+               ${INCLUDE_DIRS}
+)
+
 ADD_EXECUTABLE(clf_cmt
                src/cmt/common.cpp
                src/cmt/gui.cpp
@@ -181,7 +195,7 @@ ADD_EXECUTABLE(clf_cmt
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_detect_people_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES} ${Caffe_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_detect_faces_dlib_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
@@ -191,6 +205,7 @@ TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIE
 INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_detect_people_ros RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_detect_faces_dlib_ros RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_cmt RUNTIME DESTINATION bin)
 
 # INSTALL(TARGETS clf_detect_faces_ros RUNTIME DESTINATION bin)
