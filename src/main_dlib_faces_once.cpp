@@ -61,7 +61,7 @@ string topic,
        mean_file,
        label_file_age,
        label_file_gender;
-bool toggle = true;
+bool toggle = false;
 bool _pyr = false;
 bool gender_age = false;
 unsigned int frame_count = 0;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    ros::init(argc, argv, "clf_detect_dlib_faces", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "clf_detect_dlib_faces_once", ros::init_options::AnonymousName);
 
     // How many CPUs do we have?
     cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
@@ -143,8 +143,8 @@ int main(int argc, char *argv[]) {
     ROSGrabber ros_grabber(topic);
     ros_grabber.setPyr(_pyr);
 
-    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_dlib_faces/compute", 1, toggle_callback);
-    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_detect_dlib_faces/people", 20);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_dlib_faces_once/call", 1, toggle_callback);
+    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_detect_dlib_faces_once/people", 20);
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
@@ -266,6 +266,7 @@ int main(int argc, char *argv[]) {
             string fps = to_string((int)average_frames);
             putText(display_image, "FPS: "+fps, Point2d(display_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
             cv::imshow(":: CLF DLIB Face Detect [ROS] ::", display_image);
+            toggle = false;
         }
     }
 
