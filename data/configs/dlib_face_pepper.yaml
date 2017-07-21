@@ -1,0 +1,13 @@
+%YAML:1.0
+
+input_ros_topic: "/pepper_robot/sink/front/image_raw"
+dlib_shapepredictor: "/vol/pepper/systems/pepper-robocup-nightly/share/dlib/shape_predictor_68_face_landmarks.dat"
+model_file_age: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/deploy_age.prototxt"
+model_file_gender: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/deploy_gender.prototxt"
+trained_file_age: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/age_net.caffemodel"
+trained_file_gender: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/gender_net.caffemodel"
+mean_file: "/vol/pepper/systems/pepper-robocup-nightly//share/cnn_models/cnn_age_gender/mean.binaryproto"
+label_file_age: "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/configs/labels_age.txt"
+label_file_gender: "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/configs/labels_gender.txt"
+pyr: 0
+gender_age: 1
