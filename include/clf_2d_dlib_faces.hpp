@@ -70,6 +70,14 @@ the use of this software, even if advised of the possibility of such damage.
 // BOOST
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+// ROS
+#include <people_msgs/People.h>
+#include <people_msgs/Person.h>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+
 using namespace dlib;
 using namespace std;
 

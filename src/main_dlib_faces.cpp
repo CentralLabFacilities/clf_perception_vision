@@ -49,10 +49,6 @@ the use of this software, even if advised of the possibility of such damage.
 #include "ros_grabber.hpp"
 #include "clf_2d_dlib_faces.hpp"
 
-// ROS
-#include <ros/ros.h>
-#include <std_msgs/Bool.h>
-
 using namespace std;
 using namespace cv;
 
@@ -114,6 +110,7 @@ int main(int argc, char *argv[]) {
     ros_grabber.setPyr(_pyr);
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_dlib_faces/compute", 1, toggle_callback);
+    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_detect_dlib_faces/people", 20);
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
@@ -143,6 +140,29 @@ int main(int argc, char *argv[]) {
                         last_computed_frame = ros_grabber.getLastFrameNr();
                         for(int i = 0; i < current_faces.size(); ++i) {
                             cv::rectangle(display_image, dlib2cvrect(current_faces[i]), Scalar(0,165,255), 2);
+                        }
+                        if (current_faces.size() > 0) {
+                            std_msgs::Header h;
+                            h.stamp = ros_grabber.getTimestamp();
+                            h.frame_id = ros_grabber.frame_id;
+                            people_msgs::People people_msg;
+                            people_msgs::Person person_msg;
+                            people_msg.header = h;
+                            for (int i = 0; i < current_faces.size(); ++i) {
+                                person_msg.name = "unknown";
+                                person_msg.reliability = 0.0;
+                                geometry_msgs::Point p;
+                                Point center = Point(dlib2cvrect(current_faces[i]).x + dlib2cvrect(current_faces[i]).width/2.0,
+                                                     dlib2cvrect(current_faces[i]).y + dlib2cvrect(current_faces[i]).height/2.0);
+                                double mid_x = center.x;
+                                double mid_y = center.y;
+                                p.x = center.x;
+                                p.y = center.y;
+                                p.z = dlib2cvrect(current_faces[i]).size().area();
+                                person_msg.position = p;
+                                people_msg.people.push_back(person_msg);
+                            }
+                            people_pub.publish(people_msg);
                         }
                         frame_count++;
                     } else {
