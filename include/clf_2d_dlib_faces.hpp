@@ -78,12 +78,17 @@ the use of this software, even if advised of the possibility of such damage.
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 
+// Caffee
+#include "clf_2d_caffee_classification.h"
+
 using namespace dlib;
 using namespace std;
 
 class DlibFace {
 
 public:
+    Classifier *cl;
+    Classifier *cl_age;
     DlibFace();
     ~DlibFace();
     image_window win;

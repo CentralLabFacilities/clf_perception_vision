@@ -160,6 +160,7 @@ ADD_EXECUTABLE(clf_detect_faces_dlib_ros
                src/ros_grabber.cpp
                src/clf_2d_dlib_faces.cpp
                src/main_dlib_faces.cpp
+               src/clf_2d_caffee_classification.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
@@ -195,7 +196,7 @@ ADD_EXECUTABLE(clf_cmt
 
 TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_detect_people_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES} ${Caffe_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_detect_faces_dlib_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_detect_faces_dlib_ros ${Caffe_LIBRARIES} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 

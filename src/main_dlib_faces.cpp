@@ -52,10 +52,18 @@ the use of this software, even if advised of the possibility of such damage.
 using namespace std;
 using namespace cv;
 
-string topic;
-string shape_mode_path;
+string topic,
+       shape_mode_path,
+       model_file_age,
+       model_file_gender,
+       trained_file_age,
+       trained_file_gender,
+       mean_file,
+       label_file_age,
+       label_file_gender;
 bool toggle = true;
-bool _pyr;
+bool _pyr = false;
+bool gender_age = false;
 unsigned int frame_count = 0;
 unsigned int average_frames = 0;
 double time_spend = 0;
@@ -102,6 +110,30 @@ int main(int argc, char *argv[]) {
         fs["pyr"] >> _pyr;
         cout << ">>> PyrUp: --> " << _pyr << endl;
 
+        fs["model_file_gender"] >> model_file_gender;
+        cout << ">>> Caffee Model Gender: --> " << model_file_gender << endl;
+
+        fs["model_file_age"] >> model_file_age;
+        cout << ">>> Caffee Model Age: --> " << model_file_age << endl;
+
+        fs["trained_file_gender"] >> trained_file_gender;
+        cout << ">>> Caffee Trained Gender: --> " << trained_file_gender << endl;
+
+        fs["trained_file_age"] >> trained_file_age;
+        cout << ">>> Caffee Trained Age: --> " << trained_file_age << endl;
+
+        fs["mean_file"] >> mean_file;
+        cout << ">>> Caffe Mean: --> " << mean_file << endl;
+
+        fs["label_file_gender"] >> label_file_gender;
+        cout << ">>> Labels Gender: --> " << label_file_gender << endl;
+
+        fs["label_file_age"] >> label_file_age;
+        cout << ">>> Labels Age: --> " << label_file_age << endl;
+
+        fs["gender_age"] >> gender_age;
+        cout << ">>> Gender Detection: --> " << gender_age << endl;
+
     }
 
     fs.release();
@@ -116,6 +148,12 @@ int main(int argc, char *argv[]) {
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
+
+    // Caffee
+    if (gender_age == true) {
+        dlf.cl = new Classifier(model_file_gender, trained_file_gender, mean_file, label_file_gender);
+        dlf.cl_age = new Classifier(model_file_age, trained_file_age, mean_file, label_file_age);
+    }
 
     cout << ">>> Let's go..." << endl;
 
@@ -144,6 +182,38 @@ int main(int argc, char *argv[]) {
                             cv::rectangle(display_image, dlib2cvrect(current_faces[i]), Scalar(0,165,255), 2);
                         }
                         if (current_faces.size() > 0) {
+                             // --------------------------------------------
+                             // do gender classification, if enabled and display results
+                             // --------------------------------------------
+                             if (gender_age == true) {
+                                 for (int i = 0; i < current_faces.size(); i++)
+                                 {
+                                       cv::Mat cropped_image = display_image(Rect(dlib2cvrect(current_faces[i]).x,
+                                                                             dlib2cvrect(current_faces[i]).y,
+                                                                             dlib2cvrect(current_faces[i]).width,
+                                                                             dlib2cvrect(current_faces[i]).height)).clone();
+                                       std::vector<Prediction> predictions = dlf.cl->Classify(cropped_image);
+                                       std::vector<Prediction> predictions_age = dlf.cl_age->Classify(cropped_image);
+                                       Prediction p = predictions[0];
+                                       Prediction p_age = predictions_age[0];
+                                       if (p.second >= 0.7)
+                                       {
+                                          if (p.first == "male")
+                                          {
+                                             putText(display_image, p.first+p_age.first, Point(dlib2cvrect(current_faces[i]).x,
+                                                                                   dlib2cvrect(current_faces[i]).y + dlib2cvrect(current_faces[i]).height + 20),
+                                                                                   fontFace, fontScale, CV_RGB(70,130,180));
+                                          }
+                                          else if(p.first == "female")
+                                          {
+                                             putText(display_image, p.first+p_age.first, Point(dlib2cvrect(current_faces[i]).x,
+                                                                                   dlib2cvrect(current_faces[i]).y + dlib2cvrect(current_faces[i]).height + 20),
+                                                                                   fontFace, fontScale, CV_RGB(221,160,221));
+                                          }
+                                       }
+
+                                 }
+                             }
                             std_msgs::Header h;
                             h.stamp = ros_grabber.getTimestamp();
                             h.frame_id = ros_grabber.frame_id;
