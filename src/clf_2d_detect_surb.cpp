@@ -160,6 +160,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         if (pyr == "true") {
             // DONT CHANGE THIS! OR ALL HELL BREAKS LOOSE...
             scale_factor = 2.0;
+            cout << ">>> Scale factor is --> " << scale_factor << endl;
         }
 
         toggle_homography = true;
