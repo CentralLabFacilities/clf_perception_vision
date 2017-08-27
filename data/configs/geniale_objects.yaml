@@ -1,38 +1,15 @@
 %YAML:1.0
 # Image locations
 targets:
- - "/media/local_data/fl/milk1.png"
- - "/media/local_data/fl/milk3.png"
- - "/media/local_data/fl/other_milk1.png"
- - "/media/local_data/fl/other_milk2.png"
- - "/media/local_data/fl/other_milk3.png"
- - "/media/local_data/fl/sprite1.png"
- - "/media/local_data/fl/sprite3.png"
- - "/media/local_data/fl/sprite4.png"
- - "/media/local_data/fl/zero1.png"
- - "/media/local_data/fl/zero2.png"
- - "/media/local_data/fl/zero3.png"
- - "/media/local_data/fl/coke1.png"
- - "/media/local_data/fl/coke2.png"
- - "/media/local_data/fl/coke3.png"
-
+ - "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/example_images/milk.png"
+ - "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/example_images/coco.png"
+ - "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/example_images/pringels.png"
 
 # Corresponding labels
 labels:
- - "MILK"
- - "MILK"
- - "HALF MILK"
- - "HALF MILK"
- - "HALF MILK"
- - "SPRITE"
- - "SPRITE"
- - "SPRITE"
- - "ZERO"
- - "ZERO"
- - "ZERO"
- - "COKE"
- - "COKE"
- - "COKE"
+ - "Milk"
+ - "Coconut milk"
+ - "Chips"
 
 # ORB ONLY, number of maximum keypoints applied to an image
 # Higher values may result in better detection but slow down
