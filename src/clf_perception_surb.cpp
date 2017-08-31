@@ -46,7 +46,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 
 // SELF
-#include "clf_2d_detect.hpp"
+#include "clf_perception_surb.hpp"
 
 // ROS
 #include <geometry_msgs/Pose.h>

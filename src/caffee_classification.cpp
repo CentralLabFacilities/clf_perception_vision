@@ -47,7 +47,7 @@ THIS IS MORE OR LESS THE CAFFEE CPP API EXAMPLE ;)
 */
 
 
-#include "clf_2d_caffee_classification.h"
+#include "caffee_classification.h"
 
 /* Pair (label, confidence) representing a prediction. */
 

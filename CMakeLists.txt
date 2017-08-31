@@ -1,33 +1,25 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
+### Maintainer: flier[@techfak.uni-bielefeld.de] ###
 
-PROJECT(clf_2d_gpu_detect)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
+PROJECT(clf_perception_vision)
 
 SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
-
 SET(OpenCV_MIN_VERSION "3.2.0")
-
 SET(ROS_VERSION "kinetic")
+MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
 
-SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
-
+SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations -std=gnu++11")
 SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
-
 MESSAGE(STATUS "CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 FIND_PACKAGE(dlib REQUIRED)
-
 FIND_PACKAGE(Caffe REQUIRED)
-
 ADD_DEFINITIONS(${Caffe_DEFINITIONS})
-
 ADD_DEFINITIONS(-DENABLE_ASSERTS)
 
 FIND_PACKAGE(CUDA REQUIRED)
-
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
-
 FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
-
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS face
                                         highgui
                                         core
@@ -69,8 +61,6 @@ ENDIF()
 
 SET(ROS_BUILD_TYPE RELEASE)
 SET(CMAKE_BUILD_TYPE RELEASE)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-
 SET(CUSTOM_ROS_LIBS /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libcv_bridge.so
@@ -88,33 +78,33 @@ SET(CUSTOM_ROS_LIBS /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libimage_transport.so
 )
 
-SET(CV_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_face.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgproc.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_core.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_highgui.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_xfeatures2d.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_features2d.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_calib3d.so
-             ${CMAKE_INSTALL_PREFIX}/lib/libopencv_objdetect.so
+SET(CUSTOM_CV_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_face.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgproc.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_core.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_highgui.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_xfeatures2d.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_features2d.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_calib3d.so
+                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_objdetect.so
 )
 
-SET(CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudabgsegm.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudacodec.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudafeatures2d.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudafilters.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaimgproc.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudalegacy.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaobjdetect.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaoptflow.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudastereo.so
-               ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudawarping.so
+SET(CUSTOM_CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudabgsegm.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudacodec.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudafeatures2d.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudafilters.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaimgproc.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudalegacy.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaobjdetect.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaoptflow.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudastereo.so
+                      ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudawarping.so
 )
 
 # MESSAGE(STATUS "CUSTOM_ROS_LIBS: " ${CUSTOM_ROS_LIBS})
-# MESSAGE(STATUS "CV_LIBS: " ${CV_LIBS})
-# MESSAGE(STATUS "CUDA_LIBS: " ${CUDA_LIBS})
+# MESSAGE(STATUS "CUSTOM_CV_LIBS: " ${CV_LIBS})
+# MESSAGE(STATUS "CUSTOM_CUDA_LIBS: " ${CUDA_LIBS})
 
 CATKIN_PACKAGE(
   INCLUDE_DIRS include
@@ -125,78 +115,72 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
-                    ${dlib_INCLUDE_DIRS}
-                    include)
+                    ${dlib_INCLUDE_DIRS})
 
 FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp include/*.h)
 
-ADD_EXECUTABLE(clf_detect_objects_surb_ros
-               src/clf_2d_detect_surb.cpp
+ADD_EXECUTABLE(clf_perception_surb
                src/ros_grabber.cpp
-               src/main_surb.cpp
+               src/clf_perception_surb.cpp
+               src/clf_perception_surb_main.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_collect_data_ros
-               src/clf_2d_collect.cpp
+ADD_EXECUTABLE(clf_perception_gender_age
                src/ros_grabber.cpp
+               src/dlib_detection.cpp
+               src/caffee_classification.cpp
+               src/clf_perception_gender_age_main.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_detect_faces_dlib_ros
-               src/ros_grabber.cpp
-               src/clf_2d_dlib_faces.cpp
-               src/main_dlib_faces.cpp
-               src/clf_2d_caffee_classification.cpp
-               ${CLF_HEADER_LIST}
-               ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_detect_faces_dlib_once_ros
-               src/ros_grabber.cpp
-               src/clf_2d_dlib_faces.cpp
-               src/main_dlib_faces_once.cpp
-               src/clf_2d_caffee_classification.cpp
-               ${CLF_HEADER_LIST}
-               ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_cmt
-               src/cmt/common.cpp
-               src/cmt/gui.cpp
-               src/cmt/main.cpp
-               src/cmt/CMT.cpp
-               src/cmt/Consensus.cpp
-               src/cmt/Fusion.cpp
-               src/cmt/Matcher.cpp
-               src/cmt/Tracker.cpp
-               src/cmt/fastcluster.cpp
+ADD_EXECUTABLE(clf_perception_collect_data
+               src/clf_perception_collect_data.cpp
                src/ros_grabber.cpp
                ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
-# Deprecated
+# DEPRECATED
+# ADD_EXECUTABLE(clf_detect_faces_dlib_once_ros
+#               src/ros_grabber.cpp
+#               src/clf_2d_dlib_faces.cpp
+#               src/main_dlib_faces_once.cpp
+#               src/clf_2d_caffee_classification.cpp
+#               ${CLF_HEADER_LIST}
+#               ${INCLUDE_DIRS}
+# )
+
+# DEPRECATED
+# ADD_EXECUTABLE(clf_cmt
+#               src/cmt/common.cpp
+#               src/cmt/gui.cpp
+#               src/cmt/main.cpp
+#               src/cmt/CMT.cpp
+#               src/cmt/Consensus.cpp
+#               src/cmt/Fusion.cpp
+#               src/cmt/Matcher.cpp
+#               src/cmt/Tracker.cpp
+#               src/cmt/fastcluster.cpp
+#               src/ros_grabber.cpp
+#               ${CLF_HEADER_LIST}
+#               ${INCLUDE_DIRS}
+# )
+
+# DEPRECATED
 # ADD_EXECUTABLE(clf_train_gender_fisher
 #                src/clf_2d_train_gender_fisher.cpp
 #                ${INCLUDE_DIRS}
 # )
 
-TARGET_LINK_LIBRARIES(clf_detect_objects_surb_ros ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_detect_faces_dlib_ros ${Caffe_LIBRARIES} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_detect_faces_dlib_once_ros ${Caffe_LIBRARIES} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_collect_data_ros ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_surb ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_gender_age ${Caffe_LIBRARIES} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
-# TARGET_LINK_LIBRARIES(clf_detect_faces_ros ${CUDA_LIBS} ${CUSTOM_ROS_LIBS} ${CV_LIBS} ${Boost_LIBRARIES})
-# TARGET_LINK_LIBRARIES(clf_train_gender_fisher ${CV_LIBS})
+INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_perception_gender_age RUNTIME DESTINATION bin)
+INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION bin)
 
-INSTALL(TARGETS clf_detect_objects_surb_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_collect_data_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_detect_faces_dlib_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_detect_faces_dlib_once_ros RUNTIME DESTINATION bin)
-INSTALL(TARGETS clf_cmt RUNTIME DESTINATION bin)
-
-INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_detect)
+INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_perception_vision)

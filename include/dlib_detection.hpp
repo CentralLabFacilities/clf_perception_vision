@@ -44,47 +44,57 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
+#pragma once
 
-// SELF
-#include "clf_2d_dlib_faces.hpp"
+// STD
+#include <stdlib.h>
+#include <unistd.h>
+#include <vector>
+#include <time.h>
+#include <string>
+#include <iostream>
 
-using namespace std;
-using namespace cv;
+// CV
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+
+// DLIB
+#include <dlib/opencv.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
+#include <dlib/image_processing.h>
+#include <dlib/gui_widgets.h>
+
+// BOOST
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+// ROS
+#include <people_msgs/People.h>
+#include <people_msgs/Person.h>
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/PointStamped.h>
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+
+// Caffee
+#include "caffee_classification.h"
+
 using namespace dlib;
+using namespace std;
 
+class DlibFace {
 
-DlibFace::~DlibFace() { }
-DlibFace::DlibFace() { }
-
-void DlibFace::setup(string path_to_shape_model) {
-    try
-    {
-        detector = get_frontal_face_detector();
-        deserialize(path_to_shape_model) >> pose_model;
-    }
-    catch(serialization_error& e)
-    {
-        cout << "You need dlib's default face landmarking model file to run this example." << endl;
-        cout << "You can get it from the following URL: " << endl;
-        cout << "   http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" << endl;
-        cout << endl << e.what() << endl;
-    }
-    catch(exception& e)
-    {
-        cout << e.what() << endl;
-    }
-}
-
-std::vector<dlib::rectangle> DlibFace::detect(Mat mat)
-{
-    cv_image<bgr_pixel> cimg(mat);
-    std::vector<dlib::rectangle> faces = detector(cimg);
-    std::vector<full_object_detection> shapes;
-     for (unsigned long i = 0; i < faces.size(); ++i)
-        shapes.push_back(pose_model(cimg, faces[i]));
-    win.clear_overlay();
-    win.set_image(cimg);
-    win.add_overlay(render_face_detections(shapes));
-    return faces;
-}
-
+public:
+    Classifier *cl;
+    Classifier *cl_age;
+    DlibFace();
+    ~DlibFace();
+    image_window win;
+    void setup(string path_to_shape_model);
+    std::vector<dlib::rectangle> detect(cv::Mat mat);
+private:
+    frontal_face_detector detector;
+    shape_predictor pose_model;
+};

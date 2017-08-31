@@ -47,7 +47,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 // SELF
 #include "ros_grabber.hpp"
-#include "clf_2d_dlib_faces.hpp"
+#include "dlib_detection.hpp"
 
 using namespace std;
 using namespace cv;
@@ -61,9 +61,11 @@ string topic,
        mean_file,
        label_file_age,
        label_file_gender;
+
 bool toggle = true;
 bool _pyr = false;
 bool gender_age = false;
+
 unsigned int frame_count = 0;
 unsigned int average_frames = 0;
 double time_spend = 0;
@@ -162,11 +164,10 @@ int main(int argc, char *argv[]) {
     cv::Mat current_image, display_image;
     time(&start);
 
-    while(!dlf.win.is_closed()) {
+    while(!cv::waitKey(10);) {
 
         ros::spinOnce();
-        cv::waitKey(1);
-        usleep(microseconds);
+        // usleep(microseconds);
 
         if(toggle) {
             try {

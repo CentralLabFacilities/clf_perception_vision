@@ -48,7 +48,6 @@ the use of this software, even if advised of the possibility of such damage.
 // SELF
 #include "clf_2d_detect.hpp"
 #include "ros_grabber.hpp"
-#include "main.hpp"
 
 // ROS
 #include <ros/ros.h>
@@ -69,6 +68,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    bool toggle;
+    double time_spend;
+    unsigned int frame_count;
+    unsigned int average_frames;
+    
     toggle = true;
     frame_count = 0;
     time_spend = 0;
