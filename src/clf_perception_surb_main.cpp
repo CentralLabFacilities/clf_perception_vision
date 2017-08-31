@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     int last_computed_frame = 0;
     time(&start);
 
-    while(!cv::waitKey(5) == 27) {
+    while(cv::waitKey(5) != 27) {
 
         ros::spinOnce();
 

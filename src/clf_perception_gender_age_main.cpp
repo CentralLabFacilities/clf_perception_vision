@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    ros::init(argc, argv, "clf_detect_dlib_faces", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "clf_perception_gender_age", ros::init_options::AnonymousName);
 
     // How many CPUs do we have?
     cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
@@ -145,8 +145,8 @@ int main(int argc, char *argv[]) {
     ROSGrabber ros_grabber(topic);
     ros_grabber.setPyr(_pyr);
 
-    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_dlib_faces/compute", 1, toggle_callback);
-    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_detect_dlib_faces/people", 20);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_perception_gender_age/compute", 1, toggle_callback);
+    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_perception_gender_age/people", 20);
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
@@ -159,12 +159,12 @@ int main(int argc, char *argv[]) {
 
     cout << ">>> Let's go..." << endl;
 
-    cv::namedWindow(":: CLF DLIB Face Detect [ROS] ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
+    cv::namedWindow(":: CLF PERCEPTION GENDER AGE ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     int last_computed_frame = 0;
     cv::Mat current_image, display_image;
     time(&start);
 
-    while(!cv::waitKey(5) == 27) {
+    while(cv::waitKey(5) != 27) {
 
         ros::spinOnce();
         // usleep(microseconds);
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
             time_spend = difftime(end, start);
             string fps = to_string((int)average_frames);
             putText(display_image, "FPS: "+fps, Point2d(display_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
-            cv::imshow(":: CLF DLIB Face Detect [ROS] ::", display_image);
+            cv::imshow(":: CLF PERCEPTION GENDER AGE ::", display_image);
         }
     }
 
