@@ -111,10 +111,10 @@ private:
     bool do_not_draw = false;
     bool toggle_homography = false;
     bool toggle_silent = false;
+    bool pyr = false;
 
     std::string type_descriptor;
     std::string point_matcher;
-    std::string pyr;
     std::string draw_homography;
     std::string draw_image;
 

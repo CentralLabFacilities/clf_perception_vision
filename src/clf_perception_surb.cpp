@@ -158,9 +158,9 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         fs["pyr_up"] >> pyr;
 
-        cout << ">>> Scaling is --> " << pyr << endl;
+        cout << ">>> PyrUp: --> " << pyr << endl;
 
-        if (pyr == "true") {
+        if (pyr == true) {
             // DONT CHANGE THIS! OR ALL HELL BREAKS LOOSE...
             scale_factor = 2.0;
             cout << ">>> Scale factor is --> " << scale_factor << endl;
