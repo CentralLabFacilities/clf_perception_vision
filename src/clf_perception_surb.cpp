@@ -136,7 +136,7 @@ int Detect2D::setup(int argc, char *argv[]) {
     if (fs.isOpened()) {
 
         fs["ros_input_topic"] >> ros_input_topic;
-        cout << ">>> ROS input topic --> " << type_descriptor  << endl;
+        cout << ">>> ROS input topic --> " << ros_input_topic  << endl;
 
         fs["keypointalgo"] >> type_descriptor;
         cout << ">>> Keypoint Descriptor --> " << type_descriptor  << endl;
