@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="clf_perception_vision" type="clf_perception_vision" name="clf_perception_gender_age" output="screen">
+        <arg name="config" default="/share/clf_perception_vision/data/configs/clf_perception_surb_example.yaml"/>
+    </node>
+</launch>

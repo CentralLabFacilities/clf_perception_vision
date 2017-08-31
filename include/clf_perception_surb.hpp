@@ -87,6 +87,7 @@ public:
 
     const int fontFace = cv::FONT_HERSHEY_PLAIN;
     const double fontScale = 1;
+    std::string ros_input_topic;
 
 private:
     std::vector<cv::Scalar> colors;

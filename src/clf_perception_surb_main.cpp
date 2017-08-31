@@ -67,9 +67,8 @@ void toggle_callback(const std_msgs::Bool& _toggle) {
 
 int main(int argc, char *argv[]) {
 
-    if (argc < 3) {
-        cout << ">>> Usage: <proc> {path/to/config/file} {input scope}" << endl;
-        cout << ">>> Example: <proc> /tmp/example.yaml /usb_cam/image_raw" << endl;
+    if (argc < 2) {
+        cout << ">>> Usage: <proc> {path/to/config/file}" << endl;
         return -1;
     }
     
@@ -79,10 +78,7 @@ int main(int argc, char *argv[]) {
     average_frames = 0;
     time_t start, end;
 
-    ros::init(argc, argv, "clf_detect_objects_surb", ros::init_options::AnonymousName);
-
-    ROSGrabber ros_grabber(argv[2]);
-    cout << ">>> ROS In Topic --> " << argv[2] << endl;
+    ros::init(argc, argv, "clf_perception_surb", ros::init_options::AnonymousName);
 
     // How many CPUs do we have?
     cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
@@ -90,14 +86,16 @@ int main(int argc, char *argv[]) {
     // Are we using optimized OpenCV Code?
     cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
 
-    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_detect_objects_surb/compute", 1, toggle_callback);
+    ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_perception_surb/compute", 1, toggle_callback);
 
     Detect2D detect2d;
     detect2d.setup(argc, argv);
 
-    cout << ">>> Let's go..." << endl;
+    ROSGrabber ros_grabber(detect2d.ros_input_topic);
 
-    cv::namedWindow(":: CLF GPU Detect [ROS] ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
+    cout << ">>> Ready, let's go..." << endl;
+
+    cv::namedWindow(":: CLF PERCEPTION SURB ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     cv::Mat current_image;
 
     cout << ">>> Press 'ESC' to exit" << endl;
@@ -155,9 +153,9 @@ int main(int argc, char *argv[]) {
                     cv::Size size(current_image.cols/1.5,current_image.rows/1.5);
                     cv::Mat resize;
                     cv::resize(current_image, resize, size, cv::INTER_NEAREST);
-                    cv::imshow(":: CLF GPU Detect [ROS] ::", resize);
+                    cv::imshow(":: CLF PERCEPTION SURB ::", resize);
                 } else {
-                    cv::imshow(":: CLF GPU Detect [ROS] ::", current_image);
+                    cv::imshow(":: CLF PERCEPTION SURB ::", current_image);
                 }
 
                 if (time_spend >= 1 ) {

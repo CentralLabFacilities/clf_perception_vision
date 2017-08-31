@@ -185,3 +185,7 @@ INSTALL(TARGETS clf_perception_gender_age RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION bin)
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/clf_perception_vision)
+INSTALL(FILES package.xml
+              launch/pepper_image_sink_offload.launch
+              launch/pointcloud_offload.launch
+              DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

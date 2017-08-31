@@ -1,4 +1,8 @@
 %YAML:1.0
+
+# Input topic
+input_ros_topic: "/pepper_robot/sink/front/image_raw"
+
 # Image locations
 targets:
  - "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/example_images/milk.png"

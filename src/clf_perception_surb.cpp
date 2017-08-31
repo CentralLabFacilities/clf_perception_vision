@@ -66,7 +66,7 @@ RNG rng(133742+t);
 
 const int minhessian = 400;
 
-string out_topic = "clf_detect_objects_surb/objects";
+string out_topic = "clf_perception_surb/objects";
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
@@ -134,6 +134,9 @@ int Detect2D::setup(int argc, char *argv[]) {
     FileStorage fs(argv[1], FileStorage::READ);
 
     if (fs.isOpened()) {
+
+        fs["ros_input_topic"] >> ros_input_topic;
+        cout << ">>> ROS input topic --> " << type_descriptor  << endl;
 
         fs["keypointalgo"] >> type_descriptor;
         cout << ">>> Keypoint Descriptor --> " << type_descriptor  << endl;
