@@ -112,6 +112,11 @@ int main(int argc, char *argv[]) {
         fs["pyr"] >> _pyr;
         cout << ">>> PyrUp: --> " << _pyr << endl;
 
+        if (_pyr == "true") {
+            // DONT CHANGE THIS! OR ALL HELL BREAKS LOOSE...
+            _pyr = true;
+        }
+
         fs["model_file_gender"] >> model_file_gender;
         cout << ">>> Caffee Model Gender: --> " << model_file_gender << endl;
 
