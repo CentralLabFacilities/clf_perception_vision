@@ -125,10 +125,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if (argv[3]) {
-        out_topic = argv[3];
-        cout << ">>> ROS Out Topic --> " << argv[3] << endl;
-    }
+    cout << ">>> ROS Out Topic --> " << out_topic << endl;
 
     CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
     FileStorage fs(argv[1], FileStorage::READ);
@@ -277,7 +274,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
 
-    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 100);
+    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 10);
 
     return 0;
 
