@@ -1,17 +1,15 @@
-### CLF 2D OBJECT DETECT
+### CLF PERCEPTION VISION
 
 Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
 
-Detect any kind of objects and faces using 2d object detection, fisher faces and Haar classifier plus GPU acceleration using OpenCV/CUDA
-
-![CLF GPU DETECT](https://github.com/CentralLabFacilities/clf_2d_gpu_detect/blob/master/clf_gpu_detect_screenshot.png "")
+This needs to be redone after refactoring. SOON.
 
 ### Installation
 
-Install the latest nvidia cuda toolkit: https://developer.nvidia.com/cuda-toolkit
+Install the latest NVIDIA cuda toolkit: https://developer.nvidia.com/cuda-toolkit
 This version (master) has been tested with version 8.0
 
-Install OpenCV minimum 3.2.0 with CUDA support and OpenCV contrib modules
+Install OpenCV minimum 3.2.0 with CUDA support AND OpenCV contrib modules
 
 Invoke OpenCV's cmake with:
 
@@ -20,7 +18,7 @@ Invoke OpenCV's cmake with:
     -D BUILD_opencv_face=ON
 </pre>
 
-Here's our exact CMAKE invocation
+Here's _our_ exact CMAKE invocation
 
 <pre>
     cmake  \
@@ -77,15 +75,7 @@ Here's our exact CMAKE invocation
 Then:
 
 <pre>
-    git clone https://github.com/CentralLabFacilities/clf_2d_gpu_detect.git
-    cd clf_2d_gpu_detect
-    git checkout ros_support_cv3
-    mkdir build
-    cd build
-    source /opt/ros/indigo/setup.bash
-    cmake -DCMAKE_INSTALL_PREFIX={YOUR DECISION} ..
-    make
-    make install
+    This needs to be redone after refactoring. SOON.
 </pre>
 
 ### Usage
@@ -96,15 +86,7 @@ feature detection will be done on the original input size.
 An exemplary config file can be found in the data folder.
 
 <pre>
-    source /opt/ros/$ROSVERSION/setup.bash
-
-    ./clf_detect_objects_ros /path/to/configfile/example.yaml /camera/input/topic /output/topic
-
-    ./clf_detect_faces_ros --cascade /path/to/cascade.xml --cascade-profile /path/to/cascade.xml --topic /webcam/image_raw
-
-    Face detection with gender classification
-
-    ./clf_detect_faces_ros --cascade /path/to/cascade --cascade-profile /path/to/cascade.xml --gender /path/to/fisher_gender.xml --topic /webcam/image_raw
+    This needs to be redone after refactoring. SOON.
 </pre>
 
 ### Usage Object Detection
