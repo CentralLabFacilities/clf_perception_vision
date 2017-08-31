@@ -1,5 +1,5 @@
 <launch>
-    <arg name="config" default="/share/clf_perception_vision/data/configs/clf_perception_surb_example.yaml"/>
+    <arg name="config" default="/vol/pepper/systems/pepper-robocup-nightly/share/clf_perception_vision/data/configs/clf_perception_surb_example.yaml"/>
     <node pkg="clf_perception_vision" type="clf_perception_surb" name="clf_perception_surb" output="screen"
           args="$(arg config)">
     </node>
