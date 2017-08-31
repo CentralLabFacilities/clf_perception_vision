@@ -176,9 +176,9 @@ ADD_EXECUTABLE(clf_perception_collect_data
 #                ${INCLUDE_DIRS}
 # )
 
-TARGET_LINK_LIBRARIES(clf_perception_surb ${CUDA_LIBS} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_gender_age ${Caffe_LIBRARIES} ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_gender_age ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION bin)
 INSTALL(TARGETS clf_perception_gender_age RUNTIME DESTINATION bin)
