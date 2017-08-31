@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>clf_2d_gpu_detect</name>
+  <name>clf_perception_vision</name>
   <version>0.0.1</version>
-  <description> Detect any kind of objects using 2d object detection and GPU acceleration
+  <description> Robotics perception pipeline for robotics
                 using OpenCV and CUDA.
   </description>
 
@@ -17,7 +17,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <url type="website">https://github.com/CentralLabFacilities/clf_2d_gpu_detect</url> -->
+  <url type="website">https://github.com/CentralLabFacilities/clf_perception_vision.git</url> -->
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
   <!-- Authors do not have to be maintianers, but could be -->
