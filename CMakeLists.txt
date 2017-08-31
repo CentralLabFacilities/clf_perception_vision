@@ -115,7 +115,8 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
-                    ${dlib_INCLUDE_DIRS})
+                    ${dlib_INCLUDE_DIRS}
+                    include)
 
 FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp include/*.h)
 
