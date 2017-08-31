@@ -55,6 +55,11 @@ the use of this software, even if advised of the possibility of such damage.
 
 using namespace std;
 
+bool toggle;
+double time_spend;
+unsigned int frame_count;
+unsigned int average_frames;
+
 void toggle_callback(const std_msgs::Bool& _toggle) {
     toggle = _toggle.data;
     cout << ">>> I am currently computing? --> " << toggle << endl;
@@ -67,11 +72,6 @@ int main(int argc, char *argv[]) {
         cout << ">>> Example: <proc> /tmp/example.yaml /usb_cam/image_raw" << endl;
         return -1;
     }
-
-    bool toggle;
-    double time_spend;
-    unsigned int frame_count;
-    unsigned int average_frames;
     
     toggle = true;
     frame_count = 0;
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     int last_computed_frame = 0;
     time(&start);
 
-    while(!cv::waitKey(5)) {
+    while(!cv::waitKey(5) == 27) {
 
         ros::spinOnce();
 

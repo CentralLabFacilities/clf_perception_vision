@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     cv::Mat current_image, display_image;
     time(&start);
 
-    while(!cv::waitKey(10);) {
+    while(!cv::waitKey(5) == 27) {
 
         ros::spinOnce();
         // usleep(microseconds);
