@@ -46,7 +46,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 
 // SELF
-#include "clf_2d_detect.hpp"
+#include "clf_perception_surb.hpp"
 #include "ros_grabber.hpp"
 
 // ROS
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     int last_computed_frame = 0;
     time(&start);
 
-    while(cv::waitKey(1) != 27) {
+    while(!cv::waitKey(5)) {
 
         ros::spinOnce();
 
