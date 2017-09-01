@@ -63,9 +63,9 @@ string topic,
        label_file_gender;
 
 bool toggle = true;
-bool _pyr = false;
 bool gender_age = false;
 
+unsigned int _pyr = 0;
 unsigned int frame_count = 0;
 unsigned int average_frames = 0;
 double time_spend = 0;
@@ -109,8 +109,12 @@ int main(int argc, char *argv[]) {
         fs["dlib_shapepredictor"] >> shape_mode_path;
         cout << ">>> Frontal Face: --> " << shape_mode_path << endl;
 
-        fs["pyr"] >> _pyr;
-        cout << ">>> PyrUp: --> " << _pyr << endl;
+        fs["pyr"] >> (int)_pyr;
+        if (_pyr > 0) {
+            cout << ">>> Image Scaling is: --> ON" << endl;
+        } else {
+            cout << ">>> Image Scaling is: --> OFF" << endl;
+        }
 
         fs["model_file_gender"] >> model_file_gender;
         cout << ">>> Caffee Model Gender: --> " << model_file_gender << endl;

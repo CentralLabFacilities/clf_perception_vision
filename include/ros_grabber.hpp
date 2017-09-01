@@ -78,7 +78,7 @@ public:
     ros::NodeHandle node_handle_;
     std::string frame_id;
     int getLastFrameNr();
-    bool pyr;
+    int pyr;
 private:
     int frame_nr;
     image_transport::ImageTransport it_;

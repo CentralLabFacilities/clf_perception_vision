@@ -153,14 +153,14 @@ int Detect2D::setup(int argc, char *argv[]) {
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
 
-        fs["pyr_up"] >> pyr;
+        fs["pyr_up"] >> (int)pyr;
 
-        cout << ">>> PyrUp: --> " << pyr << endl;
-
-        if (pyr == true) {
-            // DONT CHANGE THIS! OR ALL HELL BREAKS LOOSE...
+        if (pyr > 0) {
+            cout << ">>> Image Scaling is: --> ON" << endl;
             scale_factor = 2.0;
-            cout << ">>> Scale factor is --> " << scale_factor << endl;
+            cout << ">>> Scale Factor: --> " << scale_factor << endl;
+        } else {
+            cout << ">>> Image Scaling is: --> OFF" << endl;
         }
 
         toggle_homography = true;

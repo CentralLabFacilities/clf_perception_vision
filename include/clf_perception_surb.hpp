@@ -106,12 +106,12 @@ private:
     float detection_threshold = 0;
     int res_x = 640;
     int res_y = 480;
+    int pyr = 0;
     double scale_factor = 1.0;
 
     bool do_not_draw = false;
     bool toggle_homography = false;
     bool toggle_silent = false;
-    bool pyr = false;
 
     std::string type_descriptor;
     std::string point_matcher;

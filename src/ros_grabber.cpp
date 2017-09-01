@@ -52,7 +52,7 @@ the use of this software, even if advised of the possibility of such damage.
 ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
     image_sub_ = it_.subscribe(i_scope, 100, &ROSGrabber::imageCallback, this);
     frame_nr = -1;
-    pyr = false;
+    pyr = 0;
 }
 
 ROSGrabber::~ROSGrabber() { }
@@ -73,7 +73,7 @@ void ROSGrabber::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
     frame_nr = (int)msg->header.seq;
     frame_id = msg->header.frame_id;
     source_frame = cv_ptr->image;
-    if (pyr == true) {
+    if (pyr > 0) {
         cv::pyrUp(source_frame, output_frame, cv::Size(source_frame.cols*2, source_frame.rows*2));
     } else {
         output_frame = source_frame;
