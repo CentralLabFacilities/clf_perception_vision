@@ -194,7 +194,6 @@ INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACK
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-CATKIN_PACKAGE( INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
-                INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include
+CATKIN_PACKAGE( INCLUDE_DIR include
                 CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
 )
