@@ -63,9 +63,8 @@ string topic,
        label_file_gender;
 
 bool toggle = true;
-bool gender_age = false;
-
 unsigned int _pyr = 0;
+unsigned int gender_age = 1;
 unsigned int frame_count = 0;
 unsigned int average_frames = 0;
 double time_spend = 0;
@@ -109,7 +108,7 @@ int main(int argc, char *argv[]) {
         fs["dlib_shapepredictor"] >> shape_mode_path;
         cout << ">>> Frontal Face: --> " << shape_mode_path << endl;
 
-        fs["pyr"] >> (int)_pyr;
+        fs["pyr_up"] >> (int)_pyr;
         if (_pyr > 0) {
             cout << ">>> Image Scaling is: --> ON" << endl;
         } else {
@@ -137,9 +136,6 @@ int main(int argc, char *argv[]) {
         fs["label_file_age"] >> label_file_age;
         cout << ">>> Labels Age: --> " << label_file_age << endl;
 
-        fs["gender_age"] >> gender_age;
-        cout << ">>> Gender Detection: --> " << gender_age << endl;
-
     }
 
     fs.release();
@@ -150,16 +146,14 @@ int main(int argc, char *argv[]) {
     ros_grabber.setPyr(_pyr);
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_perception_gender_age/compute", 1, toggle_callback);
-    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_perception_gender_age/people", 20);
+    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_perception_gender_age/people", 10);
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
 
     // Caffee
-    if (gender_age == true) {
-        dlf.cl = new Classifier(model_file_gender, trained_file_gender, mean_file, label_file_gender);
-        dlf.cl_age = new Classifier(model_file_age, trained_file_age, mean_file, label_file_age);
-    }
+    dlf.cl = new Classifier(model_file_gender, trained_file_gender, mean_file, label_file_gender);
+    dlf.cl_age = new Classifier(model_file_age, trained_file_age, mean_file, label_file_age);
 
     cout << ">>> Let's go..." << endl;
 
@@ -191,7 +185,7 @@ int main(int argc, char *argv[]) {
                              // do gender classification, if enabled and display results
                              // --------------------------------------------
                              std::vector<string> age_gen;
-                             if (gender_age == true) {
+                             if (gender_age > 0) {
                                  for (int i = 0; i < current_faces.size(); i++)
                                  {
                                        cv::Mat cropped_image = display_image(Rect(dlib2cvrect(current_faces[i]).x,
@@ -229,7 +223,7 @@ int main(int argc, char *argv[]) {
                              people_msgs::Person person_msg;
                              people_msg.header = h;
                              for (int i = 0; i < current_faces.size(); ++i) {
-                                if (gender_age == true) {
+                                if (gender_age > 0) {
                                     person_msg.name = age_gen[i];
                                 } else {
                                     person_msg.name = "unknown:unknown";

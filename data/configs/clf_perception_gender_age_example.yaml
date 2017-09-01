@@ -9,5 +9,4 @@ trained_file_gender: "/vol/pepper/systems/pepper-robocup-nightly/share/cnn_model
 mean_file: "/vol/pepper/systems/pepper-robocup-nightly/share/cnn_models/cnn_age_gender/mean.binaryproto"
 label_file_age: "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/configs/labels_age.txt"
 label_file_gender: "/vol/pepper/systems/pepper-robocup-nightly/share/clf_detect/data/configs/labels_gender.txt"
-pyr: false
-gender_age: true
+pyr_up: 0
