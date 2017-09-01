@@ -113,11 +113,6 @@ SET(CUSTOM_CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
 # MESSAGE(STATUS "CUSTOM_CV_LIBS: " ${CUSTOM_CV_LIBS})
 # MESSAGE(STATUS "CUSTOM_CUDA_LIBS: "${CUSTOM_CUDA_LIBS})
 
-CATKIN_PACKAGE(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS message_runtime
-)
-
 ADD_MESSAGE_FILES(
    DIRECTORY msg
    FILES
@@ -126,6 +121,11 @@ ADD_MESSAGE_FILES(
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
+
+CATKIN_PACKAGE(
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
+)
 
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
