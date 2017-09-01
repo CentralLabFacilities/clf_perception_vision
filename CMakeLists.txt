@@ -152,8 +152,6 @@ CATKIN_PACKAGE( CATKIN_DEPENDS
                             Caffe
                             Boost
                             CUDA
-                INCLUDE_DIRS
-                            ${CMAKE_INSTALL_PREFIX}/include
 )
 
 ADD_EXECUTABLE(clf_perception_surb
