@@ -124,7 +124,6 @@ ADD_MESSAGE_FILES(
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
 CATKIN_PACKAGE(
-  INCLUDE_DIRS include
   CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
 )
 
