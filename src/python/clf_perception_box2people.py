@@ -15,6 +15,11 @@ def box_cb(data):
                 h.stamp = rospy.Time.now()
                 p = ExtendedPersonStamped()
                 p.header = h
+                p.bbox_xmin = person.xmin
+                p.bbox_xmax = person.xmax
+                p.bbox_ymin = person.ymin
+                p.bbox_ymax = person.ymax
+                p.probability = person.probability
                 e.persons.append(p)
 
     except Exception, e:

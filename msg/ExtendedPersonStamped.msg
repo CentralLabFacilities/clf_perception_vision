@@ -10,4 +10,4 @@ uint16              bbox_xmax
 uint16              bbox_ymin
 uint16              bbox_ymax
 geometry_msgs/Pose  pose
-float64             reliability
+float64             probability
