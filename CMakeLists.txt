@@ -6,6 +6,12 @@ PROJECT(clf_perception_vision)
 SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
+IF (CATKIN_DEVEL_PREFIX)
+    MESSAGE("-- Found CATKIN_DEVEL_PREFIX: " "../devel")
+ELSE()
+    SET(CATKIN_DEVEL_PREFIX "../devel")
+    MESSAGE("-- Setting CATKIN_DEVEL_PREFIX: " "../devel")
+ENDIF()
 MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
 
 SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
@@ -128,7 +134,27 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
                     ${dlib_INCLUDE_DIRS}
+                    ${catkin_INCLUDE_DIRS}
                     include)
+
+
+CATKIN_PACKAGE( CATKIN_DEPENDS
+                            message_runtime
+                            roscpp
+                            std_msgs
+                            sensor_msgs
+                            geometry_msgs
+                            image_transport
+                            cv_bridge
+                DEPENDS
+                            dlib
+                            OpenCV
+                            Caffe
+                            Boost
+                            CUDA
+                INCLUDE_DIRS
+                            ${CMAKE_INSTALL_PREFIX}/include
+)
 
 ADD_EXECUTABLE(clf_perception_surb
                src/ros_grabber.cpp
@@ -193,7 +219,3 @@ INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAG
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-CATKIN_PACKAGE( INCLUDE_DIR include
-                CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
-)
