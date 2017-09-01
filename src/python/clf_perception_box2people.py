@@ -9,10 +9,10 @@ from clf_perception_vision.msg import ExtenedPeople, ExtendedPersonStamped
 def box_cb(data):
     try:
         e = ExtenedPeople()
+        h = std_msgs.msg.Header()
+        h.stamp = rospy.Time.now()
         for person in data.boundingBoxes:
             if person.Class == "person":
-                h = std_msgs.msg.Header()
-                h.stamp = rospy.Time.now()
                 p = ExtendedPersonStamped()
                 p.header = h
                 p.bbox_xmin = person.xmin
