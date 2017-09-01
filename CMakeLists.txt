@@ -129,15 +129,13 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
-                    ${dlib_INCLUDE_DIRS})
-
-FILE(GLOB CLF_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/*.hpp include/*.h)
+                    ${dlib_INCLUDE_DIRS}
+                    include)
 
 ADD_EXECUTABLE(clf_perception_surb
                src/ros_grabber.cpp
                src/clf_perception_surb.cpp
                src/clf_perception_surb_main.cpp
-               ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
@@ -146,14 +144,12 @@ ADD_EXECUTABLE(clf_perception_gender_age
                src/dlib_detection.cpp
                src/caffee_classification.cpp
                src/clf_perception_gender_age_main.cpp
-               ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
 ADD_EXECUTABLE(clf_perception_collect_data
                src/clf_perception_collect_data.cpp
                src/ros_grabber.cpp
-               ${CLF_HEADER_LIST}
                ${INCLUDE_DIRS}
 )
 
@@ -163,7 +159,6 @@ ADD_EXECUTABLE(clf_perception_collect_data
 #               src/clf_2d_dlib_faces.cpp
 #               src/main_dlib_faces_once.cpp
 #               src/clf_2d_caffee_classification.cpp
-#               ${CLF_HEADER_LIST}
 #               ${INCLUDE_DIRS}
 # )
 
@@ -179,7 +174,6 @@ ADD_EXECUTABLE(clf_perception_collect_data
 #               src/cmt/Tracker.cpp
 #               src/cmt/fastcluster.cpp
 #               src/ros_grabber.cpp
-#               ${CLF_HEADER_LIST}
 #               ${INCLUDE_DIRS}
 # )
 
