@@ -1,0 +1,9 @@
+Header              header
+string              name
+string              age
+string              gender
+string              activity
+string[]            tagnames
+string[]            tags
+geometry_msgs/Pose  pose
+float64             reliability

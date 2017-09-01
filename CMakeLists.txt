@@ -19,7 +19,14 @@ ADD_DEFINITIONS(-DENABLE_ASSERTS)
 
 FIND_PACKAGE(CUDA REQUIRED)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
-FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs image_transport cv_bridge)
+FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp
+                                        std_msgs
+                                        sensor_msgs
+                                        geometry_msgs
+                                        image_transport
+                                        cv_bridge
+                                        message_generation)
+
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS face
                                         highgui
                                         core
@@ -110,6 +117,15 @@ CATKIN_PACKAGE(
   INCLUDE_DIRS include
   CATKIN_DEPENDS message_runtime
 )
+
+ADD_MESSAGE_FILES(
+   DIRECTORY msg
+   FILES
+   ExtendedPersonStamped.msg
+   ExtenedPeople.msg
+)
+
+GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
