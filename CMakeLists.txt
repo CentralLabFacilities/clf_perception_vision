@@ -123,10 +123,6 @@ ADD_MESSAGE_FILES(
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
-CATKIN_PACKAGE( INCLUDE_DIRS include
-                CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
-)
-
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
@@ -195,3 +191,9 @@ INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINAT
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+CATKIN_PACKAGE( INCLUDE_DIRS include
+                CATKIN_DEPENDS message_runtime roscpp std_msgs sensor_msgs geometry_msgs image_transport cv_bridge
+)
