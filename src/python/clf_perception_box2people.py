@@ -20,7 +20,7 @@ class BBox2ExtendedPeople:
             h = std_msgs.msg.Header()
             h.stamp = rospy.Time.now()
             for person in data.boundingBoxes:
-                if person.Class == "chair":
+                if person.Class == "person":
                     p = ExtendedPersonStamped()
                     p.header = h
                     p.bbox_xmin = person.xmin
