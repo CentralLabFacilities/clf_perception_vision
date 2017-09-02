@@ -174,7 +174,7 @@ ADD_EXECUTABLE(clf_perception_collect_data
 
 ADD_LIBRARY(clf_perception_vision_gender_age src/clf_perception_gender_age_nodelet.cpp)
 
-ADD_DEPENDENCIES(clf_perception_vision_gender_age clf_perception_vision_generate_messages_cpp)
+ADD_DEPENDENCIES(clf_perception_vision_gender_age clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 TARGET_LINK_LIBRARIES(clf_perception_vision_gender_age ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})

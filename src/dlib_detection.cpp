@@ -79,9 +79,9 @@ std::vector<dlib::rectangle> DlibFace::detect(Mat mat)
 {
     cv_image<bgr_pixel> cimg(mat);
     std::vector<dlib::rectangle> faces = detector(cimg);
-    std::vector<full_object_detection> shapes;
-     for (unsigned long i = 0; i < faces.size(); ++i)
-        shapes.push_back(pose_model(cimg, faces[i]));
+    // std::vector<full_object_detection> shapes;
+    // for (unsigned long i = 0; i < faces.size(); ++i)
+    //     shapes.push_back(pose_model(cimg, faces[i]));
     //win.clear_overlay();
     //win.set_image(cimg);
     //win.add_overlay(render_face_detections(shapes));
