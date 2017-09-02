@@ -32,3 +32,7 @@ build
 .idea
 .idea*
 .idea/*
+
+share
+lib
+devel

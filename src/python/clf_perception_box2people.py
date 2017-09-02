@@ -11,8 +11,8 @@ class BBox2ExtendedPeople:
 
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_box2people', anonymous=True)
-        self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=1)
-        self.pub = rospy.Publisher(str(_out), ExtenedPeople, queue_size=1)
+        self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=10)
+        self.pub = rospy.Publisher(str(_out), ExtenedPeople, queue_size=10)
 
     def box_cb(self, data):
         try:
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     parser = OptionParser()
     parser.add_option("--intopic", dest="intopic", default="/darknet_ros/bounding_boxes")
-    parser.add_option("--outtopic", dest="outtopic", default="/clf_perception_vision/people_raw")
+    parser.add_option("--outtopic", dest="outtopic", default="/clf_perception_vision/people/raw")
     (options, args) = parser.parse_args()
     B2P = BBox2ExtendedPeople(options.intopic, options.outtopic)
     rate = rospy.Rate(2.0)

@@ -75,19 +75,19 @@ the use of this software, even if advised of the possibility of such damage.
 class Detect2D {
 
 public:
-    int setup(int argc, char *argv[]);
-    void detect(cv::Mat i_image, ros::Time timestamp, std::string frame_id);
-    std::vector<cv::Scalar> color_mix(int count);
-    int get_x_resolution();
-    int get_y_resolution();
-    bool get_silent();
-
     Detect2D();
     ~Detect2D();
 
+    bool get_silent();
+    int setup(int argc, char *argv[]);
+    int get_x_resolution();
+    int get_y_resolution();
     const int fontFace = cv::FONT_HERSHEY_PLAIN;
     const double fontScale = 1;
     std::string ros_input_topic;
+    std::vector<cv::Scalar> color_mix(int count);
+
+    void detect(cv::Mat i_image, ros::Time timestamp, std::string frame_id);
 
 private:
     std::vector<cv::Scalar> colors;

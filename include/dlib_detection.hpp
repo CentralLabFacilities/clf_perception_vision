@@ -91,7 +91,6 @@ public:
     Classifier *cl_age;
     DlibFace();
     ~DlibFace();
-    // image_window win;
     void setup(string path_to_shape_model);
     std::vector<dlib::rectangle> detect(cv::Mat mat);
 private:

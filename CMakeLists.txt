@@ -129,16 +129,8 @@ ADD_MESSAGE_FILES(
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
-                    ${Caffe_INCLUDE_DIRS}
-                    ${dlib_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
-                    include)
-
-
-CATKIN_PACKAGE( CATKIN_DEPENDS
+CATKIN_PACKAGE( INCLUDE_DIRS include
+                CATKIN_DEPENDS
                             message_runtime
                             roscpp
                             std_msgs
@@ -153,6 +145,16 @@ CATKIN_PACKAGE( CATKIN_DEPENDS
                             Boost
                             CUDA
 )
+
+
+
+INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
+                    ${catkin_INCLUDE_DIRS}
+                    ${Caffe_INCLUDE_DIRS}
+                    ${dlib_INCLUDE_DIRS}
+                    ${catkin_INCLUDE_DIRS}
+                    include)
 
 ADD_EXECUTABLE(clf_perception_surb
                src/ros_grabber.cpp
@@ -174,6 +176,8 @@ ADD_EXECUTABLE(clf_perception_collect_data
                src/ros_grabber.cpp
                ${INCLUDE_DIRS}
 )
+
+ADD_DEPENDENCIES(clf_perception_gender_age clf_perception_vision_generate_messages_cpp)
 
 # DEPRECATED
 # ADD_EXECUTABLE(clf_detect_faces_dlib_once_ros
