@@ -48,8 +48,6 @@ the use of this software, even if advised of the possibility of such damage.
 // SELF
 #include "ros_grabber.hpp"
 #include "dlib_detection.hpp"
-#include <clf_perception_vision/ExtendedPersonStamped.h>
-
 
 using namespace std;
 using namespace cv;

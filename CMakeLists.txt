@@ -6,12 +6,12 @@ PROJECT(clf_perception_vision)
 SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp")
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
-#IF (CATKIN_DEVEL_PREFIX)
-#    MESSAGE("-- Found CATKIN_DEVEL_PREFIX: " "../devel")
-#ELSE()
-#    SET(CATKIN_DEVEL_PREFIX "../devel")
-#    MESSAGE("-- Setting CATKIN_DEVEL_PREFIX: " "../devel")
-#ENDIF()
+IF (CATKIN_DEVEL_PREFIX)
+    MESSAGE("-- Found CATKIN_DEVEL_PREFIX: " "../devel")
+ELSE()
+    SET(CATKIN_DEVEL_PREFIX "../devel")
+    MESSAGE("-- Setting CATKIN_DEVEL_PREFIX: " "../devel")
+ENDIF()
 MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
 
 SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
@@ -32,7 +32,9 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp
                                         visualization_msgs
                                         image_transport
                                         cv_bridge
-                                        message_generation)
+                                        message_generation
+                                        nodelet
+)
 
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS face
                                         highgui
@@ -129,23 +131,24 @@ ADD_MESSAGE_FILES(
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
-CATKIN_PACKAGE( INCLUDE_DIRS include
-                CATKIN_DEPENDS
-                            message_runtime
-                            roscpp
-                            std_msgs
-                            sensor_msgs
-                            geometry_msgs
-                            image_transport
-                            cv_bridge
-                DEPENDS
-                            dlib
-                            OpenCV
-                            Caffe
-                            Boost
-                            CUDA
+CATKIN_PACKAGE(INCLUDE_DIRS include
+               LIBRARIES clf_perception_vision_gender_age
+               CATKIN_DEPENDS
+                           message_runtime
+                           roscpp
+                           std_msgs
+                           sensor_msgs
+                           geometry_msgs
+                           image_transport
+                           cv_bridge
+                           nodelet
+               DEPENDS
+                           dlib
+                           OpenCV
+                           Caffe
+                           Boost
+                           CUDA
 )
-
 
 
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
@@ -177,38 +180,11 @@ ADD_EXECUTABLE(clf_perception_collect_data
                ${INCLUDE_DIRS}
 )
 
-ADD_DEPENDENCIES(clf_perception_gender_age clf_perception_vision_generate_messages_cpp)
+ADD_LIBRARY(clf_perception_vision_gender_age src/clf_perception_gender_age_nodelet.cpp)
 
-# DEPRECATED
-# ADD_EXECUTABLE(clf_detect_faces_dlib_once_ros
-#               src/ros_grabber.cpp
-#               src/clf_2d_dlib_faces.cpp
-#               src/main_dlib_faces_once.cpp
-#               src/clf_2d_caffee_classification.cpp
-#               ${INCLUDE_DIRS}
-# )
+ADD_DEPENDENCIES(clf_perception_vision_gender_age clf_perception_vision_generate_messages_cpp)
 
-# DEPRECATED
-# ADD_EXECUTABLE(clf_cmt
-#               src/cmt/common.cpp
-#               src/cmt/gui.cpp
-#               src/cmt/main.cpp
-#               src/cmt/CMT.cpp
-#               src/cmt/Consensus.cpp
-#               src/cmt/Fusion.cpp
-#               src/cmt/Matcher.cpp
-#               src/cmt/Tracker.cpp
-#               src/cmt/fastcluster.cpp
-#               src/ros_grabber.cpp
-#               ${INCLUDE_DIRS}
-# )
-
-# DEPRECATED
-# ADD_EXECUTABLE(clf_train_gender_fisher
-#                src/clf_2d_train_gender_fisher.cpp
-#                ${INCLUDE_DIRS}
-# )
-
+TARGET_LINK_LIBRARIES(clf_perception_vision_gender_age ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_gender_age ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
@@ -216,8 +192,10 @@ TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_gender_age RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_vision_gender_age ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
