@@ -11,11 +11,12 @@ MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
 SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
 SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS} ${CMAKE_CXX_FLAGS} -std=gnu++11 -Wno-deprecated-declarations")
 MESSAGE(STATUS "CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+SET(ROS_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE Release)
 
 FIND_PACKAGE(dlib REQUIRED)
 FIND_PACKAGE(Caffe REQUIRED)
 ADD_DEFINITIONS(${Caffe_DEFINITIONS})
-ADD_DEFINITIONS(-DENABLE_ASSERTS)
 
 FIND_PACKAGE(CUDA REQUIRED)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
@@ -30,8 +31,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp
                                         nodelet
 )
 
-FIND_PACKAGE(OpenCV REQUIRED COMPONENTS face
-                                        highgui
+FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         core
                                         imgproc
                                         features2d
@@ -69,8 +69,6 @@ ELSE()
 	MESSAGE(FATAL_ERROR "OpenCV_CUDA_VERSION NOT FOUND")
 ENDIF()
 
-SET(ROS_BUILD_TYPE RELEASE)
-SET(CMAKE_BUILD_TYPE RELEASE)
 SET(CUSTOM_ROS_LIBS /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libroscpp.so
                     /opt/ros/${ROS_VERSION}/lib/libcv_bridge.so
@@ -190,6 +188,5 @@ INSTALL(TARGETS clf_perception_vision_gender_age ARCHIVE DESTINATION ${CATKIN_PA
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
