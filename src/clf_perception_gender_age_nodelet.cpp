@@ -41,9 +41,10 @@ namespace clf_perception_vision {
         GenderAge() {}
 
     private:
+        ros::NodeHandle private_nh;
         ros::Subscriber pose_sub;
         ros::Publisher people_pub;
-        ROSGrabber *ros_grabber
+        ROSGrabber *ros_grabber;
         DlibFace dlf;
 
         virtual void onInit() {
@@ -94,8 +95,8 @@ namespace clf_perception_vision {
             }
             fs.release();
             cout << ">>> ROS In Topic --> " << topic << endl;
-            pose_sub = private_nh.subscribe("/clf_perception_vision/people/raw/pose", 10, person_callback);
-            people_pub = private_nh.advertise<people_msgs::People>("/clf_perception_vision/people/raw/pose/genderage", 10);
+            pose_sub = private_nh.subscribe("/clf_perception_vision/people/raw/pose", 10, &GenderAge::person_callback, this);
+            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>("/clf_perception_vision/people/raw/pose/genderage", 10);
             ros_grabber = new ROSGrabber(topic);
             ros_grabber->setPyr(_pyr);
             dlf.setup(shape_mode_path);
