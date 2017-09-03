@@ -29,6 +29,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp
                                         cv_bridge
                                         message_generation
                                         nodelet
+                                        tf
 )
 
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
@@ -134,6 +135,7 @@ CATKIN_PACKAGE(INCLUDE_DIRS include
                            image_transport
                            cv_bridge
                            nodelet
+                           tf
                DEPENDS
                            dlib
                            OpenCV
