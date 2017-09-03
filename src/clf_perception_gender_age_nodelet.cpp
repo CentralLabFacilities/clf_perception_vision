@@ -58,39 +58,40 @@ namespace clf_perception_vision {
             // Get the NodeHandle
             private_nh = getPrivateNodeHandle();
             // How many CPUs do we have?
-            cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
+            NODELET_INFO(">>> LOOOOOOL %s", "LOL");
+            // cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
             // Are we using optimized OpenCV Code?
-            cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
+            // cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
 
             if (private_nh.getParam("gender_age_config", cfg_yaml))
             {
-                ROS_INFO(">>> Config File: --> %s", cfg_yaml.c_str());
+                //NODELET_INFO(">>> Config File: " << cfg_yaml);
             } else {
-                ROS_ERROR(">>> Failed to get depth topic parameter");
+                NODELET_ERROR(">>> Failed to get depth topic parameter");
                 exit(EXIT_FAILURE);
             }
 
             if (private_nh.getParam("gender_age_in_topic", people_topic))
             {
-                ROS_INFO(">>> Input People Topic: --> %s", people_topic.c_str());
+                //NODELET_INFO(">>> Input People Topic: " << people_topic);
             } else {
-                ROS_ERROR(">>> Failed to get people topic parameter");
+                NODELET_ERROR(">>> Failed to get people topic parameter");
                 exit(EXIT_FAILURE);
             }
 
             if (private_nh.getParam("gender_age_out_topic", out_topic))
             {
-                ROS_INFO(">>> Output People Topic: --> %s", out_topic.c_str());
+                //NODELET_INFO(">>> Output People Topic: " << out_topic);
             } else {
-                ROS_ERROR(">>> Failed to get out topic parameter");
+                NODELET_ERROR(">>> Failed to get out topic parameter");
                 exit(EXIT_FAILURE);
             }
 
             if (private_nh.getParam("gender_age_image_topic", topic))
             {
-                ROS_INFO(">>> Input Image Topic: --> %s", topic.c_str());
+                //NODELET_INFO(">>> Input Image Topic: " << topic);
             } else {
-                ROS_ERROR(">>> Failed to get input image topic parameter");
+                NODELET_ERROR(">>> Failed to get input image topic parameter");
                 exit(EXIT_FAILURE);
             }
 
@@ -98,43 +99,43 @@ namespace clf_perception_vision {
 
             if (fs.isOpened()) {
                 fs["dlib_shapepredictor"] >> shape_mode_path;
-                cout << ">>> Frontal Face: --> " << shape_mode_path << endl;
+                //NODELET_INFO(">>> Frontal Face: " << shape_mode_path);
 
                 fs["pyr_up"] >> (int)_pyr;
                 if (_pyr > 0) {
-                    cout << ">>> Image Scaling is: --> ON" << endl;
+                    //NODELET_INFO(">>> Image Scaling is: " << "ON");
                 } else {
-                    cout << ">>> Image Scaling is: --> OFF" << endl;
+                    //NODELET_INFO(">>> Image Scaling is: " << "OFF");
                 }
 
                 fs["model_file_gender"] >> model_file_gender;
-                cout << ">>> Caffee Model Gender: --> " << model_file_gender << endl;
+                //NODELET_INFO(">>> Caffee Model Gender: " << model_file_gender);
 
                 fs["model_file_age"] >> model_file_age;
-                cout << ">>> Caffee Model Age: --> " << model_file_age << endl;
+                //NODELET_INFO(">>> Caffee Model Age: " << model_file_age);
 
                 fs["trained_file_gender"] >> trained_file_gender;
-                cout << ">>> Caffee Trained Gender: --> " << trained_file_gender << endl;
+                //NODELET_INFO(">>> Caffee Trained Gender: " << trained_file_gender);
 
                 fs["trained_file_age"] >> trained_file_age;
-                cout << ">>> Caffee Trained Age: --> " << trained_file_age << endl;
+                //NODELET_INFO(">>> Caffee Trained Age: " << trained_file_age);
 
                 fs["mean_file"] >> mean_file;
-                cout << ">>> Caffe Mean: --> " << mean_file << endl;
+                ////NODELET_INFO(">>> Caffe Mean: " << mean_file);
 
                 fs["label_file_gender"] >> label_file_gender;
-                cout << ">>> Labels Gender: --> " << label_file_gender << endl;
+                ////NODELET_INFO(">>> Labels Gender: " << label_file_gender);
 
                 fs["label_file_age"] >> label_file_age;
-                cout << ">>> Labels Age: --> " << label_file_age << endl;
+                ////NODELET_INFO(">>> Labels Age: " << label_file_age);
             }
 
             fs.release();
 
-            cout << ">>> ROS In Topic: --> " << topic << endl;
+            //NODELET_INFO(">>> ROS In Topic: --> " << topic);
 
-            pose_sub = private_nh.subscribe(people_topic.c_str(), 1, &GenderAge::person_callback, this);
-            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>(out_topic.c_str(), 1);
+            pose_sub = private_nh.subscribe(people_topic, 1, &GenderAge::person_callback, this);
+            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>(out_topic, 1);
 
             ros_grabber = new ROSGrabber(topic);
             ros_grabber->setPyr(_pyr);
@@ -143,17 +144,17 @@ namespace clf_perception_vision {
             dlf.cl = new Classifier(model_file_gender, trained_file_gender, mean_file, label_file_gender);
             dlf.cl_age = new Classifier(model_file_age, trained_file_age, mean_file, label_file_age);
 
-            cout << ">>> Ready. Let's go..." << endl;
+            //NODELET_INFO(">>> Ready. ", topic);
         }
 
         cv::Rect dlib2cvrect(const dlib::rectangle& r) {return cv::Rect(r.left(), r.top(), r.width(), r.height());}
 
         void person_callback(const clf_perception_vision::ExtenedPeople::ConstPtr &person) {
-            cout << "Callback gender age" << endl;
+            NODELET_INFO(">>> Callback Gender Age");
+            //exit(EXIT_FAILURE);
         }
 
     };
 
-    PLUGINLIB_DECLARE_CLASS(clf_perception_vision, GenderAge, clf_perception_vision::GenderAge, nodelet::Nodelet
-    );
+    PLUGINLIB_DECLARE_CLASS(clf_perception_vision, GenderAge, clf_perception_vision::GenderAge, nodelet::Nodelet);
 }

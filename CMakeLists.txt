@@ -175,12 +175,24 @@ ADD_EXECUTABLE(clf_perception_collect_data
 )
 
 # Nodelets #
-ADD_LIBRARY(clf_perception_gender_age src/clf_perception_gender_age_nodelet.cpp)
+ADD_LIBRARY(clf_perception_gender_age
+               src/clf_perception_gender_age_nodelet.cpp
+               src/ros_grabber.cpp
+               src/dlib_detection.cpp
+               src/caffee_classification.cpp
+)
+
 ADD_LIBRARY(clf_perception_depth_lookup src/clf_perception_depth_lookup_nodelet.cpp)
 ADD_DEPENDENCIES(clf_perception_gender_age clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 # Nodelets #
-TARGET_LINK_LIBRARIES(clf_perception_gender_age ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_gender_age ${catkin_LIBRARIES}
+                                                ${CUSTOM_ROS_LIBS}
+                                                ${Caffe_LIBRARIES}
+                                                ${CUSTOM_CV_LIBS}
+                                                ${dlib_LIBRARIES}
+                                                ${Boost_LIBRARIES})
+
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})

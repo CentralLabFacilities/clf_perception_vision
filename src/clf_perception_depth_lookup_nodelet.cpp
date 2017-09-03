@@ -47,45 +47,45 @@ namespace clf_perception_vision {
 
             if (private_nh.getParam("depthlookup_image_topic", depth_topic))
             {
-                ROS_INFO(">>> Input depth image topic: %s", depth_topic.c_str());
+                //NODELET_INFO(">>> Input depth image topic: " << depth_topic);
             } else {
-                ROS_ERROR("Failed to get depth image topic parameter");
+                NODELET_ERROR("!Failed to get depth image topic parameter!");
                 exit(EXIT_FAILURE);
             }
             if (private_nh.getParam("depthlookup_info_topic", depth_info))
             {
-                ROS_INFO(">>> Input depth camera info topic: %s", depth_info.c_str());
+                //NODELET_INFO(">>> Input depth camera info topic: " << depth_info);
             } else {
-                ROS_ERROR("Failed to get depth camera info topic parameter");
+                NODELET_ERROR("!Failed to get depth camera info topic parameter!");
                 exit(EXIT_FAILURE);
             }
 
             if (private_nh.getParam("depthlookup_out_topic", out_topic))
             {
-                ROS_INFO(">>> Output Topic: %s", out_topic.c_str());
+                //NODELET_INFO(">>> Output Topic: " << out_topic);
             } else {
-                ROS_ERROR("Failed to get output topic parameter");
+                NODELET_ERROR("!Failed to get output topic parameter!");
                 exit(EXIT_FAILURE);
             }
 
             if (private_nh.getParam("depthlookup_in_topic", in_topic))
             {
-                ROS_INFO(">>> Input Topic: %s", in_topic.c_str());
+                //NODELET_INFO(">>> Input Topic: " << in_topic);
             } else {
-                ROS_ERROR("Failed to get input topic parameter");
+                NODELET_ERROR("!Failed to get input topic parameter!");
                 exit(EXIT_FAILURE);
             }
 
-            message_filters::Subscriber<Image> image_sub(private_nh, depth_topic.c_str(), 1);
-            message_filters::Subscriber<CameraInfo> info_sub(private_nh, depth_info.c_str(), 1);
-            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>(out_topic.c_str(), 1);
+            message_filters::Subscriber<Image> image_sub(private_nh, depth_topic.c_str(), 5);
+            message_filters::Subscriber<CameraInfo> info_sub(private_nh, depth_info.c_str(), 5);
+            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>(out_topic.c_str(), 5);
 
-            TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 10);
+            TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 5);
             sync.registerCallback(boost::bind(&DepthLookup::depth_callback, this ,_1, _2));
         }
 
         void depth_callback(const ImageConstPtr& image, const CameraInfoConstPtr& cam_info) {
-            cout << "Callback depth" << endl;
+            NODELET_INFO(">>> Callback Depth");
         }
 
 //        void setDepthData(const std::string &frameId, const ros::Time &stamp, const cv::Mat &depth, float depthConstant) {
@@ -149,6 +149,5 @@ namespace clf_perception_vision {
 
     };
 
-    PLUGINLIB_DECLARE_CLASS(clf_perception_vision, DepthLookup, clf_perception_vision::DepthLookup, nodelet::Nodelet
-    );
+    PLUGINLIB_DECLARE_CLASS(clf_perception_vision, DepthLookup, clf_perception_vision::DepthLookup, nodelet::Nodelet);
 }
