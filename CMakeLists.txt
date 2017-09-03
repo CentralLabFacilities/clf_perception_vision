@@ -176,7 +176,7 @@ ADD_EXECUTABLE(clf_perception_collect_data
 
 # Nodelets #
 ADD_LIBRARY(clf_perception_gender_age src/clf_perception_gender_age_nodelet.cpp)
-ADD_LIBRARY(clf_perception_depth_lookup src/clf_perception_gender_depth_lookup_nodelet.cpp)
+ADD_LIBRARY(clf_perception_depth_lookup src/clf_perception_depth_lookup_nodelet.cpp)
 ADD_DEPENDENCIES(clf_perception_gender_age clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 # Nodelets #
