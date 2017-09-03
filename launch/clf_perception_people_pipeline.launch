@@ -4,14 +4,14 @@
     <arg name="darknet_2_people_out"   default="/clf_perception_vision/people/raw"/>
 
     <!-- Depth Lookup Config -->
-    <arg name="depthlookup_info_topic"  default="/clf_perception_vision/people/raw/transform/genderage"/>
-    <arg name="depthlookup_image_topic" default="/clf_perception_vision/people/raw/transform/genderage"/>
+    <arg name="depthlookup_info_topic"  default="/pepper_robot/sink/depth_registered/camera_info"/>
+    <arg name="depthlookup_image_topic" default="/pepper_robot/sink/depth_registered/image_rect"/>
     <arg name="depthlookup_in_topic"    default="/clf_perception_vision/people/raw"/>
     <arg name="depthlookup_out_topic"   default="/clf_perception_vision/people/raw/transform"/>
 
     <!-- Gender Age Config -->
     <arg name="gender_age_config"       default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
-    <arg name="gender_age_image_topic"  default=""/>
+    <arg name="gender_age_image_topic"  default="/darknet_ros/detection_image"/>
     <arg name="gender_age_in_topic"     default="/clf_perception_vision/people/raw/transform"/>
     <arg name="gender_age_out_topic"    default="/clf_perception_vision/people/raw/transform/genderage"/>
 
