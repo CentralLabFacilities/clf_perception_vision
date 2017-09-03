@@ -108,7 +108,7 @@ namespace clf_perception_vision {
         cv::Rect dlib2cvrect(const dlib::rectangle& r) {return cv::Rect(r.left(), r.top(), r.width(), r.height());}
 
         void person_callback(const clf_perception_vision::ExtenedPeople::ConstPtr &person) {
-            cout << "Callback" << endl;
+            cout << "Callback gender age" << endl;
         }
 
     };
