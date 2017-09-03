@@ -3,7 +3,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 PROJECT(clf_perception_vision)
 
-SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp" "genjs")
+SET(ENV{ROS_LANG_DISABLE} "genjava" "genlisp" "gennodejs")
 SET(OpenCV_MIN_VERSION "3.2.0")
 SET(ROS_VERSION "kinetic")
 MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
