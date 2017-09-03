@@ -102,23 +102,15 @@ namespace clf_perception_vision {
 
         cv::Rect dlib2cvrect(const dlib::rectangle& r) {return cv::Rect(r.left(), r.top(), r.width(), r.height());}
 
+        // const clf_perception_vision::ExtenedPeople::ConstPtr &person
         // This function is basically the one from here: https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp
-        void get_depth(const clf_perception_vision::ExtenedPeople::ConstPtr &person) {
-				   int x, int y,
-				   float cx, float cy,
-				   float fx, float fy)
+        cv::Vec3f get_depth(const cv::Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
 
             if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
             {
-                ROS_ERROR("Point must be inside the image (x=%d, y=%d), image size=(%d,%d)",
-                        x, y,
-                        depthImage.cols, depthImage.rows);
-                return cv::Vec3f(
-                        std::numeric_limits<float>::quiet_NaN (),
-                        std::numeric_limits<float>::quiet_NaN (),
-                        std::numeric_limits<float>::quiet_NaN ());
+                ROS_ERROR("Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
+                return cv::Vec3f( std::numeric_limits<float>::quiet_NaN (), std::numeric_limits<float>::quiet_NaN (), std::numeric_limits<float>::quiet_NaN ());
             }
-
 
             cv::Vec3f pt;
 

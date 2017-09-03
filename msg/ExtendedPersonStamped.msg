@@ -9,5 +9,5 @@ uint16              bbox_xmin
 uint16              bbox_xmax
 uint16              bbox_ymin
 uint16              bbox_ymax
-geometry_msgs/Pose  pose
+geometry_msgs/TransformStamped  trans
 float64             probability
