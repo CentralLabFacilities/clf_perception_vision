@@ -23,19 +23,19 @@
           args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
     </node>
 
-    <node pkg="nodelet" type="nodelet" name="clf_depth_lookup_nodelet" output="screen"
-          args="load clf_perception_vision/clf_perception_vision_depth_lookup people_nodelet_manager --no-bond">
+    <node pkg="nodelet" type="nodelet" name="DepthLookup" output="screen"
+          args="load clf_perception_vision/DepthLookup people_nodelet_manager --no-bond">
         <param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>
         <param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>
         <param name="depthlookup_in_topic" value="$(arg depthlookup_in_topic)"/>
         <param name="depthlookup_out_topic" value="$(arg depthlookup_out_topic)"/>
     </node>
 
-    <node pkg="nodelet" type="nodelet" name="clf_gender_age_nodelet" output="screen"
-          args="load clf_perception_vision/clf_perception_vision_gender_age people_nodelet_manager --no-bond">
-        <param name="gender_age_config" value="$(arg gender_age_config)"/>
-        <param name="gender_age_image_topic" value="$(arg gender_age_image_topic)"/>
-        <param name="gender_age_in_topic" value="$(arg gender_age_in_topic)"/>
-        <param name="gender_age_out_topic" value="$(arg gender_age_out_topic)"/>
-    </node>
+    <!--<node pkg="nodelet" type="nodelet" name="clf_gender_age_nodelet" output="screen"-->
+          <!--args="load clf_perception_vision/GenderAge people_nodelet_manager &#45;&#45;no-bond">-->
+        <!--<param name="gender_age_config" value="$(arg gender_age_config)"/>-->
+        <!--<param name="gender_age_image_topic" value="$(arg gender_age_image_topic)"/>-->
+        <!--<param name="gender_age_in_topic" value="$(arg gender_age_in_topic)"/>-->
+        <!--<param name="gender_age_out_topic" value="$(arg gender_age_out_topic)"/>-->
+    <!--</node>-->
 </launch>

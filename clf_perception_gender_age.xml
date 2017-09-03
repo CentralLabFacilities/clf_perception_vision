@@ -1,4 +1,4 @@
-<library path="lib/clf_perception_vision_gender_age">
+<library path="lib/libclf_perception_gender_age">
   <class name="clf_perception_vision/GenderAge" type="clf_perception_vision::GenderAge" base_class_type="nodelet::Nodelet">
     <description>
       A nodelet to detect the gender and age of people. Requires a cropped image of the target area.

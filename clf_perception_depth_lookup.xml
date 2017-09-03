@@ -1,4 +1,4 @@
-<library path="lib/clf_perception_vision_depth_lookup">
+<library path="lib/libclf_perception_depth_lookup">
   <class name="clf_perception_vision/DepthLookup" type="clf_perception_vision::DepthLookup" base_class_type="nodelet::Nodelet">
     <description>
       A nodelet that maps RGB pixels to XYZ coordinates in a depth image.

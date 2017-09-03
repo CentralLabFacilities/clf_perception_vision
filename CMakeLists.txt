@@ -126,8 +126,8 @@ ADD_MESSAGE_FILES(
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
 CATKIN_PACKAGE(INCLUDE_DIRS include
-               LIBRARIES clf_perception_gender_age_nodelet
-                         clf_perception_depth_lookup_nodelet
+               LIBRARIES clf_perception_gender_age
+                         clf_perception_depth_lookup
                CATKIN_DEPENDS tf
                               roscpp
                               nodelet
@@ -160,7 +160,7 @@ ADD_EXECUTABLE(clf_perception_surb
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_perception_gender_age
+ADD_EXECUTABLE(clf_perception_genage
                src/ros_grabber.cpp
                src/dlib_detection.cpp
                src/caffee_classification.cpp
@@ -174,24 +174,30 @@ ADD_EXECUTABLE(clf_perception_collect_data
                ${INCLUDE_DIRS}
 )
 
-ADD_LIBRARY(clf_perception_gender_age_nodelet src/clf_perception_gender_age_nodelet.cpp)
-ADD_LIBRARY(clf_perception_depth_lookup_nodelet src/clf_perception_gender_depth_lookup_nodelet.cpp)
+# Nodelets #
+ADD_LIBRARY(clf_perception_gender_age src/clf_perception_gender_age_nodelet.cpp)
+ADD_LIBRARY(clf_perception_depth_lookup src/clf_perception_gender_depth_lookup_nodelet.cpp)
+ADD_DEPENDENCIES(clf_perception_gender_age clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
-ADD_DEPENDENCIES(clf_perception_gender_age_nodelet clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+# Nodelets #
+TARGET_LINK_LIBRARIES(clf_perception_gender_age ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 
-TARGET_LINK_LIBRARIES(clf_perception_gender_age_nodelet ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_nodelet ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_gender_age ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
+# Nodelets #
+INSTALL(TARGETS clf_perception_gender_age ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_depth_lookup ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_gender_age RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_gender_age_nodelet ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_depth_lookup_nodelet ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+INSTALL(FILES clf_perception_gender_age.xml clf_perception_depth_lookup.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
