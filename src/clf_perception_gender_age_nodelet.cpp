@@ -58,7 +58,7 @@ namespace clf_perception_vision {
             // Get the NodeHandle
             private_nh = getPrivateNodeHandle();
             // How many CPUs do we have?
-            NODELET_INFO(">>> LOOOOOOL %s", "LOL");
+            ROS_INFO(">>> LOOOOOOL %s", "LOL");
             // cout << ">>> Found --> " << cv::getNumberOfCPUs() << " CPUs"<< endl;
             // Are we using optimized OpenCV Code?
             // cout << ">>> OpenCV was built with optimizations --> " << cv::useOptimized() << endl;
@@ -152,6 +152,7 @@ namespace clf_perception_vision {
         void person_callback(const clf_perception_vision::ExtenedPeople::ConstPtr &person) {
             NODELET_INFO(">>> Callback Gender Age");
             //exit(EXIT_FAILURE);
+            NODELET_DEBUG("Initializing nodelet...");
         }
 
     };

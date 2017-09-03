@@ -25,7 +25,6 @@ using namespace std;
 using namespace sensor_msgs;
 using namespace message_filters;
 
-
 namespace clf_perception_vision {
 
     class DepthLookup : public nodelet::Nodelet {
