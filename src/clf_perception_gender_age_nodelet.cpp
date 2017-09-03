@@ -144,8 +144,7 @@ namespace clf_perception_vision {
             dlf.cl = new Classifier(model_file_gender, trained_file_gender, mean_file, label_file_gender);
             dlf.cl_age = new Classifier(model_file_age, trained_file_age, mean_file, label_file_age);
 
-            NODELET_INFO("Using device: %s", topic);
-            exit(EXIT_FAILURE);
+            NODELET_INFO("Using device: %s", topic.c_str());
         }
 
         cv::Rect dlib2cvrect(const dlib::rectangle& r) {return cv::Rect(r.left(), r.top(), r.width(), r.height());}
