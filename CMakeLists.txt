@@ -126,7 +126,8 @@ ADD_MESSAGE_FILES(
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
 CATKIN_PACKAGE(INCLUDE_DIRS include
-               LIBRARIES clf_perception_vision_gender_age
+               LIBRARIES clf_perception_gender_age_nodelet
+                         clf_perception_depth_lookup_nodelet
                CATKIN_DEPENDS tf
                               roscpp
                               nodelet
