@@ -44,6 +44,8 @@ namespace clf_perception_vision {
             // Get the NodeHandle
             private_nh = getPrivateNodeHandle();
 
+            ROS_INFO(">>> LOOOOOOL %s", "LOL");
+
             if (private_nh.getParam("depthlookup_image_topic", depth_topic))
             {
                 //NODELET_INFO(">>> Input depth image topic: " << depth_topic);
