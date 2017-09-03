@@ -1,4 +1,8 @@
 <launch>
+    <!-- Darknet to People MSG config -->
+    <arg name="darknet_2_people_in"    default="/darknet_ros/bounding_boxes"/>
+    <arg name="darknet_2_people_out"   default="/clf_perception_vision/people/raw"/>
+
     <!-- Depth Lookup Config -->
     <arg name="depthlookup_info_topic"  default="/clf_perception_vision/people/raw/transform/genderage"/>
     <arg name="depthlookup_image_topic" default="/clf_perception_vision/people/raw/transform/genderage"/>
@@ -13,6 +17,11 @@
 
     <!-- Nodelet Manager -->
     <node pkg="nodelet" type="nodelet" name="people_nodelet_manager" args="manager"/>
+
+    <!-- Darknet people percept 2 ExtendedPeople Message -->
+    <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
+          args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
+    </node>
 
     <node pkg="nodelet" type="nodelet" name="clf_depth_lookup_nodelet" output="screen"
           args="load clf_perception_vision/clf_perception_vision_depth_lookup people_nodelet_manager --no-bond">
