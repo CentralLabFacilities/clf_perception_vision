@@ -54,8 +54,7 @@
   <run_depend>nodelet</run_depend>
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- You can specify that this package is a metapackage here: -->
-    <!-- <metapackage/> -->
-    <!-- Other tools can request additional information be placed here -->
+    <nodelet plugin="${prefix}/clf_perception_depth_lookup.xml"/>
+    <nodelet plugin="${prefix}/clf_perception_gender_age.xml"/>
   </export>
 </package>
