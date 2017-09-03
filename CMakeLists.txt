@@ -59,8 +59,8 @@ IF(OpenCV_FOUND)
         ENDIF()
 
         MESSAGE(STATUS "OpenCV_VERSION: " ${OpenCV_VERSION})
-        MESSAGE(STATUS "OpenCV_INCLUDE_DIRS: " ${OpenCV_INCLUDE_DIRS})
-        MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBS})
+        # MESSAGE(STATUS "OpenCV_INCLUDE_DIRS: " ${OpenCV_INCLUDE_DIRS})
+        # MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBS})
 ELSE()
         MESSAGE(FATAL_ERROR "OpenCV NOT FOUND")
 ENDIF()
@@ -177,7 +177,7 @@ ADD_EXECUTABLE(clf_perception_collect_data
 ADD_LIBRARY(clf_perception_gender_age_nodelet src/clf_perception_gender_age_nodelet.cpp)
 ADD_LIBRARY(clf_perception_depth_lookup_nodelet src/clf_perception_gender_depth_lookup_nodelet.cpp)
 
-ADD_DEPENDENCIES(clf_perception_vision_gender_age clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+ADD_DEPENDENCIES(clf_perception_gender_age_nodelet clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 TARGET_LINK_LIBRARIES(clf_perception_gender_age_nodelet ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_nodelet ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
