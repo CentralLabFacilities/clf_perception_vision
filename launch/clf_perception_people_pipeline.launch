@@ -15,22 +15,30 @@
     <arg name="gender_age_in_topic"     default="/clf_perception_vision/people/raw/transform"/>
     <arg name="gender_age_out_topic"    default="/clf_perception_vision/people/raw/transform/genderage"/>
 
-    <!-- Nodelet Manager -->
-    <node pkg="nodelet" type="nodelet" name="people_nodelet_manager" args="manager"/>
-
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
           args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
     </node>
 
-    <!-- Derive the transform of people percepts relative to camera/robot -->
-    <node pkg="nodelet" type="nodelet" name="DepthLookup" output="screen"
-          args="load clf_perception_vision/DepthLookup people_nodelet_manager --no-bond">
+    <node pkg="clf_perception_vision" type="clf_perception_depth_lookup" name="clf_perception_depth_lookup" output="screen">
         <param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>
         <param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>
         <param name="depthlookup_in_topic" value="$(arg depthlookup_in_topic)"/>
         <param name="depthlookup_out_topic" value="$(arg depthlookup_out_topic)"/>
     </node>
+
+    <!-- NODELETS DONT WORK YET -->
+    <!-- Nodelet Manager -->
+    <!--<node pkg="nodelet" type="nodelet" name="people_nodelet_manager" args="manager"/>-->
+
+    <!-- Derive the transform of people percepts relative to camera/robot -->
+    <!--<node pkg="nodelet" type="nodelet" name="DepthLookup" output="screen"-->
+          <!--args="load clf_perception_vision/DepthLookup people_nodelet_manager &#45;&#45;no-bond">-->
+        <!--<param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>-->
+        <!--<param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>-->
+        <!--<param name="depthlookup_in_topic" value="$(arg depthlookup_in_topic)"/>-->
+        <!--<param name="depthlookup_out_topic" value="$(arg depthlookup_out_topic)"/>-->
+    <!--</node>-->
 
     <!-- Classify gender and age -->
     <!--<node pkg="nodelet" type="nodelet" name="clf_gender_age" output="screen"-->

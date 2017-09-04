@@ -173,6 +173,11 @@ ADD_EXECUTABLE(clf_perception_collect_data
                ${INCLUDE_DIRS}
 )
 
+ADD_EXECUTABLE(clf_perception_depth_lookup
+               src/clf_perception_depth_lookup.cpp
+               ${INCLUDE_DIRS}
+)
+
 # Nodelets #
 ADD_LIBRARY(clf_perception_nodelets
             src/clf_perception_depth_lookup_nodelet.cpp
@@ -198,6 +203,7 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 # Nodelets #
@@ -205,6 +211,7 @@ INSTALL(TARGETS clf_perception_nodelets ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB
 
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_depth_lookup RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
