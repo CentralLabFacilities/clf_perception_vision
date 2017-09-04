@@ -41,6 +41,7 @@ namespace clf_perception_vision {
         string in_topic;
 
         virtual void onInit() {
+            ROS_INFO("Image Sink Nodelet 'onInit()' done.");
             // Get the NodeHandle
             private_nh = getPrivateNodeHandle();
 
@@ -86,7 +87,7 @@ namespace clf_perception_vision {
         }
 
         void depth_callback(const ImageConstPtr& image, const CameraInfoConstPtr& cam_info) {
-            NODELET_INFO(">>> Callback Depth");
+            ROS_INFO(">>> callback");
         }
 
 //        void setDepthData(const std::string &frameId, const ros::Time &stamp, const cv::Mat &depth, float depthConstant) {

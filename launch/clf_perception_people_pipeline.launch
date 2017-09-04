@@ -24,7 +24,7 @@
     </node>
 
     <!-- Derive the transform of people percepts relative to camera/robot -->
-    <node pkg="nodelet" type="nodelet" name="clf_depth_lookup" output="screen"
+    <node pkg="nodelet" type="nodelet" name="DepthLookup" output="screen"
           args="load clf_perception_vision/DepthLookup people_nodelet_manager --no-bond">
         <param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>
         <param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>
