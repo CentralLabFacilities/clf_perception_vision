@@ -1,9 +1,9 @@
 <library path="lib/libclf_perception_nodelets">
-  <!--<class name="clf_perception_vision/GenderAge" type="clf_perception_vision::GenderAge" base_class_type="nodelet::Nodelet">-->
-    <!--<description>-->
-      <!--A nodelet to detect the gender and age of people. Requires a cropped image of the target area.-->
-    <!--</description>-->
-  <!--</class>-->
+  <class name="clf_perception_vision/GenderAge" type="clf_perception_vision::GenderAge" base_class_type="nodelet::Nodelet">
+    <description>
+      A nodelet to detect the gender and age of people. Requires a cropped image of the target area.
+    </description>
+  </class>
   <class name="clf_perception_vision/DepthLookup" type="clf_perception_vision::DepthLookup" base_class_type="nodelet::Nodelet">
     <description>
       A nodelet that maps RGB pixels to XYZ coordinates in a depth image.

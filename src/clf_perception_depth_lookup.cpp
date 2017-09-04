@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "clf_perception_depth_lookup", ros::init_options::AnonymousName);
     ros::Publisher people_pub;
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
 
     string depth_topic;
     string depth_info;
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
     if (nh.getParam("depthlookup_out_topic", out_topic))
     {
-        ROS_INFO(">>> >>> Output Topic:  %s", out_topic.c_str());
+        ROS_INFO(">>> Output Topic:  %s", out_topic.c_str());
     } else {
         ROS_ERROR("!Failed to get output topic parameter!");
         exit(EXIT_FAILURE);
