@@ -30,12 +30,13 @@
 std::string people_topic;
 std::string depth_topic;
 std::string depth_info;
+std::string rgb_info;
 std::string out_topic;
 std::string in_topic;
 
-std::string frameId_;
-ros::Time stamp_;
 cv::Mat depth_;
+ros::Time stamp_;
+std::string frameId_;
 float depthConstant_;
 
 ros::Publisher people_pub;

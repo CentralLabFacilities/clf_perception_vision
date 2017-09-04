@@ -71,7 +71,10 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
     depthConstant_ = depthConstant;
 }
 
-void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& cameraInfoMsg, const ExtendedPeopleConstPtr& peopleMsg) {
+void syncCallback(const ImageConstPtr& depthMsg,
+                  const CameraInfoConstPtr& cameraInfoMsg,
+                  const CameraInfoConstPtr& cameraInfoMsgRgb,
+                  const ExtendedPeopleConstPtr& peopleMsg) {
     // Copy Message in order to manipulate it later and
     // sent updated version.
     ExtendedPeople people_cpy;
@@ -84,16 +87,21 @@ void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& camer
 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
 
+    // If depth image and color image have different resolutions,
+    // derive a factor to scale the bounding boxes
+    float scale_factor = cameraInfoMsgRgb->width/cameraInfoMsg->width;
+    // ROS_INFO(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
+
     for (int i=0; i<peopleMsg->persons.size(); i++) {
         bbox_xmin = peopleMsg->persons[i].bbox_xmin;
         bbox_xmax = peopleMsg->persons[i].bbox_xmax;
         bbox_ymin = peopleMsg->persons[i].bbox_ymin;
         bbox_ymax = peopleMsg->persons[i].bbox_ymax;
 
-        float objectWidth = bbox_xmax/2 - bbox_xmin/2;
-        float objectHeight = bbox_ymax/2 - bbox_ymin/2;
-        float center_x = (bbox_xmin/2+bbox_xmax/2)/2;
-        float center_y = (bbox_ymin/2+bbox_ymax/2)/2;
+        float objectWidth = bbox_xmax/scale_factor - bbox_xmin/scale_factor;
+        float objectHeight = bbox_ymax/scale_factor - bbox_ymin/scale_factor;
+        float center_x = (bbox_xmin/scale_factor+bbox_xmax/scale_factor)/2;
+        float center_y = (bbox_ymin/scale_factor+bbox_ymax/scale_factor)/2;
         float xAxis_x = 3*objectWidth/4;
         float xAxis_y = objectHeight/2;
         float yAxis_x = objectWidth/2;
@@ -182,11 +190,20 @@ int main(int argc, char **argv)
         ROS_ERROR("!Failed to get depth image topic parameter!");
         exit(EXIT_FAILURE);
     }
-    if (nh.getParam("depthlookup_info_topic", depth_info))
+
+    if (nh.getParam("depthlookup_depth_info_topic", depth_info))
     {
         ROS_INFO(">>> Input depth camera info topic: %s", depth_info.c_str());
     } else {
         ROS_ERROR("!Failed to get depth camera info topic parameter!");
+        exit(EXIT_FAILURE);
+    }
+
+    if (nh.getParam("depthlookup_rgb_info_topic", rgb_info))
+    {
+        ROS_INFO(">>> Input rgb camera info topic: %s", rgb_info.c_str());
+    } else {
+        ROS_ERROR("!Failed to get rgb camera info topic parameter!");
         exit(EXIT_FAILURE);
     }
 
@@ -209,16 +226,18 @@ int main(int argc, char **argv)
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
     Subscriber<Image> image_sub(nh, depth_topic, 1);
-    Subscriber<CameraInfo> info_sub(nh, depth_info, 1);
+    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
+    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, CameraInfo, ExtendedPeople> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> MySyncPolicy;
 
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_sub, people_sub);
-    sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
+    sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
 
     ros::spin();
+
     return 0;
 }

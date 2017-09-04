@@ -1,20 +1,20 @@
 <launch>
     <!-- Darknet to People MSG config -->
-    <arg name="darknet_2_people_in"    default="/darknet_ros/bounding_boxes"/>
-    <arg name="darknet_2_people_out"   default="/clf_perception_vision/people/raw"/>
+    <arg name="darknet_2_people_in"  default="/darknet_ros/bounding_boxes"/>
+    <arg name="darknet_2_people_out" default="/clf_perception_vision/people/raw"/>
 
     <!-- Depth Lookup Config -->
-    <arg name="depthlookup_info_topic"  default="/pepper_robot/sink/depth_registered/camera_info"/>
-    <!--  <arg name="depthlookup_image_topic" default="/pepper_robot/sink/depth_registered/image_rect"/> -->
-    <arg name="depthlookup_image_topic" default="/pepper_robot/camera/depth/camera/image_raw"/>
-    <arg name="depthlookup_in_topic"    default="/clf_perception_vision/people/raw"/>
-    <arg name="depthlookup_out_topic"   default="/clf_perception_vision/people/raw/transform"/>
+    <arg name="depthlookup_depth_info_topic" default="/pepper_robot/camera/depth/camera/camera_info"/>
+    <arg name="depthlookup_rgb_info_topic"   default="/pepper_robot/camera/front/camera_info"/>
+    <arg name="depthlookup_image_topic"      default="/pepper_robot/sink/depth/image_raw"/>
+    <arg name="depthlookup_in_topic"         default="/clf_perception_vision/people/raw"/>
+    <arg name="depthlookup_out_topic"        default="/clf_perception_vision/people/raw/transform"/>
 
     <!-- Gender Age Config -->
-    <arg name="gender_age_config"       default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
-    <arg name="gender_age_image_topic"  default="/darknet_ros/detection_image"/>
-    <arg name="gender_age_in_topic"     default="/clf_perception_vision/people/raw/transform"/>
-    <arg name="gender_age_out_topic"    default="/clf_perception_vision/people/raw/transform/genderage"/>
+    <arg name="gender_age_config"      default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
+    <arg name="gender_age_image_topic" default="/darknet_ros/detection_image"/>
+    <arg name="gender_age_in_topic"    default="/clf_perception_vision/people/raw/transform"/>
+    <arg name="gender_age_out_topic"   default="/clf_perception_vision/people/raw/transform/genderage"/>
 
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
@@ -22,19 +22,20 @@
     </node>
 
     <node pkg="clf_perception_vision" type="clf_perception_depth_lookup" name="clf_perception_depth_lookup" output="screen">
-        <param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>
+        <param name="depthlookup_depth_info_topic" value="$(arg depthlookup_depth_info_topic)"/>
+        <param name="depthlookup_rgb_info_topic" value="$(arg depthlookup_rgb_info_topic)"/>
         <param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>
         <param name="depthlookup_in_topic" value="$(arg depthlookup_in_topic)"/>
         <param name="depthlookup_out_topic" value="$(arg depthlookup_out_topic)"/>
     </node>
 
-    <!-- NODELETS DONT WORK YET -->
+    <!-- NODELETS DONT WORK, YET -->
     <!-- Nodelet Manager -->
     <!--<node pkg="nodelet" type="nodelet" name="people_nodelet_manager" args="manager"/>-->
 
     <!-- Derive the transform of people percepts relative to camera/robot -->
     <!--<node pkg="nodelet" type="nodelet" name="DepthLookup" output="screen"-->
-          <!--args="load clf_perception_vision/DepthLookup people_nodelet_manager &#45;&#45;no-bond">-->
+        <!--args="load clf_perception_vision/DepthLookup people_nodelet_manager &#45;&#45;no-bond">-->
         <!--<param name="depthlookup_info_topic" value="$(arg depthlookup_info_topic)"/>-->
         <!--<param name="depthlookup_image_topic" value="$(arg depthlookup_image_topic)"/>-->
         <!--<param name="depthlookup_in_topic" value="$(arg depthlookup_in_topic)"/>-->

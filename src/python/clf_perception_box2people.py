@@ -13,7 +13,7 @@ class BBox2ExtendedPeople:
         rospy.init_node('clf_perception_vision_box2people', anonymous=True)
         self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=1)
         self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=1)
-        rospy.loginfo(">>> Box2People is ready.")
+        rospy.logdebug(">>> Box2People is ready.")
 
     def box_cb(self, data):
         try:
