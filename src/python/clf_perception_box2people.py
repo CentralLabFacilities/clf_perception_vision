@@ -4,7 +4,7 @@ import rospy
 import std_msgs.msg
 from optparse import OptionParser
 from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
-from clf_perception_vision.msg import ExtenedPeople, ExtendedPersonStamped
+from clf_perception_vision.msg import ExtendedPeople, ExtendedPersonStamped
 
 
 class BBox2ExtendedPeople:
@@ -12,12 +12,12 @@ class BBox2ExtendedPeople:
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_box2people', anonymous=True)
         self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=1)
-        self.pub = rospy.Publisher(str(_out), ExtenedPeople, queue_size=1)
+        self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=1)
         rospy.loginfo(">>> Box2People is ready.")
 
     def box_cb(self, data):
         try:
-            e = ExtenedPeople()
+            e = ExtendedPeople()
             h = std_msgs.msg.Header()
             h.stamp = rospy.Time.now()
             e.header = h

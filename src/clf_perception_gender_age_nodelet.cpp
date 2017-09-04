@@ -7,7 +7,7 @@
 #include <pluginlib/class_list_macros.h>
 
 // MSGS
-#include <clf_perception_vision/ExtenedPeople.h>
+#include <clf_perception_vision/ExtendedPeople.h>
 #include <clf_perception_vision/ExtendedPersonStamped.h>
 
 // SELF
@@ -135,7 +135,7 @@ namespace clf_perception_vision {
             //NODELET_INFO(">>> ROS In Topic: --> " << topic);
 
             pose_sub = private_nh.subscribe(people_topic, 1, &GenderAge::person_callback, this);
-            people_pub = private_nh.advertise<clf_perception_vision::ExtenedPeople>(out_topic, 1);
+            people_pub = private_nh.advertise<clf_perception_vision::ExtendedPeople>(out_topic, 1);
 
             ros_grabber = new ROSGrabber(topic);
             ros_grabber->setPyr(_pyr);
@@ -147,7 +147,7 @@ namespace clf_perception_vision {
 
         cv::Rect dlib2cvrect(const dlib::rectangle& r) {return cv::Rect(r.left(), r.top(), r.width(), r.height());}
 
-        void person_callback(const clf_perception_vision::ExtenedPeople::ConstPtr &person) {
+        void person_callback(const clf_perception_vision::ExtendedPeople::ConstPtr &person) {
             NODELET_INFO(">>> Callback Gender Age");
             //exit(EXIT_FAILURE);
             NODELET_DEBUG("Initializing nodelet...");

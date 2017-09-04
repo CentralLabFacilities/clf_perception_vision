@@ -12,7 +12,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/image_encodings.h>
-#include <clf_perception_vision/ExtenedPeople.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <clf_perception_vision/ExtendedPeople.h>
 #include <clf_perception_vision/ExtendedPersonStamped.h>
 
 // FILTER
@@ -37,4 +38,5 @@ ros::Time stamp_;
 cv::Mat depth_;
 float depthConstant_;
 
+ros::Publisher people_pub;
 tf::TransformBroadcaster *tfBroadcaster_;

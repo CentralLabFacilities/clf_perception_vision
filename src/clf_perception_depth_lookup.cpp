@@ -3,19 +3,20 @@
 using namespace cv;
 using namespace std;
 using namespace sensor_msgs;
+using namespace geometry_msgs;
 using namespace message_filters;
 using namespace clf_perception_vision;
 
 
 // This piece of code luckily already existed in https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp (THANKS!)
-cv::Vec3f getDepth(const cv::Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
+Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
 	if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
 	{
 		ROS_ERROR("Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
-		return cv::Vec3f(
-				std::numeric_limits<float>::quiet_NaN (),
-				std::numeric_limits<float>::quiet_NaN (),
-				std::numeric_limits<float>::quiet_NaN ());
+		return Vec3f(
+				numeric_limits<float>::quiet_NaN (),
+				numeric_limits<float>::quiet_NaN (),
+				numeric_limits<float>::quiet_NaN ());
 	}
 
 	cv::Vec3f pt;
@@ -30,7 +31,7 @@ cv::Vec3f getDepth(const cv::Mat & depthImage, int x, int y, float cx, float cy,
 	float unit_scaling = isInMM?0.001f:1.0f;
 	float constant_x = unit_scaling / fx; //cameraInfo.K.at(0)
 	float constant_y = unit_scaling / fy; //cameraInfo.K.at(4)
-	float bad_point = std::numeric_limits<float>::quiet_NaN ();
+	float bad_point = numeric_limits<float>::quiet_NaN ();
 
 	float depth;
 	bool isValid;
@@ -45,7 +46,7 @@ cv::Vec3f getDepth(const cv::Mat & depthImage, int x, int y, float cx, float cy,
 	{
 		ROS_DEBUG("Image is in Meters");
 		depth = depthImage.at<float>(y,x);
-		isValid = std::isfinite(depth);
+		isValid = isfinite(depth);
 	}
 
 	// Check for invalid measurements
@@ -53,32 +54,36 @@ cv::Vec3f getDepth(const cv::Mat & depthImage, int x, int y, float cx, float cy,
 	{
 	    ROS_WARN("Image is invalid, whoopsie.");
 		pt.val[0] = pt.val[1] = pt.val[2] = bad_point;
-	}
-	else
-	{
+	} else{
 		// Fill in XYZ
 		pt.val[0] = (float(x) - center_x) * depth * constant_x;
 		pt.val[1] = (float(y) - center_y) * depth * constant_y;
 		pt.val[2] = depth*unit_scaling;
 	}
+
 	return pt;
 }
 
-void setDepthData(const std::string &frameId, const ros::Time &stamp, const cv::Mat &depth, float depthConstant) {
+void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &depth, float depthConstant) {
     frameId_ = frameId;
     stamp_ = stamp;
     depth_ = depth;
     depthConstant_ = depthConstant;
 }
 
-void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& cameraInfoMsg, const ExtenedPeopleConstPtr& peopleMsg)
-{
-    // tf::TransformBroadcaster tfBroadcaster_;
-    std::vector<tf::StampedTransform> transforms;
+void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& cameraInfoMsg, const ExtendedPeopleConstPtr& peopleMsg) {
+    // Copy Message in order to manipulate it later and
+    // sent updated version.
+    ExtendedPeople people_cpy;
+    people_cpy = *peopleMsg;
+
+    vector<tf::StampedTransform> transforms;
     cv_bridge::CvImageConstPtr ptrDepth = cv_bridge::toCvShare(depthMsg);
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
+
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
+
     for (int i=0; i<peopleMsg->persons.size(); i++) {
         bbox_xmin = peopleMsg->persons[i].bbox_xmin;
         bbox_xmax = peopleMsg->persons[i].bbox_xmax;
@@ -109,16 +114,14 @@ void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& camer
                 float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                 1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        // cout << "Center3D" << center3D << endl;
-        // cout << "axisEndX" << axisEndX << endl;
-        // cout << "axisEndY" << axisEndY << endl;
+        string id = "person_" + to_string(i);
 
-        if(std::isfinite(center3D.val[0]) && std::isfinite(center3D.val[1]) && std::isfinite(center3D.val[2]) &&
-				std::isfinite(axisEndX.val[0]) && std::isfinite(axisEndX.val[1]) && std::isfinite(axisEndX.val[2]) &&
-				std::isfinite(axisEndY.val[0]) && std::isfinite(axisEndY.val[1]) && std::isfinite(axisEndY.val[2])) {
+        if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2]) &&
+				isfinite(axisEndX.val[0]) && isfinite(axisEndX.val[1]) && isfinite(axisEndX.val[2]) &&
+				isfinite(axisEndY.val[0]) && isfinite(axisEndY.val[1]) && isfinite(axisEndY.val[2])) {
             tf::StampedTransform transform;
             transform.setIdentity();
-            transform.child_frame_id_ = "person_";
+            transform.child_frame_id_ = id;
             transform.frame_id_ = frameId_;
             transform.stamp_ = stamp_;
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
@@ -139,23 +142,37 @@ void syncCallback(const ImageConstPtr& depthMsg, const CameraInfoConstPtr& camer
             q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
             transform.setRotation(q.normalized());
             transforms.push_back(transform);
-            ROS_INFO("person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, "person_");
-		} else {
-			ROS_WARN("person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! "
-					 "(maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, "person_");
-		}
 
+            people_cpy.persons[i].name = id;
+            TransformStamped trans_stamped;
+            trans_stamped.header = people_cpy.header;
+            trans_stamped.header.frame_id = frameId_;
+            trans_stamped.child_frame_id = id;
+            trans_stamped.transform.translation.x = center3D.val[0];
+            trans_stamped.transform.translation.y = center3D.val[1];
+            trans_stamped.transform.translation.z = center3D.val[2];
+            trans_stamped.transform.rotation.x = q.normalized().x();
+            trans_stamped.transform.rotation.y = q.normalized().y();
+            trans_stamped.transform.rotation.z = q.normalized().z();
+            trans_stamped.transform.rotation.w = q.normalized().w();
+            people_cpy.persons[i].name = id;
+            people_cpy.persons[i].trans = trans_stamped;
+
+            ROS_DEBUG("person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
+		} else {
+			ROS_WARN("person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());
+		}
     }
 
     if(transforms.size()) {
 	   tfBroadcaster_->sendTransform(transforms);
+	   people_pub.publish(people_cpy);
     }
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "clf_perception_depth_lookup", ros::init_options::AnonymousName);
-    ros::Publisher people_pub;
     ros::NodeHandle nh("~");
 
     if (nh.getParam("depthlookup_image_topic", depth_topic))
@@ -193,13 +210,14 @@ int main(int argc, char **argv)
 
     Subscriber<Image> image_sub(nh, depth_topic, 1);
     Subscriber<CameraInfo> info_sub(nh, depth_info, 1);
-    Subscriber<ExtenedPeople> people_sub(nh, in_topic, 1);
+    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, CameraInfo, ExtenedPeople> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<Image, CameraInfo, ExtendedPeople> MySyncPolicy;
 
     Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
-    people_pub = nh.advertise<ExtenedPeople>(out_topic, 1);
+
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
 
     ros::spin();
     return 0;

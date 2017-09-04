@@ -1,25 +1,32 @@
 ### Maintainer: flier[@techfak.uni-bielefeld.de] ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
+
 PROJECT(clf_perception_vision)
 
-SET(ENV{ROS_LANG_DISABLE} "genjava")
+SET(ENV{ROS_LANG_DISABLE} "geneus;genlisp;gennodejs")
+
 SET(OpenCV_MIN_VERSION "3.2.0")
+
 SET(ROS_VERSION "kinetic")
 MESSAGE(STATUS "BUILD FOR ROS: " ${ROS_VERSION})
 
 SET(DEFAULT_CXX_FLAGS "" CACHE STRING "-O2 -march=native -Wno-deprecated-declarations")
 SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS} ${CMAKE_CXX_FLAGS} -std=gnu++11 -Wno-deprecated-declarations")
 MESSAGE(STATUS "CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+
 SET(ROS_BUILD_TYPE Release)
 SET(CMAKE_BUILD_TYPE Release)
 
 FIND_PACKAGE(dlib REQUIRED)
+
 FIND_PACKAGE(Caffe REQUIRED)
 ADD_DEFINITIONS(${Caffe_DEFINITIONS})
 
 FIND_PACKAGE(CUDA REQUIRED)
+
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
+
 FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         roscpp
                                         nodelet
@@ -120,7 +127,7 @@ ADD_MESSAGE_FILES(
    DIRECTORY msg
    FILES
    ExtendedPersonStamped.msg
-   ExtenedPeople.msg
+   ExtendedPeople.msg
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
@@ -187,7 +194,9 @@ ADD_EXECUTABLE(clf_perception_depth_lookup
 #            src/caffee_classification.cpp
 # )
 
-# ADD_DEPENDENCIES(clf_perception_nodelets clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+# Build Messages First
+ADD_DEPENDENCIES(clf_perception_depth_lookup clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 # Nodelets #
 # TARGET_LINK_LIBRARIES(clf_perception_nodelets ${catkin_LIBRARIES}
