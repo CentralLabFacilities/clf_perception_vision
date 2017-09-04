@@ -20,6 +20,7 @@ class BBox2ExtendedPeople:
             e = ExtenedPeople()
             h = std_msgs.msg.Header()
             h.stamp = rospy.Time.now()
+            e.header = h
             for person in data.boundingBoxes:
                 if person.Class == "person":
                     p = ExtendedPersonStamped()
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     rate = rospy.Rate(2.0)
     while not rospy.is_shutdown():
         try:
-            rate.sleep()
+            rospy.spin()
         except rospy.ROSInterruptException, ex:
             rospy.logwarn(">>> Exiting, %s" % str(ex))
 

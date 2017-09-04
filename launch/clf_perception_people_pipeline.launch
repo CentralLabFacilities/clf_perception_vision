@@ -5,7 +5,8 @@
 
     <!-- Depth Lookup Config -->
     <arg name="depthlookup_info_topic"  default="/pepper_robot/sink/depth_registered/camera_info"/>
-    <arg name="depthlookup_image_topic" default="/pepper_robot/sink/depth_registered/image_rect"/>
+    <!--  <arg name="depthlookup_image_topic" default="/pepper_robot/sink/depth_registered/image_rect"/> -->
+    <arg name="depthlookup_image_topic" default="/pepper_robot/camera/depth/camera/image_raw"/>
     <arg name="depthlookup_in_topic"    default="/clf_perception_vision/people/raw"/>
     <arg name="depthlookup_out_topic"   default="/clf_perception_vision/people/raw/transform"/>
 

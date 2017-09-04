@@ -17,6 +17,7 @@
 // FILTER
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 // CV
 #include <opencv2/imgproc/imgproc.hpp>
