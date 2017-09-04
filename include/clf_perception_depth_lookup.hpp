@@ -1,6 +1,7 @@
 // STD
-#include <stdlib.h>
 #include <cmath>
+#include <stdlib.h>
+#include <string>
 
 // ROS
 #include <ros/ros.h>
@@ -35,3 +36,5 @@ std::string frameId_;
 ros::Time stamp_;
 cv::Mat depth_;
 float depthConstant_;
+
+tf::TransformBroadcaster *tfBroadcaster_;
