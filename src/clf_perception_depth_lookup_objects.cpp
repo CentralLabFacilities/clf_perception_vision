@@ -247,17 +247,17 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
-    Subscriber<Image> image_sub(nh, depth_topic, 1);
-    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
-    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
-    Subscriber<ExtendedObjects> objects_sub(nh, in_topic, 1);
+    Subscriber<Image> image_sub(nh, depth_topic, 2);
+    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
+    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
+    Subscriber<ExtendedObjects> objects_sub(nh, in_topic, 2);
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedObjects> MySyncPolicy;
 
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    objects_pub = nh.advertise<ExtendedObjects>(out_topic, 1);
+    objects_pub = nh.advertise<ExtendedObjects>(out_topic, 2);
 
     ros::spin();
 

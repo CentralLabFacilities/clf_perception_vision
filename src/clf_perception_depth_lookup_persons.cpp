@@ -184,6 +184,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
 			ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());
+   		    return
 		}
     }
 
@@ -248,17 +249,17 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
-    Subscriber<Image> image_sub(nh, depth_topic, 1);
-    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
-    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
-    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
+    Subscriber<Image> image_sub(nh, depth_topic, 2);
+    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
+    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
+    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> MySyncPolicy;
 
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub, info_depth_sub, info_rgb_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
 
     ros::spin();
 
