@@ -127,7 +127,9 @@ ADD_MESSAGE_FILES(
    DIRECTORY msg
    FILES
    ExtendedPersonStamped.msg
+   ExtendedObjectsStamped.msg
    ExtendedPeople.msg
+   ExtendedObjects.msg
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
@@ -228,3 +230,4 @@ INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACK
 INSTALL(FILES clf_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2objects.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
