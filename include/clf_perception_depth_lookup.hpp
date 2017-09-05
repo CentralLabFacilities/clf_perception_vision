@@ -38,6 +38,7 @@ cv::Mat depth_;
 ros::Time stamp_;
 std::string frameId_;
 float depthConstant_;
+double shift_center_y;
 
 ros::Publisher people_pub;
 tf::TransformBroadcaster *tfBroadcaster_;

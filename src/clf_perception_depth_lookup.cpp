@@ -102,7 +102,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
         float objectWidth = bbox_xmax/scale_factor - bbox_xmin/scale_factor;
         float objectHeight = bbox_ymax/scale_factor - bbox_ymin/scale_factor;
         float center_x = (bbox_xmin/scale_factor+bbox_xmax/scale_factor)/2;
-        float center_y = (bbox_ymin/scale_factor+bbox_ymax/scale_factor)/2;
+        float center_y = (bbox_ymin/scale_factor+bbox_ymax/scale_factor/shift_center_y)/2;
         float xAxis_x = 3*objectWidth/4;
         float xAxis_y = objectHeight/2;
         float yAxis_x = objectWidth/2;
@@ -219,6 +219,14 @@ int main(int argc, char **argv)
     if (nh.getParam("depthlookup_out_topic", out_topic))
     {
         ROS_INFO(">>> Output Topic: %s", out_topic.c_str());
+    } else {
+        ROS_ERROR("!Failed to get output topic parameter!");
+        exit(EXIT_FAILURE);
+    }
+
+    if (nh.getParam("depthlookup_shift_center_y", shift_center_y))
+    {
+        ROS_INFO(">>> Shift center_y: %f", shift_center_y);
     } else {
         ROS_ERROR("!Failed to get output topic parameter!");
         exit(EXIT_FAILURE);
