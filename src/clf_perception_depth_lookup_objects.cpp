@@ -142,7 +142,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             yAxis.normalize();
             tf::Vector3 zAxis = xAxis*yAxis;
             tf::Matrix3x3 rotationMatrix(
-                        xAxis.x(), yAxis.x() ,zAxis.x(),
+                        xAxis.x(), yAxis.x(), zAxis.x(),
                         xAxis.y(), yAxis.y(), zAxis.y(),
                         xAxis.z(), yAxis.z(), zAxis.z());
             tf::Quaternion q;
