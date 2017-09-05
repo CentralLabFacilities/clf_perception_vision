@@ -25,7 +25,7 @@ class BBox2ExtendedPeople:
                 if item.Class == "person":
                     continue
                 else:
-                    if item.probability > 40.0:
+                    if item.probability > 0.4:
                         o = ExtendedObjectsStamped()
                         o.header = h
                         o.bbox_xmin = item.xmin

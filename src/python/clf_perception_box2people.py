@@ -22,7 +22,7 @@ class BBox2ExtendedPeople:
             h.stamp = rospy.Time.now()
             e.header = h
             for person in data.boundingBoxes:
-                if person.Class == "person" and float(person.probability) > 40.0:
+                if person.Class == "person" and float(person.probability) > 0.4:
                     p = ExtendedPersonStamped()
                     p.header = h
                     p.bbox_xmin = person.xmin
