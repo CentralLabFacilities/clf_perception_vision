@@ -12,7 +12,7 @@ using namespace clf_perception_vision;
 Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
 	if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
 	{
-		ROS_ERROR("Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
+		ROS_ERROR(">>> Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
 		return Vec3f(
 				numeric_limits<float>::quiet_NaN (),
 				numeric_limits<float>::quiet_NaN (),
@@ -38,13 +38,14 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 
 	if(isInMM)
 	{
-	    ROS_DEBUG("Image is in Millimeters");
-		depth = (float)depthImage.at<uint8_t>(y,x);
+	    ROS_DEBUG(">>> Image is in Millimeters");
+		depth = (float)depthImage.at<uint16_t>(y,x);
+		ROS_DEBUG("%f", depth);
 		isValid = depth != 0.0f;
 	}
 	else
 	{
-		ROS_DEBUG("Image is in Meters");
+		ROS_DEBUG(">>> Image is in Meters");
 		depth = depthImage.at<float>(y,x);
 		isValid = isfinite(depth);
 	}
@@ -52,7 +53,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	// Check for invalid measurements
 	if (!isValid)
 	{
-	    ROS_WARN("Image is invalid, whoopsie.");
+	    ROS_DEBUG(">>> Image is invalid, whoopsie.");
 		pt.val[0] = pt.val[1] = pt.val[2] = bad_point;
 	} else{
 		// Fill in XYZ
@@ -166,9 +167,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
             people_cpy.persons[i].name = id;
             people_cpy.persons[i].trans = trans_stamped;
 
-            ROS_DEBUG("person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
+            ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
-			ROS_WARN("person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());
+			ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());
 		}
     }
 
