@@ -39,7 +39,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	if(isInMM)
 	{
 	    ROS_DEBUG("Image is in Millimeters");
-		depth = (float)depthImage.at<uint16_t>(y,x);
+		depth = (float)depthImage.at<uint8_t>(y,x);
 		isValid = depth != 0.0f;
 	}
 	else
