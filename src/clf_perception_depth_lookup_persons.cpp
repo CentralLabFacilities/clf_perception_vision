@@ -109,9 +109,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
         float yAxis_y = 3*objectHeight/4;
 
         cv::Vec3f center3D = getDepth(depth_,
-					center_x+0.5f, center_y+0.5f,
-					float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-					1.0f/depthConstant_, 1.0f/depthConstant_);
+				center_x+0.5f, center_y+0.5f,
+				float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
+				1.0f/depthConstant_, 1.0f/depthConstant_);
 
         cv::Vec3f axisEndX = getDepth(depth_,
                 xAxis_x+0.5f, xAxis_y+0.5f,
@@ -165,6 +165,21 @@ void syncCallback(const ImageConstPtr& depthMsg,
             trans_stamped.transform.rotation.w = q.normalized().w();
             people_cpy.persons[i].name = id;
             people_cpy.persons[i].trans = trans_stamped;
+
+            PoseStamped pose_stamped;
+            pose_stamped.header = people_cpy.header;
+            pose_stamped.header.frame_id = frameId_;
+
+            pose_stamped.pose.position.x = center3D.val[0];
+            pose_stamped.pose.position.y = center3D.val[1];
+            pose_stamped.pose.position.z = center3D.val[2];
+
+            pose_stamped.pose.orientation.x = q.normalized().x();
+            pose_stamped.pose.orientation.y = q.normalized().y();
+            pose_stamped.pose.orientation.z = q.normalized().z();
+            pose_stamped.pose.orientation.w = q.normalized().w();
+
+            people_cpy.persons[i].pose = pose_stamped;
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {

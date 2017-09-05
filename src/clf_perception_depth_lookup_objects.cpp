@@ -165,6 +165,21 @@ void syncCallback(const ImageConstPtr& depthMsg,
             trans_stamped.transform.rotation.w = q.normalized().w();
             objects_cpy.objects[i].trans = trans_stamped;
 
+            PoseStamped pose_stamped;
+            pose_stamped.header = objects_cpy.header;
+            pose_stamped.header.frame_id = frameId_;
+
+            pose_stamped.pose.position.x = center3D.val[0];
+            pose_stamped.pose.position.y = center3D.val[1];
+            pose_stamped.pose.position.z = center3D.val[2];
+
+            pose_stamped.pose.orientation.x = q.normalized().x();
+            pose_stamped.pose.orientation.y = q.normalized().y();
+            pose_stamped.pose.orientation.z = q.normalized().z();
+            pose_stamped.pose.orientation.w = q.normalized().w();
+
+            objects_cpy.objects[i].pose = pose_stamped;
+
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
 			ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());

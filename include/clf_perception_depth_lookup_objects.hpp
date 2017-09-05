@@ -11,6 +11,9 @@
 // MSGS
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Vector3.h>
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <clf_perception_vision/ExtendedObjects.h>
