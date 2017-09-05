@@ -182,8 +182,13 @@ ADD_EXECUTABLE(clf_perception_collect_data
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_perception_depth_lookup
-               src/clf_perception_depth_lookup.cpp
+ADD_EXECUTABLE(clf_perception_depth_lookup_persons
+               src/clf_perception_depth_lookup_persons.cpp
+               ${INCLUDE_DIRS}
+)
+
+ADD_EXECUTABLE(clf_perception_depth_lookup_objects
+               src/clf_perception_depth_lookup_objects.cpp
                ${INCLUDE_DIRS}
 )
 
@@ -197,7 +202,8 @@ ADD_EXECUTABLE(clf_perception_depth_lookup
 # )
 
 # Build Messages First
-ADD_DEPENDENCIES(clf_perception_depth_lookup clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+ADD_DEPENDENCIES(clf_perception_depth_lookup_persons clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+ADD_DEPENDENCIES(clf_perception_depth_lookup_objects clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 # Nodelets #
@@ -214,7 +220,8 @@ ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_c
 
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_objects ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 # Nodelets #
@@ -222,7 +229,8 @@ TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS
 
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_depth_lookup RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_depth_lookup_objects RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

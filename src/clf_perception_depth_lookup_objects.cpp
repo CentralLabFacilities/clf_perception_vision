@@ -1,4 +1,4 @@
-#include "clf_perception_depth_lookup.hpp"
+#include "clf_perception_depth_lookup_objects.hpp"
 
 using namespace cv;
 using namespace std;
@@ -75,11 +75,11 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
 void syncCallback(const ImageConstPtr& depthMsg,
                   const CameraInfoConstPtr& cameraInfoMsg,
                   const CameraInfoConstPtr& cameraInfoMsgRgb,
-                  const ExtendedPeopleConstPtr& peopleMsg) {
+                  const ExtendedObjectsConstPtr& objectsMsg) {
     // Copy Message in order to manipulate it later and
     // sent updated version.
-    ExtendedPeople people_cpy;
-    people_cpy = *peopleMsg;
+    ExtendedObjects objects_cpy;
+    objects_cpy = *objectsMsg;
 
     vector<tf::StampedTransform> transforms;
     cv_bridge::CvImageConstPtr ptrDepth = cv_bridge::toCvShare(depthMsg);
@@ -93,11 +93,11 @@ void syncCallback(const ImageConstPtr& depthMsg,
     float scale_factor = cameraInfoMsgRgb->width/cameraInfoMsg->width;
     // ROS_INFO(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
 
-    for (int i=0; i<peopleMsg->persons.size(); i++) {
-        bbox_xmin = peopleMsg->persons[i].bbox_xmin;
-        bbox_xmax = peopleMsg->persons[i].bbox_xmax;
-        bbox_ymin = peopleMsg->persons[i].bbox_ymin;
-        bbox_ymax = peopleMsg->persons[i].bbox_ymax;
+    for (int i=0; i<objectsMsg->objects.size(); i++) {
+        bbox_xmin = objectsMsg->objects[i].bbox_xmin;
+        bbox_xmax = objectsMsg->objects[i].bbox_xmax;
+        bbox_ymin = objectsMsg->objects[i].bbox_ymin;
+        bbox_ymax = objectsMsg->objects[i].bbox_ymax;
 
         float objectWidth = bbox_xmax/scale_factor - bbox_xmin/scale_factor;
         float objectHeight = bbox_ymax/scale_factor - bbox_ymin/scale_factor;
@@ -123,7 +123,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
                 float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                 1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        string id = "person_" + to_string(i);
+        string id = objectsMsg->objects[i].category + "_" + to_string(i);
 
         if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2]) &&
 				isfinite(axisEndX.val[0]) && isfinite(axisEndX.val[1]) && isfinite(axisEndX.val[2]) &&
@@ -152,9 +152,8 @@ void syncCallback(const ImageConstPtr& depthMsg,
             transform.setRotation(q.normalized());
             transforms.push_back(transform);
 
-            people_cpy.persons[i].name = id;
             TransformStamped trans_stamped;
-            trans_stamped.header = people_cpy.header;
+            trans_stamped.header = objects_cpy.header;
             trans_stamped.header.frame_id = frameId_;
             trans_stamped.child_frame_id = id;
             trans_stamped.transform.translation.x = center3D.val[0];
@@ -164,8 +163,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             trans_stamped.transform.rotation.y = q.normalized().y();
             trans_stamped.transform.rotation.z = q.normalized().z();
             trans_stamped.transform.rotation.w = q.normalized().w();
-            people_cpy.persons[i].name = id;
-            people_cpy.persons[i].trans = trans_stamped;
+            objects_cpy.objects[i].trans = trans_stamped;
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -175,7 +173,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     if(transforms.size()) {
 	   tfBroadcaster_->sendTransform(transforms);
-	   people_pub.publish(people_cpy);
+	   objects_pub.publish(objects_cpy);
     }
 }
 
@@ -237,14 +235,14 @@ int main(int argc, char **argv)
     Subscriber<Image> image_sub(nh, depth_topic, 1);
     Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
     Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
-    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
+    Subscriber<ExtendedObjects> objects_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedObjects> MySyncPolicy;
 
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
+    objects_pub = nh.advertise<ExtendedObjects>(out_topic, 1);
 
     ros::spin();
 
