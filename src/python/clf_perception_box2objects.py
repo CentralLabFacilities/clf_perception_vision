@@ -7,7 +7,7 @@ from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
 from clf_perception_vision.msg import ExtendedObjects, ExtendedObjectsStamped
 
 
-class BBox2ExtendedPeople:
+class BBox2ExtendedObjects:
 
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_box2objects', anonymous=True)
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     parser.add_option("--intopic", dest="intopic", default="/darknet_ros/bounding_boxes")
     parser.add_option("--outtopic", dest="outtopic", default="/clf_perception_vision/objects/raw")
     (options, args) = parser.parse_args()
-    B2P = BBox2ExtendedPeople(options.intopic, options.outtopic)
+    B2P = BBox2ExtendedObjects(options.intopic, options.outtopic)
     rate = rospy.Rate(2.0)
     while not rospy.is_shutdown():
         try:
