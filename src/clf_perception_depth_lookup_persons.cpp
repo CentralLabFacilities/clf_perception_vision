@@ -39,20 +39,23 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	if(isInMM)
 	{
 	    ROS_DEBUG(">>> Image is in Millimeters");
-		array<float,5> depth_values;
+		//array<float,5> depth_values;
 
-		for (int i=0; i < 5; i++) {
-		    depth_values[i] = (float)depthImage.at<uint16_t>(y+i,x+i);
-		}
+		//for (int i=0; i < 5; i++) {
+		//    depth_values[i] = (float)depthImage.at<uint16_t>(y+i,x+i);
+		//}
 
-		float average = 0.0;
-		float sum = 0.0;
+		//float average = 0.0;
+		//float sum = 0.0;
 
-		for (int i=0; i < 5; i++) {
-		    sum += depth_values[i];
-		}
+		//for (int i=0; i < 5; i++) {
+		//    sum += depth_values[i];
+		//}
 
-        depth = (float)sum/depth_values.size();
+        //depth = (float)sum/depth_values.size();
+
+        // Original version
+        depth = (float)depthImage.at<uint16_t>(y,x);
 
 		ROS_DEBUG("%f", depth);
 		isValid = depth != 0.0f;
@@ -61,20 +64,23 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	{
 		ROS_DEBUG(">>> Image is in Meters");
 
-		array<float,5> depth_values;
+		//array<float,5> depth_values;
 
-		for (int i=0; i < 5; i++) {
-		    depth_values[i] = depthImage.at<float>(y+i,x+i);
-		}
+		//for (int i=0; i < 5; i++) {
+		//    depth_values[i] = depthImage.at<float>(y+i,x+i);
+		//}
 
-        float average = 0.0;
-		float sum = 0.0;
+        //float average = 0.0;
+		//float sum = 0.0;
 
-		for (int i=0; i < 5; i++) {
-		    sum += depth_values[i];
-		}
+		//for (int i=0; i < 5; i++) {
+		//    sum += depth_values[i];
+		//}
 
-        depth = (float)sum/depth_values.size();
+        //depth = (float)sum/depth_values.size();
+
+        // Original version
+        depth = depthImage.at<float>(y,x);
 
 		isValid = isfinite(depth);
 	}
