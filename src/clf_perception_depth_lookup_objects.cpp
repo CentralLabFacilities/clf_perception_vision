@@ -40,22 +40,19 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	{
 	    // ROS_DEBUG(">>> Image is in Millimeters");
 		depth = (float)depthImage.at<uint16_t>(y,x);
-		ROS_DEBUG("%f", depth);
+		// ROS_DEBUG("%f", depth);
 		isValid = depth != 0.0f;
-	}
-	else
-	{
+	} else {
 		// ROS_DEBUG(">>> Image is in Meters");
 		depth = depthImage.at<float>(y,x);
 		isValid = isfinite(depth);
 	}
 
 	// Check for invalid measurements
-	if (!isValid)
-	{
+	if (!isValid) {
 	    ROS_DEBUG(">>> WARN Image is invalid, whoopsie.");
 		pt.val[0] = pt.val[1] = pt.val[2] = bad_point;
-	} else{
+	} else {
 		// Fill in XYZ
 		pt.val[0] = (float(x) - center_x) * depth * constant_x;
 		pt.val[1] = (float(y) - center_y) * depth * constant_y;
@@ -80,31 +77,26 @@ void syncCallback(const ImageConstPtr& depthMsg,
     // sent updated version.
     ExtendedObjects objects_cpy;
     objects_cpy = *objectsMsg;
-
     vector<tf::StampedTransform> transforms;
-
     im_mutex.lock();
-    cv_bridge::CvImageConstPtr ptrDepth;
 
+    cv_bridge::CvImageConstPtr ptrDepth;
     if (depthMsg->encoding == "16UC1") {
        ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
     } else if (depthMsg->encoding == "32FC1") {
        ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
     } else {
-      ROS_ERROR(">>> Unknown image encoding %s", depthMsg->encoding.c_str());
+      ROS_ERROR(">>> Incompatible image encoding %s", depthMsg->encoding.c_str());
 	  im_mutex.unlock();
 	  return;
     }
 
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
-
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
-
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
-
     // If depth image and color image have different resolutions,
     // derive a factor to scale the bounding boxes
-    float scale_factor = cameraInfoMsgRgb->width/cameraInfoMsg->width;
+    float scale_factor = (cameraInfoMsgRgb->width/cameraInfoMsg->width);
     // ROS_INFO(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
 
     for (int i=0; i<objectsMsg->objects.size(); i++) {
@@ -117,31 +109,31 @@ void syncCallback(const ImageConstPtr& depthMsg,
         float objectHeight = bbox_ymax/scale_factor - bbox_ymin/scale_factor;
         float center_x = (bbox_xmin/scale_factor+bbox_xmax/scale_factor)/2;
         float center_y = (bbox_ymin/scale_factor+bbox_ymax/scale_factor/shift_center_y)/2;
-        float xAxis_x = 3*objectWidth/4;
-        float xAxis_y = objectHeight/2;
-        float yAxis_x = objectWidth/2;
-        float yAxis_y = 3*objectHeight/4;
+
+        // float xAxis_x = 3*objectWidth/4;
+        // float xAxis_y = objectHeight/2;
+        // float yAxis_x = objectWidth/2;
+        // float yAxis_y = 3*objectHeight/4;
 
         cv::Vec3f center3D = getDepth(depth_,
 					center_x+0.5f, center_y+0.5f,
 					float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
 					1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        cv::Vec3f axisEndX = getDepth(depth_,
-                xAxis_x+0.5f, xAxis_y+0.5f,
-                float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-                1.0f/depthConstant_, 1.0f/depthConstant_);
+        // cv::Vec3f axisEndX = getDepth(depth_,
+        //         xAxis_x+0.5f, xAxis_y+0.5f,
+        //         float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
+        //         1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        cv::Vec3f axisEndY = getDepth(depth_,
-                yAxis_x+0.5f, yAxis_y+0.5f,
-                float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-                1.0f/depthConstant_, 1.0f/depthConstant_);
+        // cv::Vec3f axisEndY = getDepth(depth_,
+        //         yAxis_x+0.5f, yAxis_y+0.5f,
+        //         float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
+        //         1.0f/depthConstant_, 1.0f/depthConstant_);
 
         string id = objectsMsg->objects[i].category + "_" + to_string(i);
 
-        if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2]) &&
-				isfinite(axisEndX.val[0]) && isfinite(axisEndX.val[1]) && isfinite(axisEndX.val[2]) &&
-				isfinite(axisEndY.val[0]) && isfinite(axisEndY.val[1]) && isfinite(axisEndY.val[2])) {
+        if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
+
             tf::StampedTransform transform;
             transform.setIdentity();
             transform.child_frame_id_ = id;
@@ -150,12 +142,12 @@ void syncCallback(const ImageConstPtr& depthMsg,
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
 
             // set rotation (y inverted)
-            tf::Vector3 xAxis(axisEndX.val[0] - center3D.val[0], axisEndX.val[1] - center3D.val[1], axisEndX.val[2] - center3D.val[2]);
-            xAxis.normalize();
-            tf::Vector3 yAxis(axisEndY.val[0] - center3D.val[0], axisEndY.val[1] - center3D.val[1], axisEndY.val[2] - center3D.val[2]);
-            yAxis.normalize();
-            tf::Vector3 zAxis = xAxis*yAxis;
-            //tf::Matrix3x3 rotationMatrix(
+            // tf::Vector3 xAxis(axisEndX.val[0] - center3D.val[0], axisEndX.val[1] - center3D.val[1], axisEndX.val[2] - center3D.val[2]);
+            // xAxis.normalize();
+            // tf::Vector3 yAxis(axisEndY.val[0] - center3D.val[0], axisEndY.val[1] - center3D.val[1], axisEndY.val[2] - center3D.val[2]);
+            // yAxis.normalize();
+            // tf::Vector3 zAxis = xAxis*yAxis;
+            // tf::Matrix3x3 rotationMatrix(
             //            xAxis.x(), yAxis.x(), zAxis.x(),
             //            xAxis.y(), yAxis.y(), zAxis.y(),
             //            xAxis.z(), yAxis.z(), zAxis.z());
@@ -164,6 +156,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             // set x axis going front of the object, with z up and z left
             // q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
             // transform.setRotation(q.normalized());
+
             transforms.push_back(transform);
 
             PoseStamped pose_stamped;
@@ -181,20 +174,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
             objects_cpy.objects[i].pose = pose_stamped;
 
-            if (waitKey(5) != 27) {
-                cv::Point pt;
-                pt.x = 10;
-                pt.y = 10;
-                depth_copy = depth_.clone();
-                circle(depth_copy, pt, 100, cv::Scalar(0, 0, 255));
-	            imshow(":: CLF DEPTH LOOKUP PERSONS ::", depth_copy);
-	        }
-
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
 			ROS_DEBUG(">>> WARN person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"!\n", i, center_x, center_y, id.c_str());
-            im_mutex.unlock();
-		    return;
 		}
     }
 
@@ -262,19 +244,18 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
-    Subscriber<Image> image_sub(nh, depth_topic, 2);
-    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
-    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
-    Subscriber<ExtendedObjects> objects_sub(nh, in_topic, 2);
+    Subscriber<Image> image_sub(nh, depth_topic, 1);
+    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
+    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
+    Subscriber<ExtendedObjects> objects_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedObjects> MySyncPolicy;
-
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
+    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedObjects> sync_pol;
+    Synchronizer<sync_pol> sync(sync_pol(5), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    objects_pub = nh.advertise<ExtendedObjects>(out_topic, 2);
+    objects_pub = nh.advertise<ExtendedObjects>(out_topic, 1);
 
-    namedWindow(":: CLF DEPTH LOOKUP OBJECTS ::", cv::WINDOW_AUTOSIZE);
+    // namedWindow(":: CLF DEPTH LOOKUP OBJECTS ::", cv::WINDOW_AUTOSIZE);
 
     ros::spin();
 
