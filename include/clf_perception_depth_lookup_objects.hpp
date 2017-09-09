@@ -1,7 +1,8 @@
 // STD
+#include <mutex>
 #include <cmath>
-#include <stdlib.h>
 #include <string>
+#include <stdlib.h>
 
 // ROS
 #include <ros/ros.h>
@@ -25,6 +26,8 @@
 #include <message_filters/sync_policies/approximate_time.h>
 
 // CV
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 // TF
@@ -38,8 +41,10 @@ std::string out_topic;
 std::string in_topic;
 
 cv::Mat depth_;
+cv::Mat depth_copy;
 ros::Time stamp_;
 std::string frameId_;
+std::mutex im_mutex;
 float depthConstant_;
 double shift_center_y;
 

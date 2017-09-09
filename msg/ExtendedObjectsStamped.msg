@@ -5,5 +5,4 @@ uint16                          bbox_xmax
 uint16                          bbox_ymin
 uint16                          bbox_ymax
 float64                         probability
-geometry_msgs/TransformStamped  trans
 geometry_msgs/PoseStamped       pose

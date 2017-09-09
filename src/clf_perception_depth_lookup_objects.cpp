@@ -38,14 +38,14 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 
 	if(isInMM)
 	{
-	    ROS_DEBUG(">>> Image is in Millimeters");
+	    // ROS_DEBUG(">>> Image is in Millimeters");
 		depth = (float)depthImage.at<uint16_t>(y,x);
 		ROS_DEBUG("%f", depth);
 		isValid = depth != 0.0f;
 	}
 	else
 	{
-		ROS_DEBUG(">>> Image is in Meters");
+		// ROS_DEBUG(">>> Image is in Meters");
 		depth = depthImage.at<float>(y,x);
 		isValid = isfinite(depth);
 	}
@@ -53,7 +53,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	// Check for invalid measurements
 	if (!isValid)
 	{
-	    ROS_DEBUG(">>> Image is invalid, whoopsie.");
+	    ROS_DEBUG(">>> WARN Image is invalid, whoopsie.");
 		pt.val[0] = pt.val[1] = pt.val[2] = bad_point;
 	} else{
 		// Fill in XYZ
@@ -82,8 +82,22 @@ void syncCallback(const ImageConstPtr& depthMsg,
     objects_cpy = *objectsMsg;
 
     vector<tf::StampedTransform> transforms;
-    cv_bridge::CvImageConstPtr ptrDepth = cv_bridge::toCvShare(depthMsg);
+
+    im_mutex.lock();
+    cv_bridge::CvImageConstPtr ptrDepth;
+
+    if (depthMsg->encoding == "16UC1") {
+       ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
+    } else if (depthMsg->encoding == "32FC1") {
+       ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
+    } else {
+      ROS_ERROR(">>> Unknown image encoding %s", depthMsg->encoding.c_str());
+	  im_mutex.unlock();
+	  return;
+    }
+
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
+
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
@@ -141,29 +155,16 @@ void syncCallback(const ImageConstPtr& depthMsg,
             tf::Vector3 yAxis(axisEndY.val[0] - center3D.val[0], axisEndY.val[1] - center3D.val[1], axisEndY.val[2] - center3D.val[2]);
             yAxis.normalize();
             tf::Vector3 zAxis = xAxis*yAxis;
-            tf::Matrix3x3 rotationMatrix(
-                        xAxis.x(), yAxis.x(), zAxis.x(),
-                        xAxis.y(), yAxis.y(), zAxis.y(),
-                        xAxis.z(), yAxis.z(), zAxis.z());
-            tf::Quaternion q;
-            rotationMatrix.getRotation(q);
+            //tf::Matrix3x3 rotationMatrix(
+            //            xAxis.x(), yAxis.x(), zAxis.x(),
+            //            xAxis.y(), yAxis.y(), zAxis.y(),
+            //            xAxis.z(), yAxis.z(), zAxis.z());
+            // tf::Quaternion q;
+            // rotationMatrix.getRotation(q);
             // set x axis going front of the object, with z up and z left
-            q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
-            transform.setRotation(q.normalized());
+            // q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
+            // transform.setRotation(q.normalized());
             transforms.push_back(transform);
-
-            TransformStamped trans_stamped;
-            trans_stamped.header = objects_cpy.header;
-            trans_stamped.header.frame_id = frameId_;
-            trans_stamped.child_frame_id = id;
-            trans_stamped.transform.translation.x = center3D.val[0];
-            trans_stamped.transform.translation.y = center3D.val[1];
-            trans_stamped.transform.translation.z = center3D.val[2];
-            trans_stamped.transform.rotation.x = q.normalized().x();
-            trans_stamped.transform.rotation.y = q.normalized().y();
-            trans_stamped.transform.rotation.z = q.normalized().z();
-            trans_stamped.transform.rotation.w = q.normalized().w();
-            objects_cpy.objects[i].trans = trans_stamped;
 
             PoseStamped pose_stamped;
             pose_stamped.header = objects_cpy.header;
@@ -173,24 +174,37 @@ void syncCallback(const ImageConstPtr& depthMsg,
             pose_stamped.pose.position.y = center3D.val[1];
             pose_stamped.pose.position.z = center3D.val[2];
 
-            pose_stamped.pose.orientation.x = q.normalized().x();
-            pose_stamped.pose.orientation.y = q.normalized().y();
-            pose_stamped.pose.orientation.z = q.normalized().z();
-            pose_stamped.pose.orientation.w = q.normalized().w();
+            pose_stamped.pose.orientation.x = 0.0; //q.normalized().x();
+            pose_stamped.pose.orientation.y = 0.0; //q.normalized().y();
+            pose_stamped.pose.orientation.z = 0.0; //q.normalized().z();
+            pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
 
             objects_cpy.objects[i].pose = pose_stamped;
 
+            if (waitKey(5) != 27) {
+                cv::Point pt;
+                pt.x = 10;
+                pt.y = 10;
+                depth_copy = depth_.clone();
+                circle(depth_copy, pt, 100, cv::Scalar(0, 0, 255));
+	            imshow(":: CLF DEPTH LOOKUP PERSONS ::", depth_copy);
+	        }
+
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
-			ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"! (maybe object is too near of the camera or bad depth image)\n", i, center_x, center_y, id.c_str());
+			ROS_DEBUG(">>> WARN person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"!\n", i, center_x, center_y, id.c_str());
+            im_mutex.unlock();
 		    return;
 		}
     }
+
+    im_mutex.unlock();
 
     if(transforms.size()) {
 	   tfBroadcaster_->sendTransform(transforms);
 	   objects_pub.publish(objects_cpy);
     }
+
 }
 
 int main(int argc, char **argv)
@@ -255,10 +269,12 @@ int main(int argc, char **argv)
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedObjects> MySyncPolicy;
 
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(5), image_sub, info_depth_sub, info_rgb_sub, objects_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
     objects_pub = nh.advertise<ExtendedObjects>(out_topic, 2);
+
+    namedWindow(":: CLF DEPTH LOOKUP OBJECTS ::", cv::WINDOW_AUTOSIZE);
 
     ros::spin();
 
