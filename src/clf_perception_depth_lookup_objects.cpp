@@ -173,6 +173,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
 
             objects_cpy.objects[i].pose = pose_stamped;
+            objects_cpy.objects[i].transformid = id;
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
