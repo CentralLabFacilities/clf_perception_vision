@@ -1,0 +1,6 @@
+#request fields
+string transform_id
+---
+#response fields
+bool res_known
+string res_name

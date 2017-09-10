@@ -132,6 +132,12 @@ ADD_MESSAGE_FILES(
    ExtendedObjects.msg
 )
 
+ADD_SERVICE_FILES(
+   DIRECTORY srv
+   FILES
+   DoIKnowThatPerson.srv
+)
+
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
 
 CATKIN_PACKAGE(INCLUDE_DIRS include
