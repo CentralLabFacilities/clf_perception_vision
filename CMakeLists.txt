@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 
 PROJECT(clf_perception_vision)
 
-SET(ENV{ROS_LANG_DISABLE} "geneus;genlisp;gennodejs")
+SET(ENV{ROS_LANG_DISABLE} "geneus;genlisp;gennodejs;genjava")
 
 SET(OpenCV_MIN_VERSION "3.2.0")
 
