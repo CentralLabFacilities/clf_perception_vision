@@ -155,6 +155,8 @@ int Detect2D::setup(int argc, char *argv[]) {
 
         fs["pyr_up"] >> (int)pyr;
 
+        cout << ">>> PYRUP in config: --> " << pyr << endl;
+
         if (pyr > 0) {
             cout << ">>> Image Scaling is: --> ON" << endl;
             scale_factor = 2.0;
