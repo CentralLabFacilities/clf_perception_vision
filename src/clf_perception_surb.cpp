@@ -514,8 +514,9 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
             }
         }
     }
-
-    object_pub.publish(ma);
+    if (detected_classes > 0) {
+        object_pub.publish(ma);
+    }
 
     boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff_detect = end_detect - start_detect;
