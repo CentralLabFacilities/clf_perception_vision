@@ -153,7 +153,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         detection_threshold = fs["detectionthreshold"];
         cout << ">>> Detection Threshold --> " << detection_threshold << endl;
 
-        fs["pyr_up"] >> (int)pyr;
+        pyr = (int) fs["pyr_up"];
 
         cout << ">>> PYRUP in config: --> " << pyr << endl;
 

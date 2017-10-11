@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
         fs["dlib_shapepredictor"] >> shape_mode_path;
         cout << ">>> Frontal Face: --> " << shape_mode_path << endl;
 
-        fs["pyr_up"] >> (int)_pyr;
+        _pyr = (int) fs["pyr_up"];
+
         if (_pyr > 0) {
             cout << ">>> Image Scaling is: --> ON" << endl;
         } else {
