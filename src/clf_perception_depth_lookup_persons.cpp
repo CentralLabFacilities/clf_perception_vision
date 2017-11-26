@@ -74,8 +74,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
                   const CameraInfoConstPtr& cameraInfoMsgRgb,
                   const ExtendedPeopleConstPtr& peopleMsg) {
 
-    // Copy Message in order to manipulate it later and
-    // sent updated version.
+    // Copy Message in order to manipulate it later and sent updated version.
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
     ExtendedPeople people_cpy_closest;
