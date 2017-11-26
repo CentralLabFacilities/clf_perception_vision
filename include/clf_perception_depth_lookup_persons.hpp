@@ -51,4 +51,5 @@ float farest_distance;
 double shift_center_y;
 
 ros::Publisher people_pub;
+ros::Publisher people_pub_close;
 tf::TransformBroadcaster *tfBroadcaster_;
