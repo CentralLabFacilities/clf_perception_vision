@@ -212,7 +212,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     if(transforms.size()) {
    	   tfBroadcaster_->sendTransform(transforms);
-   	   tfBroadcaster_->sendTransform(transforms_closest);
+   	   // tfBroadcaster_->sendTransform(transforms_closest);
        // Remove all but the closest person
 	   people_cpy_closest.persons.resize(1);
    	   people_pub_close.publish(people_cpy_closest);
