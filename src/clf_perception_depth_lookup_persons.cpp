@@ -42,14 +42,15 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 		ROS_DEBUG("%f", depth);
         depth = (float)depthImage.at<uint16_t>(y,x);
 		isValid = depth != 0.0f;
-		if (!isValid) {
-		    depth = (float)depthImage.at<uint16_t>(y+5,x+5);
-    		isValid = depth != 0.0f;
-   		}
-   		if (!isValid) {
-		    depth = (float)depthImage.at<uint16_t>(y-5,x-5);
-   		}
-   		isValid = depth != 0.0f;
+		// Sanity Image checks
+        //		if (!isValid) {
+        //		    depth = (float)depthImage.at<uint16_t>(y+5,x+5);
+        //    		isValid = depth != 0.0f;
+        //   		}
+        //   		if (!isValid) {
+        //		    depth = (float)depthImage.at<uint16_t>(y-5,x-5);
+        //   		}
+        //   		isValid = depth != 0.0f;
 	} else {
 		ROS_DEBUG(">>> Image is in Meters");
         depth = depthImage.at<float>(y,x);
