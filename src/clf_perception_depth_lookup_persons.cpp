@@ -44,6 +44,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 		isValid = depth != 0.0f;
 		if (!isValid) {
 		    depth = (float)depthImage.at<uint16_t>(y+5,x+5);
+    		isValid = depth != 0.0f;
    		}
    		if (!isValid) {
 		    depth = (float)depthImage.at<uint16_t>(y-5,x-5);
