@@ -90,6 +90,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
     ExtendedPeople people_cpy_closest;
     people_cpy_closest = *peopleMsg;
     vector<tf::StampedTransform> transforms;
+    vector<tf::StampedTransform> transforms_closest;
     farest_distance = 50.0;
 
     im_mutex.lock();
@@ -150,6 +151,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
         if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
             tf::StampedTransform transform;
+            tf::StampedTransform transform_copy;
             transform.setIdentity();
             transform.child_frame_id_ = id;
             transform.frame_id_ = frameId_;
@@ -190,9 +192,11 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
             // Do this with proper distance calculation
             if (pose_stamped.pose.position.x < farest_distance) {
-                // people_cpy_closest.persons[0].activity = "closest";
+                transform_copy = transform;
+                transform_copy.child_frame_id_ = "closest_person";
                 people_cpy_closest.persons[0].pose = pose_stamped;
-                people_cpy_closest.persons[0].transformid = "closest_person";
+                people_cpy_closest.persons[0].transformid = id;
+                transforms_closest[0] = transform_copy;
                 pose_stamped.pose.position.x = farest_distance;
             }
 
@@ -208,6 +212,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     if(transforms.size()) {
    	   tfBroadcaster_->sendTransform(transforms);
+   	   tfBroadcaster_->sendTransform(transforms_closest);
        // Remove all but the closest person
 	   people_cpy_closest.persons.resize(1);
    	   people_pub_close.publish(people_cpy_closest);
