@@ -197,11 +197,11 @@ void syncCallback(const ImageConstPtr& depthMsg,
     im_mutex.unlock();
 
     if(transforms.size()) {
-	   tfBroadcaster_->sendTransform(transforms);
-	   people_pub.publish(people_cpy);
-	   // Remove all but the closest person
+   	   tfBroadcaster_->sendTransform(transforms);
+       // Remove all but the closest person
 	   people_cpy_closest.persons.resize(1);
-	   people_pub_close.publish(people_cpy_closest);
+   	   people_pub_close.publish(people_cpy_closest);
+	   people_pub.publish(people_cpy);
     }
 }
 
