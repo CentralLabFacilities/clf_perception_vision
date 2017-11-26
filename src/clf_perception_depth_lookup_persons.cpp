@@ -192,11 +192,11 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
             // Do this with proper distance calculation
             if (pose_stamped.pose.position.x < farest_distance) {
-                transform_copy = transform;
-                transform_copy.child_frame_id_ = "closest_person";
+                //transform_copy = transform;
+                //transform_copy.child_frame_id_ = "closest_person";
                 people_cpy_closest.persons[0].pose = pose_stamped;
                 people_cpy_closest.persons[0].transformid = id;
-                transforms_closest[0] = transform_copy;
+                //transforms_closest[0] = transform_copy;
                 pose_stamped.pose.position.x = farest_distance;
             }
 
