@@ -37,45 +37,12 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	bool isValid;
 
 	if(isInMM) {
-	    // ROS_DEBUG(">>> Image is in Millimeters");
-		// array<float,5> depth_values;
-
-		// for (int i=0; i < 5; i++) {
-		//     depth_values[i] = (float)depthImage.at<uint16_t>(y+i,x+i);
-		// }
-
-		// float average = 0.0;
-		// float sum = 0.0;
-
-		// for (int i=0; i < 5; i++) {
-		//     sum += depth_values[i];
-		// }
-
-        // depth = (float)sum/depth_values.size();
-
-        // Original version
+	    ROS_DEBUG(">>> Image is in Millimeters");
         depth = (float)depthImage.at<uint16_t>(y,x);
-		// ROS_DEBUG("%f", depth);
+		ROS_DEBUG("%f", depth);
 		isValid = depth != 0.0f;
 	} else {
-		// ROS_DEBUG(">>> Image is in Meters");
-
-		// array<float,5> depth_values;
-
-		// for (int i=0; i < 5; i++) {
-		//     depth_values[i] = depthImage.at<float>(y+i,x+i);
-		// }
-
-        // float average = 0.0;
-		// float sum = 0.0;
-
-		// for (int i=0; i < 5; i++) {
-		//     sum += depth_values[i];
-		// }
-
-        // depth = (float)sum/depth_values.size();
-
-        // Original version
+		ROS_DEBUG(">>> Image is in Meters");
         depth = depthImage.at<float>(y,x);
 		isValid = isfinite(depth);
 	}
@@ -106,11 +73,16 @@ void syncCallback(const ImageConstPtr& depthMsg,
                   const CameraInfoConstPtr& cameraInfoMsg,
                   const CameraInfoConstPtr& cameraInfoMsgRgb,
                   const ExtendedPeopleConstPtr& peopleMsg) {
+
     // Copy Message in order to manipulate it later and
     // sent updated version.
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
+    ExtendedPeople people_cpy_closest;
+    people_cpy_closest = *peopleMsg;
     vector<tf::StampedTransform> transforms;
+    farest_distance = 50.0;
+
     im_mutex.lock();
 
     cv_bridge::CvImageConstPtr ptrDepth;
@@ -127,10 +99,12 @@ void syncCallback(const ImageConstPtr& depthMsg,
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
+
     // If depth image and color image have different resolutions,
     // derive a factor to scale the bounding boxes
     float scale_factor = cameraInfoMsgRgb->width/cameraInfoMsg->width;
-    // ROS_INFO(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
+
+    ROS_DEBUG(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
 
     for (int i=0; i<peopleMsg->persons.size(); i++) {
         bbox_xmin = peopleMsg->persons[i].bbox_xmin;
@@ -188,7 +162,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
             // set x axis going front of the object, with z up and z left
             // q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
             // transform.setRotation(q.normalized());
-            transforms.push_back(transform);
 
             PoseStamped pose_stamped;
             pose_stamped.header = people_cpy.header;
@@ -206,6 +179,15 @@ void syncCallback(const ImageConstPtr& depthMsg,
             people_cpy.persons[i].pose = pose_stamped;
             people_cpy.persons[i].transformid = id;
 
+            // Do this with proper distance calculation
+            if (pose_stamped.pose.position.x < farest_distance) {
+                people_cpy_closest.persons[0].pose = pose_stamped;
+                people_cpy_closest.persons[0].transformid = id;
+                pose_stamped.pose.position.x = farest_distance;
+            }
+
+            transforms.push_back(transform);
+
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
 			ROS_DEBUG(">>> WARN person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"!\n", i, center_x, center_y, id.c_str());
@@ -217,6 +199,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
     if(transforms.size()) {
 	   tfBroadcaster_->sendTransform(transforms);
 	   people_pub.publish(people_cpy);
+	   // Remove all but the closest person
+	   people_cpy_closest.persons.resize(1);
+	   people_pub_close.publish(people_cpy_closest);
     }
 }
 
@@ -265,6 +250,14 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    if (nh.getParam("depthlookup_out_topic_close", out_topic_close))
+    {
+        ROS_INFO(">>> Output Topic: %s", out_topic_close.c_str());
+    } else {
+        ROS_ERROR("!Failed to get output topic close parameter!");
+        exit(EXIT_FAILURE);
+    }
+
     if (nh.getParam("depthlookup_shift_center_y", shift_center_y))
     {
         ROS_INFO(">>> Shift center_y: %f", shift_center_y);
@@ -275,17 +268,18 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
-    Subscriber<Image> image_sub(nh, depth_topic, 1);
-    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 1);
-    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 1);
-    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
+    Subscriber<Image> image_sub(nh, depth_topic, 2);
+    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
+    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
+    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> sync_pol;
 
     Synchronizer<sync_pol> sync(sync_pol(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
+    people_pub_close = nh.advertise<ExtendedPeople>(out_topic_close, 2);
 
     ros::spin();
 

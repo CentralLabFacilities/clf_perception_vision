@@ -33,11 +33,12 @@
 // TF
 #include <tf/transform_broadcaster.h>
 
+std::string out_topic_close;
 std::string people_topic;
 std::string depth_topic;
 std::string depth_info;
-std::string rgb_info;
 std::string out_topic;
+std::string rgb_info;
 std::string in_topic;
 
 cv::Mat depth_;
@@ -46,6 +47,7 @@ ros::Time stamp_;
 std::string frameId_;
 std::mutex im_mutex;
 float depthConstant_;
+float farest_distance;
 double shift_center_y;
 
 ros::Publisher people_pub;
