@@ -192,7 +192,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             if (pose_stamped.pose.position.x < farest_distance) {
                 // people_cpy_closest.persons[0].activity = "closest";
                 people_cpy_closest.persons[0].pose = pose_stamped;
-                people_cpy_closest.persons[0].transformid = id;
+                people_cpy_closest.persons[0].transformid = "closest_person";
                 pose_stamped.pose.position.x = farest_distance;
             }
 
