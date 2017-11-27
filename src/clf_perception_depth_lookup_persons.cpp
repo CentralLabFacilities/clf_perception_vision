@@ -92,8 +92,8 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     // Pose Array of people
     PoseArray pose_arr;
-    poses_arr.header.stamp = stamp_;
-    poses_arr.header.frame_id = frameId_;
+    pose_arr.header.stamp = stamp_;
+    pose_arr.header.frame_id = frameId_;
 
     im_mutex.lock();
 
