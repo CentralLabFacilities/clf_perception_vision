@@ -89,7 +89,11 @@ void syncCallback(const ImageConstPtr& depthMsg,
     people_cpy = *peopleMsg;
     vector<tf::StampedTransform> transforms;
     vector<tf::StampedTransform> transforms_closest;
-    farest_distance = 50.0;
+
+    // Pose Array of people
+    PoseArray poses;
+    poses.header.stamp = stamp_;
+    poses.header.frame_id = frameId_;
 
     im_mutex.lock();
 
@@ -172,6 +176,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             // transform.setRotation(q.normalized());
 
             PoseStamped pose_stamped;
+            Pose pose;
             pose_stamped.header = people_cpy.header;
             pose_stamped.header.frame_id = frameId_;
 
@@ -179,15 +184,25 @@ void syncCallback(const ImageConstPtr& depthMsg,
             pose_stamped.pose.position.y = center3D.val[1];
             pose_stamped.pose.position.z = center3D.val[2];
 
+            pose.position.x = center3D.val[0];
+            pose.position.y = center3D.val[1];
+            pose.position.z = center3D.val[2];
+
             pose_stamped.pose.orientation.x = 0.0; //q.normalized().x();
             pose_stamped.pose.orientation.y = 0.0; //q.normalized().y();
             pose_stamped.pose.orientation.z = 0.0; //q.normalized().z();
             pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
 
+            pose.orientation.x = 0.0; //q.normalized().x();
+            pose.orientation.y = 0.0; //q.normalized().y();
+            pose.orientation.z = 0.0; //q.normalized().z();
+            pose.orientation.w = 1.0; //q.normalized().w();
+
             people_cpy.persons[i].pose = pose_stamped;
             people_cpy.persons[i].transformid = id;
 
             transforms.push_back(transform);
+            poses.push_back(pose);
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -200,6 +215,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
     if(transforms.size()) {
    	   tfBroadcaster_->sendTransform(transforms);
 	   people_pub.publish(people_cpy);
+       people_pub_pose.publish(poses);
     }
 }
 
@@ -248,6 +264,14 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    if (nh.getParam("depthlookup_out_topic_pose", out_topic_pose))
+    {
+        ROS_INFO(">>> Output Topic Pose: %s", out_topic_pose.c_str());
+    } else {
+        ROS_ERROR("!Failed to get pose output topic parameter!");
+        exit(EXIT_FAILURE);
+    }
+
     if (nh.getParam("depthlookup_shift_center_y", shift_center_y))
     {
         ROS_INFO(">>> Shift center_y: %f", shift_center_y);
@@ -269,6 +293,7 @@ int main(int argc, char **argv)
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
+    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 2);
 
     ros::spin();
 

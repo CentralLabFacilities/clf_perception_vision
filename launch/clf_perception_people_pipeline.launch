@@ -9,6 +9,7 @@
     <arg name="depthlookup_image_topic"      default="/pepper_robot/sink/depth/image_raw"/>
     <arg name="depthlookup_in_topic"         default="/clf_perception_vision/people/raw"/>
     <arg name="depthlookup_out_topic"        default="/clf_perception_vision/people/raw/transform"/>
+    <arg name="depthlookup_out_topic_pose"   default="/clf_perception_vision/people/raw/transform/pose"/>
     <arg name="depthlookup_shift_center_y"   default="1.0" />
 
     <!-- Gender Age Config -->
@@ -28,6 +29,7 @@
         <param name="depthlookup_image_topic" type="str" value="$(arg depthlookup_image_topic)"/>
         <param name="depthlookup_in_topic" type="str" value="$(arg depthlookup_in_topic)"/>
         <param name="depthlookup_out_topic" type="str" value="$(arg depthlookup_out_topic)"/>
+        <param name="depthlookup_out_topic_pose" type="str" value="$(arg depthlookup_out_topic_pose)"/>
         <param name="depthlookup_shift_center_y" type="double" value="$(arg depthlookup_shift_center_y)"/>
     </node>
 

@@ -10,11 +10,14 @@
 #include <sensor_msgs/image_encodings.h>
 
 // MSGS
+
 #include <sensor_msgs/Image.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Vector3.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/PoseArray.h>
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <clf_perception_vision/ExtendedPeople.h>
@@ -47,8 +50,8 @@ ros::Time stamp_;
 std::string frameId_;
 std::mutex im_mutex;
 float depthConstant_;
-float farest_distance;
 double shift_center_y;
 
 ros::Publisher people_pub;
+ros::Publisher people_pub_pose;
 tf::TransformBroadcaster *tfBroadcaster_;
