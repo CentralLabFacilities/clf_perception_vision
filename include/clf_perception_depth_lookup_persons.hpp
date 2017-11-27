@@ -36,7 +36,7 @@
 // TF
 #include <tf/transform_broadcaster.h>
 
-std::string out_topic_close;
+std::string out_topic_pose;
 std::string people_topic;
 std::string depth_topic;
 std::string depth_info;
