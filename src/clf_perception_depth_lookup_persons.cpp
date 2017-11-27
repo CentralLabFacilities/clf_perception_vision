@@ -91,9 +91,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
     vector<tf::StampedTransform> transforms_closest;
 
     // Pose Array of people
-    PoseArray poses;
-    poses.header.stamp = stamp_;
-    poses.header.frame_id = frameId_;
+    PoseArray pose_arr;
+    poses_arr.header.stamp = stamp_;
+    poses_arr.header.frame_id = frameId_;
 
     im_mutex.lock();
 
@@ -202,7 +202,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
             people_cpy.persons[i].transformid = id;
 
             transforms.push_back(transform);
-            poses.push_back(pose);
+            pose_arr.poses.push_back(pose);
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -215,7 +215,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
     if(transforms.size()) {
    	   tfBroadcaster_->sendTransform(transforms);
 	   people_pub.publish(people_cpy);
-       people_pub_pose.publish(poses);
+       people_pub_pose.publish(pose_arr);
     }
 }
 
