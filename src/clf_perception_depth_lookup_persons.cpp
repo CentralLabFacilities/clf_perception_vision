@@ -87,8 +87,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
     // Copy Message in order to manipulate it later and sent updated version.
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
-    ExtendedPeople people_cpy_closest;
-    people_cpy_closest = *peopleMsg;
     vector<tf::StampedTransform> transforms;
     vector<tf::StampedTransform> transforms_closest;
     farest_distance = 50.0;
@@ -151,7 +149,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
         if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
             tf::StampedTransform transform;
-            tf::StampedTransform transform_copy;
             transform.setIdentity();
             transform.child_frame_id_ = id;
             transform.frame_id_ = frameId_;
@@ -190,16 +187,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
             people_cpy.persons[i].pose = pose_stamped;
             people_cpy.persons[i].transformid = id;
 
-            // Do this with proper distance calculation
-            if (pose_stamped.pose.position.x < farest_distance) {
-                //transform_copy = transform;
-                //transform_copy.child_frame_id_ = "closest_person";
-                people_cpy_closest.persons[0].pose = pose_stamped;
-                people_cpy_closest.persons[0].transformid = id;
-                //transforms_closest[0] = transform_copy;
-                pose_stamped.pose.position.x = farest_distance;
-            }
-
             transforms.push_back(transform);
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
@@ -212,10 +199,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     if(transforms.size()) {
    	   tfBroadcaster_->sendTransform(transforms);
-   	   // tfBroadcaster_->sendTransform(transforms_closest);
-       // Remove all but the closest person
-	   people_cpy_closest.persons.resize(1);
-   	   people_pub_close.publish(people_cpy_closest);
 	   people_pub.publish(people_cpy);
     }
 }
@@ -262,14 +245,6 @@ int main(int argc, char **argv)
         ROS_INFO(">>> Output Topic: %s", out_topic.c_str());
     } else {
         ROS_ERROR("!Failed to get output topic parameter!");
-        exit(EXIT_FAILURE);
-    }
-
-    if (nh.getParam("depthlookup_out_topic_close", out_topic_close))
-    {
-        ROS_INFO(">>> Output Topic: %s", out_topic_close.c_str());
-    } else {
-        ROS_ERROR("!Failed to get output topic close parameter!");
         exit(EXIT_FAILURE);
     }
 
