@@ -269,7 +269,6 @@ int main(int argc, char **argv)
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
-    people_pub_close = nh.advertise<ExtendedPeople>(out_topic_close, 2);
 
     ros::spin();
 
