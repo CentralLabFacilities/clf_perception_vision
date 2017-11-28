@@ -37,23 +37,63 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	bool isValid;
 
 	if(isInMM) {
-	    ROS_DEBUG(">>> Image is in Millimeters");
-        depth = (float)depthImage.at<uint16_t>(y,x);
+	    // ROS_DEBUG(">>> Image is in Millimeters");
+	    float depth_samples [20];
+
+        // Sample fore depth points to the right, left, top and down
+        // right
+        for (int i=0; i<5; i++) {
+            depth_samples[i] = (float)depthImage.at<uint16_t>(y, x+i);
+        }
+        // left
+        for (int i=5; i<9; i++) {
+            depth_samples[i] = (float)depthImage.at<uint16_t>(y, x-i);
+        }
+        // top
+        for (int i=10; i<14; i++) {
+            depth_samples[i] = (float)depthImage.at<uint16_t>(y+i, x);
+        }
+        // down
+        for (int i=15; i<19; i++) {
+            depth_samples[i] = (float)depthImage.at<uint16_t>(y-i, x);
+        }
+
+        int arr_size = sizeof(depth_samples)/sizeof(float);
+        sort(&depth_samples[0], &depth_samples[arr_size]);
+        float median = arr_size % 2 ? depth_samples[arr_size/2] : (depth_samples[arr_size/2-1] + depth_samples[arr_size/2]) / 2;
+
+        depth = median;
 		ROS_DEBUG("%f", depth);
-        depth = (float)depthImage.at<uint16_t>(y,x);
 		isValid = depth != 0.0f;
-		// Sanity Image checks
-        //		if (!isValid) {
-        //		    depth = (float)depthImage.at<uint16_t>(y+5,x+5);
-        //    		isValid = depth != 0.0f;
-        //   		}
-        //   		if (!isValid) {
-        //		    depth = (float)depthImage.at<uint16_t>(y-5,x-5);
-        //   		}
-        //   		isValid = depth != 0.0f;
+
 	} else {
-		ROS_DEBUG(">>> Image is in Meters");
-        depth = depthImage.at<float>(y,x);
+		// ROS_DEBUG(">>> Image is in Meters");
+		float depth_samples [20];
+
+        // Sample fore depth points to the right, left, top and down
+        // right
+        for (int i=0; i<5; i++) {
+            depth_samples[i] = depthImage.at<float>(y,x+i);
+        }
+        // left
+        for (int i=5; i<9; i++) {
+            depth_samples[i] = depthImage.at<float>(y,x-i);
+        }
+        // top
+        for (int i=10; i<14; i++) {
+            depth_samples[i] = depthImage.at<float>(y+i,x);
+        }
+        // down
+        for (int i=15; i<19; i++) {
+            depth_samples[i] = depthImage.at<float>(y-i,x);
+        }
+
+        int arr_size = sizeof(depth_samples)/sizeof(float);
+        sort(&depth_samples[0], &depth_samples[arr_size]);
+        float median = arr_size % 2 ? depth_samples[arr_size/2] : (depth_samples[arr_size/2-1] + depth_samples[arr_size/2]) / 2;
+
+        depth = median;
+        ROS_DEBUG("%f", depth);
 		isValid = isfinite(depth);
 	}
 
@@ -109,7 +149,9 @@ void syncCallback(const ImageConstPtr& depthMsg,
     }
 
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
+
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
+
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
 
     // If depth image and color image have different resolutions,
