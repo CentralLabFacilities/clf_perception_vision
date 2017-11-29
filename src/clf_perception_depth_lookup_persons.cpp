@@ -38,25 +38,17 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 
 	if(isInMM) {
 	    // ROS_DEBUG(">>> Image is in Millimeters");
-	    float depth_samples [20];
+	    float depth_samples[20];
 
         // Sample fore depth points to the right, left, top and down
-        // right
         for (int i=0; i<5; i++) {
-            depth_samples[i] = (float)depthImage.at<uint16_t>(y, x+i);
+            depth_samples[i] = (float)depthImage.at<uint16_t>(y,x+i);
+            depth_samples[i+5] = (float)depthImage.at<uint16_t>(y,x-i);
+            depth_samples[i+10] = (float)depthImage.at<uint16_t>(y+i,x);
+            depth_samples[i+15] = (float)depthImage.at<uint16_t>(y-i,x);
         }
-        // left
-        for (int i=5; i<9; i++) {
-            depth_samples[i] = (float)depthImage.at<uint16_t>(y, x-i);
-        }
-        // top
-        for (int i=10; i<14; i++) {
-            depth_samples[i] = (float)depthImage.at<uint16_t>(y+i, x);
-        }
-        // down
-        for (int i=15; i<19; i++) {
-            depth_samples[i] = (float)depthImage.at<uint16_t>(y-i, x);
-        }
+
+        //depth_samples[20] = (float)depthImage.at<uint16_t>(y, x);
 
         int arr_size = sizeof(depth_samples)/sizeof(float);
         sort(&depth_samples[0], &depth_samples[arr_size]);
@@ -68,25 +60,17 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 
 	} else {
 		// ROS_DEBUG(">>> Image is in Meters");
-		float depth_samples [20];
+		float depth_samples[20];
 
         // Sample fore depth points to the right, left, top and down
-        // right
         for (int i=0; i<5; i++) {
             depth_samples[i] = depthImage.at<float>(y,x+i);
+            depth_samples[i+5] = depthImage.at<float>(y,x-i);
+            depth_samples[i+10] = depthImage.at<float>(y+i,x);
+            depth_samples[i+15] = depthImage.at<float>(y-i,x);
         }
-        // left
-        for (int i=5; i<9; i++) {
-            depth_samples[i] = depthImage.at<float>(y,x-i);
-        }
-        // top
-        for (int i=10; i<14; i++) {
-            depth_samples[i] = depthImage.at<float>(y+i,x);
-        }
-        // down
-        for (int i=15; i<19; i++) {
-            depth_samples[i] = depthImage.at<float>(y-i,x);
-        }
+
+        //depth_samples[20] = depthImage.at<float>(y,x);
 
         int arr_size = sizeof(depth_samples)/sizeof(float);
         sort(&depth_samples[0], &depth_samples[arr_size]);
