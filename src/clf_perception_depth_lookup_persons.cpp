@@ -315,11 +315,11 @@ int main(int argc, char **argv)
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(50), image_sub, info_depth_sub, info_rgb_sub, people_sub);
+    Synchronizer<sync_pol> sync(sync_pol(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
-    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 2);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
+    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
 
     ros::spin();
 
