@@ -11,9 +11,9 @@ class BBox2ExtendedObjects:
 
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_box2objects', anonymous=True)
-        self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=1)
-        self.pub = rospy.Publisher(str(_out), ExtendedObjects, queue_size=1)
-        rospy.logdebug(">>> Box2People is ready.")
+        self.sub = rospy.Subscriber(str(_in), BoundingBoxes, self.box_cb, queue_size=2)
+        self.pub = rospy.Publisher(str(_out), ExtendedObjects, queue_size=2)
+        rospy.logdebug(">>> Box2Objects is ready.")
 
     def box_cb(self, data):
         try:
