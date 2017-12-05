@@ -10,7 +10,7 @@
     <arg name="depthlookup_in_topic"         default="/clf_perception_vision/people/raw"/>
     <arg name="depthlookup_out_topic"        default="/clf_perception_vision/people/raw/transform"/>
     <arg name="depthlookup_out_topic_pose"   default="/clf_perception_vision/people/raw/transform/pose"/>
-    <arg name="depthlookup_shift_center_y"   default="1.2" />
+    <arg name="depthlookup_shift_center_y"   default="1.3" />
 
     <!-- Gender Age Config -->
     <arg name="gender_age_config"      default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
