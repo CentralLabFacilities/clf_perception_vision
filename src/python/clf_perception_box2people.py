@@ -43,7 +43,6 @@ if __name__ == "__main__":
     parser.add_option("--outtopic", dest="outtopic", default="/clf_perception_vision/people/raw")
     (options, args) = parser.parse_args()
     B2P = BBox2ExtendedPeople(options.intopic, options.outtopic)
-    rate = rospy.Rate(2.0)
     while not rospy.is_shutdown():
         try:
             rospy.spin()
