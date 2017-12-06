@@ -309,14 +309,14 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
-    Subscriber<Image> image_sub(nh, depth_topic, 2);
+    Subscriber<Image> depth_image_sub(nh, depth_topic, 2);
     Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
     Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
 
     typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(5), image_sub, info_depth_sub, info_rgb_sub, people_sub);
+    Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, info_depth_sub, info_rgb_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
