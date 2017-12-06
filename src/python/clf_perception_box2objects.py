@@ -19,7 +19,7 @@ class BBox2ExtendedObjects:
         try:
             e = ExtendedObjects()
             h = std_msgs.msg.Header()
-            h.stamp = rospy.Time.now()
+            h.stamp = data.header.stamp
             e.header = h
             for item in data.boundingBoxes:
                 if item.Class == "person":

@@ -19,7 +19,7 @@ class BBox2ExtendedPeople:
         try:
             e = ExtendedPeople()
             h = std_msgs.msg.Header()
-            h.stamp = rospy.Time.now()
+            h.stamp = data.header.stamp
             e.header = h
             for person in data.boundingBoxes:
                 if person.Class == "person" and float(person.probability) > 0.31:
