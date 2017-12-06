@@ -111,6 +111,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
     im_mutex.lock();
 
     cv_bridge::CvImageConstPtr ptrDepth;
+
     if (depthMsg->encoding == "16UC1") {
        ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
     } else if (depthMsg->encoding == "32FC1") {
