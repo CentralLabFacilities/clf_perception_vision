@@ -108,17 +108,6 @@ void syncCallback(const ImageConstPtr& depthMsg,
                   const CameraInfoConstPtr& cameraInfoMsgRgb,
                   const ExtendedPeopleConstPtr& peopleMsg) {
 
-    // Copy Message in order to manipulate it later and sent updated version.
-    ExtendedPeople people_cpy;
-    people_cpy = *peopleMsg;
-    vector<tf::StampedTransform> transforms;
-    vector<tf::StampedTransform> transforms_closest;
-
-    // Pose Array of people
-    PoseArray pose_arr;
-    pose_arr.header.stamp = stamp_;
-    pose_arr.header.frame_id = frameId_;
-
     im_mutex.lock();
 
     cv_bridge::CvImageConstPtr ptrDepth;
@@ -135,6 +124,18 @@ void syncCallback(const ImageConstPtr& depthMsg,
     float depthConstant = 1.0f/cameraInfoMsg->K[4];
 
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
+
+    // Copy Message in order to manipulate it later and sent updated version.
+    // Set stamp and frame_id AFTER depth_data has been set.
+    ExtendedPeople people_cpy;
+    people_cpy = *peopleMsg;
+    vector<tf::StampedTransform> transforms;
+    vector<tf::StampedTransform> transforms_closest;
+
+    // Pose Array of people
+    PoseArray pose_arr;
+    pose_arr.header.stamp = stamp_;
+    pose_arr.header.frame_id = frameId_;
 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
 
