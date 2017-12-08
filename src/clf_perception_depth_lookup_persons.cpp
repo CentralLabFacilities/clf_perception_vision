@@ -103,6 +103,7 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
 }
 
 void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
+    ROS_INFO(">>> DepthInfoCallback");
     if(!isnan(depthConstant_factor)) {
         ROS_INFO(">>> Setting depthConstant_factor");
         depthConstant_factor = cameraInfoMsg->K[4];
@@ -111,6 +112,7 @@ void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
 }
 
 void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
+    ROS_INFO(">>> RgBInfoCallback");
     if(!isnan(camera_image_rgb_width)) {
         ROS_INFO(">>> Setting camera_rgb_width");
         camera_image_rgb_width = cameraInfoMsgRgb->width;
@@ -342,8 +344,8 @@ int main(int argc, char **argv)
     Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
-    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
+    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 2);
 
     ros::spin();
 
