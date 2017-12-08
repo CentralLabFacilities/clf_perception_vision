@@ -104,6 +104,7 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
 
 void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
     if(!isnan(depthConstant_factor)) {
+        ROS_INFO(">>> Setting depthConstant_factor");
         depthConstant_factor = cameraInfoMsg->K[4];
         camera_image_depth_width = cameraInfoMsg->width;
     }
@@ -111,6 +112,7 @@ void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
 
 void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
     if(!isnan(camera_image_rgb_width)) {
+        ROS_INFO(">>> Setting camera_rgb_width");
         camera_image_rgb_width = cameraInfoMsgRgb->width;
     }
 }
