@@ -7,7 +7,6 @@ using namespace geometry_msgs;
 using namespace message_filters;
 using namespace clf_perception_vision;
 
-
 // This piece of code luckily already existed in https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp (THANKS!)
 Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
 	if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
@@ -31,7 +30,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	float unit_scaling = isInMM?0.001f:1.0f;
 	float constant_x = unit_scaling / fx; //cameraInfo.K.at(0)
 	float constant_y = unit_scaling / fy; //cameraInfo.K.at(4)
-	float bad_point = numeric_limits<float>::quiet_NaN ();
+	float bad_point = numeric_limits<float>::quiet_NaN();
 
 	float depth;
 	bool isValid;
@@ -103,10 +102,30 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
     depthConstant_ = depthConstant;
 }
 
-void syncCallback(const ImageConstPtr& depthMsg,
-                  const CameraInfoConstPtr& cameraInfoMsg,
-                  const CameraInfoConstPtr& cameraInfoMsgRgb,
-                  const ExtendedPeopleConstPtr& peopleMsg) {
+void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
+    if(isnan(depthConstant_factor)) {
+        depthConstant_factor = cameraInfoMsg->K[4];
+        camera_image_depth_width = cameraInfoMsg->width;
+    }
+}
+
+void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
+    if(isnan(camera_image_rgb_width)) {
+        camera_image_rgb_width = cameraInfoMsgRgb->width;
+    }
+}
+
+void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& peopleMsg) {
+
+    if(isnan(depthConstant_factor)) {
+        ROS_WARN(">>> Waiting for first depth camera info message to arrive...");
+        return;
+    }
+
+    if(isnan(camera_image_rgb_width)) {
+        ROS_WARN(">>> Waiting for first rgb camera info message to arrive...");
+        return;
+    }
 
     im_mutex.lock();
 
@@ -122,7 +141,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
 	  return;
     }
 
-    float depthConstant = 1.0f/cameraInfoMsg->K[4];
+    float depthConstant = 1.0f/depthConstant_factor;
 
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
 
@@ -142,7 +161,7 @@ void syncCallback(const ImageConstPtr& depthMsg,
 
     // If depth image and color image have different resolutions,
     // derive a factor to scale the bounding boxes
-    float scale_factor = cameraInfoMsgRgb->width/cameraInfoMsg->width;
+    float scale_factor = camera_image_rgb_width/camera_image_depth_width;
 
     ROS_DEBUG(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
 
@@ -310,15 +329,16 @@ int main(int argc, char **argv)
 
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
+    info_depth_sub = nh.subscribe(depth_info, 2, depthInfoCallback);
+    info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
+
     Subscriber<Image> depth_image_sub(nh, depth_topic, 2);
-    Subscriber<CameraInfo> info_depth_sub(nh, depth_info, 2);
-    Subscriber<CameraInfo> info_rgb_sub(nh, rgb_info, 2);
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
 
-    typedef sync_policies::ApproximateTime<Image, CameraInfo, CameraInfo, ExtendedPeople> sync_pol;
+    typedef sync_policies::ApproximateTime<Image, ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, info_depth_sub, info_rgb_sub, people_sub);
-    sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3, _4));
+    Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, people_sub);
+    sync.registerCallback(boost::bind(&syncCallback, _1, _2));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
     people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);

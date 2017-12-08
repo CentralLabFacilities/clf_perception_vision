@@ -2,6 +2,7 @@
 #include <mutex>
 #include <cmath>
 #include <string>
+#include <limits>
 #include <stdlib.h>
 
 // ROS
@@ -50,8 +51,13 @@ ros::Time stamp_;
 std::string frameId_;
 std::mutex im_mutex;
 float depthConstant_;
+float depthConstant_factor;
+float camera_image_rgb_width;
+float camera_image_depth_width;
 double shift_center_y;
 
 ros::Publisher people_pub;
 ros::Publisher people_pub_pose;
+ros::Subscriber info_depth_sub;
+ros::Subscriber info_rgb_sub;
 tf::TransformBroadcaster *tfBroadcaster_;
