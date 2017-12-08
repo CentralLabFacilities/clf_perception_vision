@@ -103,31 +103,30 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
 }
 
 void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
-    // ROS_INFO(">>> DepthInfoCallback");
-    if(!isnan(depthConstant_factor)) {
+    if(!depthConstant_factor_is_set) {
         ROS_INFO(">>> Setting depthConstant_factor");
         depthConstant_factor = cameraInfoMsg->K[4];
-        cout << depthConstant_factor << endl;
         camera_image_depth_width = cameraInfoMsg->width;
+        depthConstant_factor_is_set = true;
     }
 }
 
 void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
-    // ROS_INFO(">>> RgBInfoCallback");
-    if(!isnan(camera_image_rgb_width)) {
+    if(!camera_image_rgb_width_is_set) {
         ROS_INFO(">>> Setting camera_rgb_width");
         camera_image_rgb_width = cameraInfoMsgRgb->width;
+        camera_image_rgb_width_is_set = true;
     }
 }
 
 void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& peopleMsg) {
 
-    if(!isnan(depthConstant_factor)) {
+    if(!depthConstant_factor_is_set) {
         ROS_WARN(">>> Waiting for first depth camera info message to arrive...");
         return;
     }
 
-    if(!isnan(camera_image_rgb_width)) {
+    if(!camera_image_rgb_width_is_set) {
         ROS_WARN(">>> Waiting for first rgb camera info message to arrive...");
         return;
     }

@@ -57,6 +57,9 @@ float camera_image_rgb_width;
 float camera_image_depth_width;
 double shift_center_y;
 
+bool depthConstant_factor_is_set = false;
+bool camera_image_rgb_width_is_set = false;
+
 ros::Publisher people_pub;
 ros::Publisher people_pub_pose;
 ros::Subscriber info_depth_sub;
