@@ -50,6 +50,7 @@ cv::Mat depth_copy;
 ros::Time stamp_;
 std::string frameId_;
 std::mutex im_mutex;
+
 float depthConstant_;
 float depthConstant_factor;
 float camera_image_rgb_width;

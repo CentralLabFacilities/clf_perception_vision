@@ -13,9 +13,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	{
 		ROS_ERROR(">>> Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
 		return Vec3f(
-				numeric_limits<float>::quiet_NaN (),
-				numeric_limits<float>::quiet_NaN (),
-				numeric_limits<float>::quiet_NaN ());
+				numeric_limits<float>::quiet_NaN(),
+				numeric_limits<float>::quiet_NaN(),
+				numeric_limits<float>::quiet_NaN());
 	}
 
 	cv::Vec3f pt;
@@ -103,26 +103,26 @@ void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &dept
 }
 
 void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
-    if(isnan(depthConstant_factor)) {
+    if(!isnan(depthConstant_factor)) {
         depthConstant_factor = cameraInfoMsg->K[4];
         camera_image_depth_width = cameraInfoMsg->width;
     }
 }
 
 void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
-    if(isnan(camera_image_rgb_width)) {
+    if(!isnan(camera_image_rgb_width)) {
         camera_image_rgb_width = cameraInfoMsgRgb->width;
     }
 }
 
 void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& peopleMsg) {
 
-    if(isnan(depthConstant_factor)) {
+    if(!isnan(depthConstant_factor)) {
         ROS_WARN(">>> Waiting for first depth camera info message to arrive...");
         return;
     }
 
-    if(isnan(camera_image_rgb_width)) {
+    if(!isnan(camera_image_rgb_width)) {
         ROS_WARN(">>> Waiting for first rgb camera info message to arrive...");
         return;
     }
