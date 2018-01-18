@@ -136,6 +136,7 @@ ADD_SERVICE_FILES(
    DIRECTORY srv
    FILES
    DoIKnowThatPerson.srv
+   LearnPerson.srv
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
