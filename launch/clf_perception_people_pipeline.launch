@@ -4,7 +4,7 @@
     <arg name="darknet_2_people_out" default="/clf_perception_vision/people/raw"/>
 
     <!-- Depth Lookup Config -->
-    <arg name="depthlookup_depth_info_topic" default="/pepper_robot/camera/depth/camera/camera_info"/>
+    <arg name="depthlookup_depth_info_topic" default="/pepper_robot/camera/depth/camera_info"/>
     <arg name="depthlookup_rgb_info_topic"   default="/pepper_robot/camera/front/camera_info"/>
     <arg name="depthlookup_image_topic"      default="/pepper_robot/sink/depth/image_raw"/>
     <arg name="depthlookup_in_topic"         default="/clf_perception_vision/people/raw"/>
