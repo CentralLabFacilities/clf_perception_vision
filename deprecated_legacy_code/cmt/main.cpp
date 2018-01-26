@@ -45,19 +45,24 @@ bool pyr = false;
 float UPPER_I = 0;
 
 
-int display(Mat im, CMT & cmt, int result)
+int display(Mat im, CMT & cmt, float result)
 {
-    if(result > UPPER_I-(UPPER_I/100)*10 && result <= UPPER_I+(UPPER_I/100)*10) {
+    if(result > UPPER_I) {
+        UPPER_I = result;
+    }
+    float fraction = result / UPPER_I;
+    //cout << result << ", " << fraction << endl;
+    if(fraction > 0.75){
         for(size_t i = 0; i < cmt.points_active.size(); i++)
         {
-            circle(im, cmt.points_active[i], 2, Scalar(255,0,0));
+            circle(im, cmt.points_active[i], 2, Scalar(0,255,0));
         }
 
         Point2f vertices[4];
         cmt.bb_rot.points(vertices);
         for (int i = 0; i < 4; i++)
         {
-            line(im, vertices[i], vertices[(i+1)%4], Scalar(255,0,0));
+            line(im, vertices[i], vertices[(i+1)%4], Scalar(0,255,0));
         }
     }
 

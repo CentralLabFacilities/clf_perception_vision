@@ -166,38 +166,54 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
                     ${dlib_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
-                    include)
+                    include
+                    deprecated_legacy_code/include)
 
-ADD_EXECUTABLE(clf_perception_surb
+#ADD_EXECUTABLE(clf_perception_surb
+ #              src/ros_grabber.cpp
+  #             src/clf_perception_surb.cpp
+   #            src/clf_perception_surb_main.cpp
+    #           ${INCLUDE_DIRS}
+#)
+
+#ADD_EXECUTABLE(clf_perception_genage
+ #              src/ros_grabber.cpp
+  #             src/dlib_detection.cpp
+   #            src/caffee_classification.cpp
+    #           src/clf_perception_gender_age_main.cpp
+     #          ${INCLUDE_DIRS}
+#)
+
+#ADD_EXECUTABLE(clf_perception_collect_data
+ #              src/clf_perception_collect_data.cpp
+  #             src/ros_grabber.cpp
+   #            ${INCLUDE_DIRS}
+#)
+
+#ADD_EXECUTABLE(clf_perception_depth_lookup_persons
+ #              src/clf_perception_depth_lookup_persons.cpp
+  #             ${INCLUDE_DIRS}
+#)
+
+#ADD_EXECUTABLE(clf_perception_depth_lookup_objects
+ #              src/clf_perception_depth_lookup_objects.cpp
+  #             ${INCLUDE_DIRS}
+#)
+
+
+ADD_EXECUTABLE(clf_cmt
+               deprecated_legacy_code/cmt/common.cpp
+               deprecated_legacy_code/cmt/gui.cpp
+               deprecated_legacy_code/cmt/main.cpp
+               deprecated_legacy_code/cmt/CMT.cpp
+               deprecated_legacy_code/cmt/Consensus.cpp
+               deprecated_legacy_code/cmt/Fusion.cpp
+               deprecated_legacy_code/cmt/Matcher.cpp
+               deprecated_legacy_code/cmt/Tracker.cpp
+               deprecated_legacy_code/cmt/fastcluster.cpp
                src/ros_grabber.cpp
-               src/clf_perception_surb.cpp
-               src/clf_perception_surb_main.cpp
                ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_perception_genage
-               src/ros_grabber.cpp
-               src/dlib_detection.cpp
-               src/caffee_classification.cpp
-               src/clf_perception_gender_age_main.cpp
-               ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_perception_collect_data
-               src/clf_perception_collect_data.cpp
-               src/ros_grabber.cpp
-               ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_perception_depth_lookup_persons
-               src/clf_perception_depth_lookup_persons.cpp
-               ${INCLUDE_DIRS}
-)
-
-ADD_EXECUTABLE(clf_perception_depth_lookup_objects
-               src/clf_perception_depth_lookup_objects.cpp
-               ${INCLUDE_DIRS}
-)
+ )
 
 # Nodelets #
 # ADD_LIBRARY(clf_perception_nodelets
@@ -209,9 +225,9 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_objects
 # )
 
 # Build Messages First
-ADD_DEPENDENCIES(clf_perception_depth_lookup_persons clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-ADD_DEPENDENCIES(clf_perception_depth_lookup_objects clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+#ADD_DEPENDENCIES(clf_perception_depth_lookup_persons clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+#ADD_DEPENDENCIES(clf_perception_depth_lookup_objects clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+#ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 # Nodelets #
 # TARGET_LINK_LIBRARIES(clf_perception_nodelets ${catkin_LIBRARIES}
@@ -225,20 +241,21 @@ ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_c
 #  ADD_DEPENDENCIES(clf_perception_nodelets ${catkin_EXPORTED_LIBRARIES})
 # ENDIF()
 
-TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_objects ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
+#TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_objects ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+#TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 # Nodelets #
 # INSTALL(TARGETS clf_perception_nodelets ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_depth_lookup_objects RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#INSTALL(TARGETS clf_perception_depth_lookup_objects RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
