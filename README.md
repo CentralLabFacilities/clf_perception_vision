@@ -3,6 +3,8 @@
 Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
 
 This needs to be redone after refactoring. SOON.
+Also the readme has to be updated ... lot's of things changed.
+REMINDER: Messages are a separate repo now.
 
 ### Installation
 
