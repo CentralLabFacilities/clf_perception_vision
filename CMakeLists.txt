@@ -137,6 +137,8 @@ ADD_SERVICE_FILES(
    FILES
    DoIKnowThatPerson.srv
    LearnPerson.srv
+        CMTObjectTrack.srv
+        CMTStopObjectTrack.srv
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
