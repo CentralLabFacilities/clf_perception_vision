@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
+
 import rospy
 import std_msgs.msg
 from optparse import OptionParser
