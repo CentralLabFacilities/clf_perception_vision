@@ -37,6 +37,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         message_filters
                                         image_transport
                                         visualization_msgs
+					clf_perception_vision_msgs
                                         message_generation
 )
 
@@ -123,23 +124,9 @@ SET(CUSTOM_CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
 # MESSAGE(STATUS "CUSTOM_CV_LIBS: " ${CUSTOM_CV_LIBS})
 # MESSAGE(STATUS "CUSTOM_CUDA_LIBS: "${CUSTOM_CUDA_LIBS})
 
-ADD_MESSAGE_FILES(
-   DIRECTORY msg
-   FILES
-   ExtendedPersonStamped.msg
-   ExtendedObjectsStamped.msg
-   ExtendedPeople.msg
-   ExtendedObjects.msg
-)
 
-ADD_SERVICE_FILES(
-   DIRECTORY srv
-   FILES
-   DoIKnowThatPerson.srv
-   LearnPerson.srv
-)
 
-GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
+GENERATE_MESSAGES(DEPENDENCIES clf_perception_vision_msgs geometry_msgs std_msgs)
 
 CATKIN_PACKAGE(INCLUDE_DIRS include
                # LIBRARIES clf_perception_nodelets
@@ -150,6 +137,7 @@ CATKIN_PACKAGE(INCLUDE_DIRS include
                               cv_bridge
                               sensor_msgs
                               geometry_msgs
+			      clf_perception_vision_msgs
                               message_filters
                               message_runtime
                               image_transport

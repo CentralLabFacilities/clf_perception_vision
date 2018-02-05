@@ -1,9 +1,0 @@
-Header                     header
-string                     category
-string                     transformid
-uint16                     bbox_xmin
-uint16                     bbox_xmax
-uint16                     bbox_ymin
-uint16                     bbox_ymax
-float64                    probability
-geometry_msgs/PoseStamped  pose

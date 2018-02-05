@@ -1,2 +1,0 @@
-Header header
-clf_perception_vision/ExtendedObjectsStamped[] objects

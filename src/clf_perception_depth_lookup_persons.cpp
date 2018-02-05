@@ -5,7 +5,7 @@ using namespace std;
 using namespace sensor_msgs;
 using namespace geometry_msgs;
 using namespace message_filters;
-using namespace clf_perception_vision;
+using namespace clf_perception_vision_msgs;
 
 // This piece of code luckily already existed in https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp (THANKS!)
 Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {

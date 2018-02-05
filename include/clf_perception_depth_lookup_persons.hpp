@@ -21,8 +21,8 @@
 #include <geometry_msgs/PoseArray.h>
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <clf_perception_vision/ExtendedPeople.h>
-#include <clf_perception_vision/ExtendedPersonStamped.h>
+#include <clf_perception_vision_msgs/ExtendedPeople.h>
+#include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 
 // FILTER
 #include <message_filters/subscriber.h>
