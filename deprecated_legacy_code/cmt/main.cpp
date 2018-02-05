@@ -95,6 +95,7 @@ bool stop_track(clf_perception_vision::CMTStopObjectTrack::Request &req,
                          clf_perception_vision::CMTStopObjectTrack::Response &res) {
     tracker_counter = 0;
     last_computed_frame = -1;
+    res.success = true;
     return true;
 }
 
@@ -106,6 +107,7 @@ bool track(clf_perception_vision::CMTObjectTrack::Request &req,
     rect.width = req.xmax - req.xmin;
     rect.height = req.ymax - req.ymin;
     cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << std::endl;
+    res.success = true;
 
     tracker_counter = 1;
     return true;
