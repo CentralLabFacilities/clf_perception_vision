@@ -14,6 +14,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <unistd.h>
+
 // MSGS
 #include "clf_perception_vision/CMTObjectTrack.h"
 #include "clf_perception_vision/CMTStopObjectTrack.h"
@@ -32,6 +34,7 @@
  * - main loop frisst massiv cpu
  *      - liegt vmtl am continue bei tracker_counter = 0
  *      - mögliche lösung: sleep in abhängigkeit von fps (config)?
+ *      - Done
  * - state designen
  * - state generieren + publishen
  * - streamende: was tun?
@@ -75,8 +78,18 @@ float UPPER_I = 0;
 //Create a CMT object
 cmt::CMT cmt_;
 int tracker_counter = 0;
+int sensor_fps = 30;
 unsigned int last_computed_frame = -1;
 cv::Rect rect;
+
+/*
+ * Config File needed.
+ * In it declared should be (with example/ default values):
+ * sensor_fps: 30
+ * pyr: 0
+ * string_topic: "/usb_cam/image_raw"
+ * show_tracking_results: 1
+ */
 
 
 int display(Mat im, CMT &cmt, float result) {
@@ -158,6 +171,9 @@ int main(int argc, char **argv) {
 
         fs["show_tracking_results"] >> show_tracking_results;
         cout << ">>> Show Tracking Results: --> " << show_tracking_results << endl;
+
+        fs["sensor_fps"] >> sensor_fps;
+        cout << ">>> Sensor FPS: --> " << sensor_fps << endl;
     }
 
     fs.release();
@@ -191,6 +207,7 @@ int main(int argc, char **argv) {
         ros::spinOnce();
         ros_grabber.getImage(&im);
         if (tracker_counter == 0) {
+            usleep((int)(1000/sensor_fps));
             continue;
         }
 
