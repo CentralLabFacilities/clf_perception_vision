@@ -72,6 +72,7 @@ using ::atof;
 static string WIN_NAME = "CMT";
 
 string topic = "/usb_cam/image_raw";
+string state_topic = "/cmt/state";
 bool pyr = false;
 bool show_tracking_results = false;
 float UPPER_I = 0;
@@ -87,7 +88,8 @@ cv::Rect rect;
  * In it declared should be (with example/ default values):
  * sensor_fps: 30
  * pyr: 0
- * string_topic: "/usb_cam/image_raw"
+ * input_ros_topic: "/usb_cam/image_raw"
+ * output_ros_topic: "/cmt/state"
  * show_tracking_results: 1
  */
 
@@ -165,6 +167,9 @@ int main(int argc, char **argv) {
 
         fs["input_ros_topic"] >> topic;
         cout << ">>> Input Topic: --> " << topic << endl;
+
+        fs["output_ros_topic"] >> state_topic;
+        cout << ">>> Output Topic: --> " << state_topic << endl;
 
         fs["pyr"] >> pyr;
         cout << ">>> PyrUP: --> " << pyr << endl;

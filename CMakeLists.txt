@@ -213,9 +213,10 @@ ADD_EXECUTABLE(clf_cmt
                deprecated_legacy_code/cmt/Matcher.cpp
                deprecated_legacy_code/cmt/Tracker.cpp
                deprecated_legacy_code/cmt/fastcluster.cpp
+               deprecated_legacy_code/cmt/Continuity.cpp
                src/ros_grabber.cpp
                ${INCLUDE_DIRS}
- )
+        )
 
 # Nodelets #
 # ADD_LIBRARY(clf_perception_nodelets
