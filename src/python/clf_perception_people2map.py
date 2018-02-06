@@ -26,7 +26,7 @@ class ExtendedPeople2Map:
 
         try:
             for person in data.persons:
-                person.pose = self.tf.transformPose(person.pose, '/map')
+                person.pose = self.tf.transformPose('/map', person.pose)
 
             self.pub.publish(data)
         except Exception, ex:
