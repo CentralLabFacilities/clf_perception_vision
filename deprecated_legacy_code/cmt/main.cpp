@@ -29,15 +29,24 @@
 
 /*
  * TODO List:
+ * - main loop frisst massiv cpu
+ *      - liegt vmtl am continue bei tracker_counter = 0
+ *      - mögliche lösung: sleep in abhängigkeit von fps (config)?
+ * - state designen
+ * - state generieren + publishen
+ * - streamende: was tun?
+ *      - tracking des objects beenden
+ *      - warten, bis es wieder bilddateien gibt (aktuelle lösung)
+ *      - node terminieren
+ * - reaquirieren von halb verlorenen objekten
+ *      - wenn alle features verloren sind, prüft der cmt auf dem ganzen bild nach den punkten
+ *      - wenn nur noch wenige features gefunden werden oder der getrackte bereich zu hart springen sollte derselbe vorgang ablaufen
+ * - object Erkennung (low prio)
  * - Bug: segfault bei mehrmaligem neustarten des trackens
  *      - tritt nur (?) bei sehr wenigen (< 10) punkten auf
  *      - und in der process_frame Methode des CMT, bzw in Methoden der Consensus Klasse
  *      - Grund: CMT/Consensus scheint neuinitialisieren nicht zu mögen
  *      - Lösung: für jedes tracking einen neuen CMT erstellen
- * - state designen
- * - state generieren
- * - state publishen
- * - object Erkennung (low prio)
  */
 
 using cmt::CMT;
@@ -61,6 +70,7 @@ static string WIN_NAME = "CMT";
 
 string topic = "/usb_cam/image_raw";
 bool pyr = false;
+bool show_tracking_results = false;
 float UPPER_I = 0;
 //Create a CMT object
 cmt::CMT cmt_;
@@ -134,10 +144,6 @@ int main(int argc, char **argv) {
     const int skip_msecs_cmd = 1006;
     const int output_file_cmd = 1007;
 
-    //Create window
-    namedWindow(WIN_NAME);
-
-    bool show_preview = true;
 
     cv::CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
     cv::FileStorage fs(argv[1], cv::FileStorage::READ);
@@ -149,9 +155,17 @@ int main(int argc, char **argv) {
 
         fs["pyr"] >> pyr;
         cout << ">>> PyrUP: --> " << pyr << endl;
+
+        fs["show_tracking_results"] >> show_tracking_results;
+        cout << ">>> Show Tracking Results: --> " << show_tracking_results << endl;
     }
 
     fs.release();
+
+    if(show_tracking_results) {
+        //Create window
+        namedWindow(WIN_NAME);
+    }
 
     // ROS
     ROSGrabber ros_grabber(topic);
@@ -221,8 +235,10 @@ int main(int argc, char **argv) {
             }
             last_computed_frame = ros_grabber.getLastFrameNr();
             // Display image and then quit if requested.
-            char key = display(im, cmt_, result);
-            if (key == 'q') break;
+            if (show_tracking_results){
+                char key = display(im, cmt_, result);
+                if (key == 'q') exit(0);
+            }
         }
     }
 
