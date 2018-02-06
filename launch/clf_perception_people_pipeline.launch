@@ -12,6 +12,9 @@
     <arg name="depthlookup_out_topic_pose"   default="/clf_perception_vision/people/raw/transform/pose"/>
     <arg name="depthlookup_shift_center_y"   default="1.3" />
 
+    <!-- People2Map Transform topic -->
+    <arg name="people_to_map_topic"        default="/clf_perception_vision/people/raw/transform/map"/>
+
     <!-- Gender Age Config -->
     <arg name="gender_age_config"      default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
     <arg name="gender_age_image_topic" default="/darknet_ros/detection_image"/>
@@ -21,6 +24,11 @@
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
           args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
+    </node>
+
+     <!-- ExtendedPeople Message Transform to /map-->
+    <node pkg="clf_perception_vision" type="clf_perception_people2map.py" name="clf_perception_people2map"
+          args="--intopic=$(arg depthlookup_out_topic) --outtopic=$(arg people_to_map_topic)" output="screen">
     </node>
 
     <node pkg="clf_perception_vision" type="clf_perception_depth_lookup_persons" name="clf_perception_depth_lookup_persons" output="screen">
