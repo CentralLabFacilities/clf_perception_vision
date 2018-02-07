@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Author: Florian Lier [flier AT techfak.uni-bielefeld DOT de]
+# Author: Felix Friese [ffriese AT techfak.uni-bielefeld DOT de]
 
 import rospy
 from optparse import OptionParser
