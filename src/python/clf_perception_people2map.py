@@ -4,7 +4,7 @@
 
 import rospy
 from optparse import OptionParser
-from clf_perception_vision.msg import ExtendedPeople
+from clf_perception_vision_msgs.msg import ExtendedPeople
 from tf import TransformListener
 
 

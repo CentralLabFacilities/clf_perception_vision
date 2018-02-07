@@ -6,7 +6,7 @@ import rospy
 import std_msgs.msg
 from optparse import OptionParser
 from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
-from clf_perception_vision.msg import ExtendedObjects, ExtendedObjectsStamped
+from clf_perception_vision_msgs.msg import ExtendedObjects, ExtendedObjectsStamped
 
 
 class BBox2ExtendedObjects:
