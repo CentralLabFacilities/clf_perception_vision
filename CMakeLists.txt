@@ -125,9 +125,6 @@ SET(CUSTOM_CUDA_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_cudaarithm.so
 # MESSAGE(STATUS "CUSTOM_CUDA_LIBS: "${CUSTOM_CUDA_LIBS})
 
 
-
-GENERATE_MESSAGES(DEPENDENCIES clf_perception_vision_msgs geometry_msgs std_msgs)
-
 CATKIN_PACKAGE(INCLUDE_DIRS include
                # LIBRARIES clf_perception_nodelets
                CATKIN_DEPENDS tf
