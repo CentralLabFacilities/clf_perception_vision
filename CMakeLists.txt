@@ -4,8 +4,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 
 PROJECT(clf_perception_vision)
 
-SET(ENV{ROS_LANG_DISABLE} "geneus;genlisp;gennodejs;genjava")
-
 SET(OpenCV_MIN_VERSION "3.2.0")
 
 SET(ROS_VERSION "kinetic")
@@ -19,14 +17,9 @@ SET(ROS_BUILD_TYPE Release)
 SET(CMAKE_BUILD_TYPE Release)
 
 FIND_PACKAGE(dlib REQUIRED)
-
 FIND_PACKAGE(Caffe REQUIRED)
-ADD_DEFINITIONS(${Caffe_DEFINITIONS})
-
 FIND_PACKAGE(CUDA REQUIRED)
-
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system program_options)
-
 FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         roscpp
                                         nodelet
@@ -38,9 +31,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         image_transport
                                         visualization_msgs
 					clf_perception_vision_msgs
-                                        message_generation
 )
-
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         core
                                         imgproc
@@ -60,6 +51,8 @@ FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         cudawarping
                                         cudacodec
 )
+
+ADD_DEFINITIONS(${Caffe_DEFINITIONS})
 
 IF(OpenCV_FOUND)
         IF(${OpenCV_VERSION} VERSION_LESS ${OpenCV_MIN_VERSION} AND (SUPPORT_VIDEO OR SUPPORT_IMAGE) )
@@ -193,11 +186,6 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_objects
 #            src/caffee_classification.cpp
 # )
 
-# Build Messages First
-ADD_DEPENDENCIES(clf_perception_depth_lookup_persons clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-ADD_DEPENDENCIES(clf_perception_depth_lookup_objects clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-ADD_DEPENDENCIES(clf_perception_genage clf_perception_vision_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-
 # Nodelets #
 # TARGET_LINK_LIBRARIES(clf_perception_nodelets ${catkin_LIBRARIES}
 #                                              ${CUSTOM_ROS_LIBS}
@@ -227,7 +215,8 @@ INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINAT
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-INSTALL(FILES clf_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+# Nodelets #
+# INSTALL(FILES clf_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_box2people.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 CATKIN_INSTALL_PYTHON(PROGRAMS src/python/clf_perception_people2map.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
