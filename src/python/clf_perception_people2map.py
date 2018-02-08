@@ -33,8 +33,8 @@ class ExtendedPeople2Map:
         try:
             for person in data.persons:
                 self.tf.waitForTransform(self.reference_frame, person.pose, rospy.Time.now(), rospy.Duration(0.15))
-                transform_pose = self.tf.transformPose(self.reference_frame, person.pose)
-                self.pub.publish(transform_pose)
+                self.tf.transformPose(self.reference_frame, person.pose)
+            self.pub.publish(data)
         except Exception, ex:
             rospy.logwarn(">>> Problem receiving data, %s" % str(ex))
 
