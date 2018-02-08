@@ -14,7 +14,7 @@ class ExtendedPeople2Map:
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_people2map', anonymous=True)
         self.tf = TransformListener()
-        self.reference_frame = "/map"
+        self.reference_frame = "map"
         self.sub = rospy.Subscriber(str(_in), ExtendedPeople, self.people_cb, queue_size=2)
         self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=2)
         rospy.logdebug(">>> People2Map is ready.")
