@@ -4,8 +4,8 @@
 
 import rospy
 from optparse import OptionParser
-from clf_perception_vision_msgs.msg import ExtendedPeople
 from tf import TransformListener
+from clf_perception_vision_msgs.msg import ExtendedPeople
 
 
 class ExtendedPeople2Map:
@@ -23,7 +23,6 @@ class ExtendedPeople2Map:
         if not self.tf.frameExists(frame_id) and self.tf.frameExists("/map"):
             print('transform from %s to /map not found... discarding message' % frame_id)
             return
-
         try:
             for person in data.persons:
                 person.pose = self.tf.transformPose('/map', person.pose)
