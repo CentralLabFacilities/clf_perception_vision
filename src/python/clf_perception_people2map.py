@@ -17,7 +17,7 @@ class ExtendedPeople2Map:
         self.reference_frame = "map"
         self.sub = rospy.Subscriber(str(_in), ExtendedPeople, self.people_cb, queue_size=2)
         self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=2)
-        rospy.logdebug(">>> People2Map is ready.")
+        rospy.loginfo(">>> People2Map is ready.")
 
     def people_cb(self, data):
 
