@@ -7,6 +7,7 @@
 #include "Fusion.h"
 #include "Matcher.h"
 #include "Tracker.h"
+#include "Continuity.h"
 
 #include <opencv2/features2d/features2d.hpp>
 
@@ -30,6 +31,7 @@ public:
     Matcher matcher;
     Tracker tracker;
     Consensus consensus;
+    Continuity continuity;
 
     vector<int> classes_active;
 

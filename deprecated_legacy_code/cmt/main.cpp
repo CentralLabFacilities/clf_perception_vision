@@ -36,6 +36,10 @@
  *      - mögliche lösung: sleep in abhängigkeit von fps (config)?
  *      - Done
  * - state designen
+ *      - angle | float
+ *      - tracked | bool (float?)
+ *      - posi | 4 int
+ *      -
  * - state generieren + publishen
  * - streamende: was tun?
  *      - tracking des objects beenden
@@ -43,6 +47,7 @@
  *      - node terminieren
  * - reaquirieren von halb verlorenen objekten
  *      - wenn alle features verloren sind, prüft der cmt auf dem ganzen bild nach den punkten
+ *          - verhalten vmtl nur nebeneffekt, wenn im vorherigen frame nichts gefunden wurde
  *      - wenn nur noch wenige features gefunden werden oder der getrackte bereich zu hart springen sollte derselbe vorgang ablaufen
  * - object Erkennung (low prio)
  * - Bug: segfault bei mehrmaligem neustarten des trackens

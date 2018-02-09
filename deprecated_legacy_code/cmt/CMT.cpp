@@ -3,6 +3,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+
+#include <iostream>
+
 namespace cmt {
 
 void CMT::initialize(const Mat im_gray, const Rect rect)
@@ -105,6 +108,9 @@ void CMT::initialize(const Mat im_gray, const Rect rect)
         classes_active = classes_fg;
     }
 
+    //Initialize continuity
+    continuity.initialize(points_active, bb_rot);
+
     FILE_LOG(logDEBUG) << "CMT::initialize() return";
 }
 
@@ -191,6 +197,12 @@ void CMT::processFrame(Mat im_gray) {
 
     //TODO: Use theta to suppress result
     bb_rot = RotatedRect(center,  size_initial * scale, rotation/CV_PI * 180);
+
+    if(continuity.check_for_continuity(points_active, bb_rot)){
+        std::cout << "continuity preserved!" << std::endl;
+    }else{
+        std::cout << "continuity broken!" << std::endl;
+    }
 
     //Remember current image
     im_prev = im_gray;
