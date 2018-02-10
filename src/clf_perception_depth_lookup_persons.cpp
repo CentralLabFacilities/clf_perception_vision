@@ -274,6 +274,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
 
             PoseStamped pose_stamped;
             Pose pose;
+
             pose_stamped.header = people_cpy.header;
             pose_stamped.header.frame_id = frameId_;
 
