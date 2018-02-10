@@ -25,8 +25,8 @@ class ExtendedPeople2Map:
         deep_data = copy_module.deepcopy(data)
         try:
             for p in deep_data.persons:
-                print "looking up %s --> %s " % (self.reference_frame, p.transformid)
-                self.tf_listener.waitForTransform(self.reference_frame, p.transformid, rospy.Time.now(), rospy.Duration(1))
+                # print "looking up %s --> %s " % (self.reference_frame, p.transformid)
+                self.tf_listener.waitForTransform(self.reference_frame, p.transformid, rospy.Time.now(), rospy.Duration(0.5))
                 trans_pose = self.tf_listener.transformPose(self.reference_frame, p.pose)
                 p.pose = trans_pose
             self.pub.publish(deep_data)
