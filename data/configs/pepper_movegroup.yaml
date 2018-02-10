@@ -1,3 +1,0 @@
-filter_primitive:
-  move_group: "body_arms"
-  links : "all"
