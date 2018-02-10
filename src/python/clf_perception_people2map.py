@@ -29,7 +29,7 @@ class ExtendedPeople2Map:
                 self.tf_listener.waitForTransform(self.reference_frame, p.transformid, rospy.Time.now(), rospy.Duration(1))
                 trans_pose = self.tf_listener.transformPose(self.reference_frame, p.pose)
                 p.pose = trans_pose
-            self.pub(deep_data)
+            self.pub.publish(deep_data)
         except Exception, ex:
             rospy.logwarn(">>> Problem looking up TF data ---> %s" % str(ex))
 
