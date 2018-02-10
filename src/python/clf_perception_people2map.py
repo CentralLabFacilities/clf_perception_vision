@@ -4,6 +4,7 @@
 
 import time
 import rospy
+import copy as copy_module
 from optparse import OptionParser
 from tf import TransformListener
 from geometry_msgs.msg import Pose, PoseStamped
@@ -21,16 +22,14 @@ class ExtendedPeople2Map:
         rospy.loginfo(">>> People2Map is ready.")
 
     def people_cb(self, data):
+        deep_data = copy_module.deepcopy(data)
         try:
-            for p in data.persons:
-                print "looking up %s --> %s " % (self.reference_frame, data.header.frame_id)
-                self.tf_listener.waitForTransform(self.reference_frame, data.header.frame_id, rospy.Time.now(), rospy.Duration(1))
+            for p in deep_data.persons:
+                print "looking up %s --> %s " % (self.reference_frame, p.transformid)
+                self.tf_listener.waitForTransform(self.reference_frame, p.transformid, rospy.Time.now(), rospy.Duration(1))
                 trans_pose = self.tf_listener.transformPose(self.reference_frame, p.pose)
-                print trans_pose
-                # pa.poses.append(trans_pose)
-            if len(pa.poses) > 0:
-                # self.pub.publish(data)
-                pass
+                p.pose = trans_pose
+            self.pub(deep_data)
         except Exception, ex:
             rospy.logwarn(">>> Problem looking up TF data ---> %s" % str(ex))
 
