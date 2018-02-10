@@ -6,6 +6,7 @@ import time
 import rospy
 from optparse import OptionParser
 from tf import TransformListener
+from geometry_msgs.msg import PoseArray, Pose
 from clf_perception_vision_msgs.msg import ExtendedPeople
 
 
@@ -35,8 +36,8 @@ class ExtendedPeople2Map:
                 # self.tf.waitForTransform(self.reference_frame, person.pose, rospy.Time.now(), rospy.Duration(0.15))
                 # self.tf.transformPose(self.reference_frame, person.pose)
                 if self.tf.waitForTransform(self.reference_frame, person.pose.header.frame_id, person.pose.header.stamp,
-                                            rospy.Duration(0.1)):
-                    transd_pose = self.tl.transformPose(self.reference_frame, person.pose)
+                                            rospy.Duration(0.4)):
+                    transd_pose = self.tf.transformPose(self.reference_frame, person.pose)
                     rospy.logdebug(transd_pose)
             self.pub.publish(data)
         except Exception, ex:
