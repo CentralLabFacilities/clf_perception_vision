@@ -28,6 +28,7 @@ class ExtendedPeople2Map:
                 # print person.pose
                 if self.tf.waitForTransform(self.reference_frame, person.transformid, person.pose.header.stamp,
                                             rospy.Duration(0.5)):
+                    print "found transform"
                     # target_frame, stamped_in, stamped_out
                     self.tf.transformPose(self.reference_frame, person.pose, person.pose)
                     pa.poses.append(person.pose)
