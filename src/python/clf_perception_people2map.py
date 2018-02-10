@@ -17,29 +17,22 @@ class ExtendedPeople2Map:
         self.tf = TransformListener()
         self.reference_frame = "map"
         self.sub = rospy.Subscriber(str(_in), ExtendedPeople, self.people_cb, queue_size=2)
-        self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=2)
+        self.pub = rospy.Publisher(str(_out), PoseArray, queue_size=2)
         rospy.loginfo(">>> People2Map is ready.")
 
     def people_cb(self, data):
-
-        frame_id = data.persons[0].pose.header.frame_id
-        if not self.tf.frameExists(frame_id):
-            rospy.logwarn(">>> Frame does not exist, %s" % frame_id)
-            time.sleep(0.05)
-            return
-        if not self.tf.frameExists(self.reference_frame):
-            rospy.logwarn(">>> Frame does not exist, %s" % self.reference_frame)
-            time.sleep(0.05)
-            return
+        pa = PoseArray()
+        pa.header = data.header
         try:
             for person in data.persons:
-                # self.tf.waitForTransform(self.reference_frame, person.pose, rospy.Time.now(), rospy.Duration(0.15))
-                # self.tf.transformPose(self.reference_frame, person.pose)
-                if self.tf.waitForTransform(self.reference_frame, person.pose.header.frame_id, person.pose.header.stamp,
-                                            rospy.Duration(0.4)):
-                    transd_pose = self.tf.transformPose(self.reference_frame, person.pose)
-                    rospy.logdebug(transd_pose)
-            self.pub.publish(data)
+                # print person.pose
+                if self.tf.waitForTransform(self.reference_frame, person.transformid, person.pose.header.stamp,
+                                            rospy.Duration(0.5)):
+                    # target_frame, stamped_in, stamped_out
+                    self.tf.transformPose(self.reference_frame, person.pose, person.pose)
+                    pa.poses.append(person.pose)
+            if len(pa.poses) > 0:
+                self.pub.publish(pa)
         except Exception, ex:
             rospy.logwarn(">>> Problem receiving data, %s" % str(ex))
 
