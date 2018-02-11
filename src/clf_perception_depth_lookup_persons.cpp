@@ -273,32 +273,28 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
             // transform.setRotation(q.normalized());
 
             PoseStamped pose_stamped;
-            Pose pose;
-
             pose_stamped.header = people_cpy.header;
             pose_stamped.header.frame_id = frameId_;
-
             pose_stamped.pose.position.x = center3D.val[0];
             pose_stamped.pose.position.y = center3D.val[1];
             pose_stamped.pose.position.z = center3D.val[2];
-
-            pose.position.x = center3D.val[0];
-            pose.position.y = center3D.val[1];
-            pose.position.z = center3D.val[2];
-
             pose_stamped.pose.orientation.x = 0.0; //q.normalized().x();
             pose_stamped.pose.orientation.y = 0.0; //q.normalized().y();
             pose_stamped.pose.orientation.z = 0.0; //q.normalized().z();
             pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
 
+            Pose pose;
+            pose.position.x = center3D.val[0];
+            pose.position.y = center3D.val[1];
+            pose.position.z = center3D.val[2];
             pose.orientation.x = 0.0; //q.normalized().x();
             pose.orientation.y = 0.0; //q.normalized().y();
             pose.orientation.z = 0.0; //q.normalized().z();
             pose.orientation.w = 1.0; //q.normalized().w();
 
+            ///////// FILL ///////////////////////////////////////////////////////
             people_cpy.persons[i].pose = pose_stamped;
             people_cpy.persons[i].transformid = id;
-
             transforms.push_back(transform);
             pose_arr.poses.push_back(pose);
 
@@ -310,7 +306,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
 
     im_mutex.unlock();
 
-    if(transforms.size()) {
+    if(transforms.size() > 0) {
    	   tfBroadcaster_->sendTransform(transforms);
 	   people_pub.publish(people_cpy);
        people_pub_pose.publish(pose_arr);

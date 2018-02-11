@@ -20,14 +20,12 @@ class BBox2ExtendedPeople:
     def box_cb(self, data):
         try:
             e = ExtendedPeople()
-            h = std_msgs.msg.Header()
-            h.stamp = data.header.stamp
-            e.header = h
+            e.header = data.header
             for person in data.boundingBoxes:
                 # This is also handled in darknet_ros and the default is 0.3
-                if person.Class == "person" and float(person.probability) > 0.31:
+                if person.Class == "person" and float(person.probability) > 0.30:
                     p = ExtendedPersonStamped()
-                    p.header = h
+                    p.header = data.header
                     p.bbox_xmin = person.xmin
                     p.bbox_xmax = person.xmax
                     p.bbox_ymin = person.ymin
