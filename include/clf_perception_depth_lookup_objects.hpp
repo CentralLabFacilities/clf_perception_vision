@@ -63,8 +63,8 @@ the use of this software, even if advised of the possibility of such damage.
 #include <geometry_msgs/Vector3.h>
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <clf_perception_vision/ExtendedObjects.h>
-#include <clf_perception_vision/ExtendedObjectsStamped.h>
+#include <clf_perception_vision_msgs/ExtendedObjects.h>
+#include <clf_perception_vision_msgs/ExtendedObjectsStamped.h>
 
 // FILTER
 #include <message_filters/subscriber.h>

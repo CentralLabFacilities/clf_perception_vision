@@ -10,8 +10,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/image_encodings.h>
-#include <clf_perception_vision/ExtendedPeople.h>
-#include <clf_perception_vision/ExtendedPersonStamped.h>
+#include <clf_perception_vision_msgs/ExtendedPeople.h>
+#include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 
 // FILTER
 #include <message_filters/subscriber.h>

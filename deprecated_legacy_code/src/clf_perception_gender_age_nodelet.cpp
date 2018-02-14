@@ -7,8 +7,8 @@
 #include <pluginlib/class_list_macros.h>
 
 // MSGS
-#include <clf_perception_vision/ExtendedPeople.h>
-#include <clf_perception_vision/ExtendedPersonStamped.h>
+#include <clf_perception_vision_msgs/ExtendedPeople.h>
+#include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 
 // SELF
 #include "ros_grabber.hpp"
