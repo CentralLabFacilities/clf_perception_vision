@@ -387,8 +387,8 @@ int main(int argc, char **argv)
     Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
-    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 2);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
+    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
 
     ros::spin();
 
