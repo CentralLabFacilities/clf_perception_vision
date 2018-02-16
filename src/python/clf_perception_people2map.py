@@ -12,13 +12,12 @@ from clf_perception_vision_msgs.msg import ExtendedPeople, ExtendedPersonStamped
 
 
 class ExtendedPeople2Map:
-
     def __init__(self, _in, _out):
         rospy.init_node('clf_perception_vision_people2map', anonymous=True)
         self.tf_listener = TransformListener()
         self.reference_frame = "map"
-        self.sub = rospy.Subscriber(str(_in), ExtendedPeople, self.people_cb, queue_size=2)
-        self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=2)
+        self.sub = rospy.Subscriber(str(_in), ExtendedPeople, self.people_cb, queue_size=1)
+        self.pub = rospy.Publisher(str(_out), ExtendedPeople, queue_size=1)
         rospy.loginfo(">>> People2Map is ready.")
 
     def people_cb(self, data):
@@ -26,7 +25,8 @@ class ExtendedPeople2Map:
         try:
             for p in deep_data.persons:
                 # print "looking up %s --> %s " % (self.reference_frame, p.transformid)
-                self.tf_listener.waitForTransform(self.reference_frame, p.transformid, p.header.stamp, rospy.Duration(0.5))
+                self.tf_listener.waitForTransform(self.reference_frame, p.transformid, p.header.stamp,
+                                                  rospy.Duration(0.3))
                 trans_pose = self.tf_listener.transformPose(self.reference_frame, p.pose)
                 p.pose = trans_pose
             self.pub.publish(deep_data)
@@ -46,4 +46,3 @@ if __name__ == "__main__":
             rospy.spin()
         except rospy.ROSInterruptException, ex:
             rospy.logwarn(">>> Exiting, %s" % str(ex))
-
