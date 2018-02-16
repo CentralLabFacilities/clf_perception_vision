@@ -202,7 +202,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
     // Transform vector
     vector<tf::StampedTransform> transforms;
 
-    // Common time. copied from extended people, which
+    // Common time. Copied from extended people, which
     // in turn has been copied from the time of detection
     // using Darknet Yolo
     ros::Time current_stamp = people_cpy.header.stamp;
