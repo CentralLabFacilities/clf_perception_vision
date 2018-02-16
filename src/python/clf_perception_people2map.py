@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Author: Felix Friese [ffriese AT techfak.uni-bielefeld DOT de]
+# Author: Felix Friese [ffriese AT techfak.uni-bielefeld DOT de], Florian Lier [flier AT techfak.uni-bielefeld DOT de]
 
 import time
 import rospy
