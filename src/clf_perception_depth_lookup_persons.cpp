@@ -384,12 +384,12 @@ int main(int argc, char **argv)
     info_depth_sub = nh.subscribe(depth_info, 2, depthInfoCallback);
     info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
 
-    Subscriber<Image> depth_image_sub(nh, depth_topic, 2);
-    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
+    Subscriber<Image> depth_image_sub(nh, depth_topic, 1);
+    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
     typedef sync_policies::ApproximateTime<Image, ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(5), depth_image_sub, people_sub);
+    Synchronizer<sync_pol> sync(sync_pol(2), depth_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
