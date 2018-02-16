@@ -196,7 +196,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
 
     // Copy Message in order to manipulate it later and sent updated version.
-    // Set stamp and frame_id AFTER depth_data has been set.
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
 
