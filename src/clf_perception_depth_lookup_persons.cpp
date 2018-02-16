@@ -199,12 +199,18 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
     // Set stamp and frame_id AFTER depth_data has been set.
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
+
+    // Transform vector
     vector<tf::StampedTransform> transforms;
-    vector<tf::StampedTransform> transforms_closest;
+
+    // Common time. copied from extended people, which
+    // in turn has been copied from the time of detection
+    // using Darknet Yolo
+    ros::Time current_stamp = people_cpy.header.stamp;
 
     // Pose Array of people
     PoseArray pose_arr;
-    pose_arr.header.stamp = stamp_;
+    pose_arr.header.stamp = current_stamp;
     pose_arr.header.frame_id = frameId_;
 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
@@ -253,7 +259,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
             transform.setIdentity();
             transform.child_frame_id_ = id;
             transform.frame_id_ = frameId_;
-            transform.stamp_ = stamp_;
+            transform.stamp_ = current_stamp;
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
 
             // set rotation (y inverted)
