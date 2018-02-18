@@ -26,11 +26,6 @@
           args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
     </node>
 
-    <!-- ExtendedPeople Message Transform to /map NOT YET REQUIRED. -->
-    <!-- <node pkg="clf_perception_vision" type="clf_perception_people2map.py" name="clf_perception_people2map" -->
-    <!--       args="--intopic=$(arg depthlookup_out_topic) --outtopic=$(arg people_to_map_topic)" output="screen"> -->
-    <!-- </node> -->
-
     <node pkg="clf_perception_vision" type="clf_perception_depth_lookup_persons" name="clf_perception_depth_lookup_persons" output="screen">
         <param name="depthlookup_depth_info_topic" type="str" value="$(arg depthlookup_depth_info_topic)"/>
         <param name="depthlookup_rgb_info_topic" type="str" value="$(arg depthlookup_rgb_info_topic)"/>
