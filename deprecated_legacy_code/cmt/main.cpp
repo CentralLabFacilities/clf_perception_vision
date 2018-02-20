@@ -83,10 +83,11 @@ bool show_tracking_results = false;
 float UPPER_I = 0;
 //Create a CMT object
 cmt::CMT cmt_;
-int tracker_counter = 0;
-int sensor_fps = 30;
+int sensor_fps = 5;
 unsigned int last_computed_frame = -1;
 cv::Rect rect;
+enum Tracking_Status {idle, start, running};
+Tracking_Status tracking_status = idle;
 
 /*
  * Config File needed.
@@ -100,30 +101,28 @@ cv::Rect rect;
 
 
 int display(Mat im, CMT &cmt, float result) {
-    if (result > UPPER_I) {
-        UPPER_I = result;
-    }
+    Mat im_cp = Mat(im);
     float fraction = result / UPPER_I;
-    //cout << result << ", " << fraction << endl;
-    if (fraction > 0.75) {
+    cout << result << ", " << fraction << endl;
+    if (fraction > 0.75 || true) {//temporaryly disable fraction based displaying
         for (size_t i = 0; i < cmt.points_active.size(); i++) {
-            circle(im, cmt.points_active[i], 2, Scalar(0, 255, 0));
+            circle(im_cp, cmt.points_active[i], 2, Scalar(0, 255, 0));
         }
 
         Point2f vertices[4];
         cmt.bb_rot.points(vertices);
         for (int i = 0; i < 4; i++) {
-            line(im, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
+            line(im_cp, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
         }
     }
 
-    imshow(WIN_NAME, im);
+    imshow(WIN_NAME, im_cp);
     return waitKey(5);
 }
 
 bool stop_track(clf_perception_vision::CMTStopObjectTrack::Request &req,
                          clf_perception_vision::CMTStopObjectTrack::Response &res) {
-    tracker_counter = 0;
+    tracking_status = idle;
     last_computed_frame = -1;
     res.success = true;
     return true;
@@ -139,8 +138,12 @@ bool track(clf_perception_vision::CMTObjectTrack::Request &req,
     cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << std::endl;
     res.success = true;
 
-    tracker_counter = 1;
+    tracking_status = start;
     return true;
+}
+
+void pub_state(bool &tracked, float &angle, vector<int> &position){
+
 }
 
 int main(int argc, char **argv) {
@@ -216,55 +219,63 @@ int main(int argc, char **argv) {
 
         ros::spinOnce();
         ros_grabber.getImage(&im);
-        if (tracker_counter == 0) {
-            usleep((int)(1000/sensor_fps));
-            continue;
-        }
-
-
-        else if (tracker_counter == 1) {
-            //set everything to start
-            Mat leere;
-            im = leere;
-            im_gray = leere;
-            result = 0;
-            UPPER_I = 0;
-            cmt::CMT cmt__;
-            cmt_ = cmt__;
-            last_computed_frame = -1;
-
-
-            while (im.empty()) {
-                ros::spinOnce();
-                ros_grabber.getImage(&im);
+        switch(tracking_status){
+            case idle:{
+                usleep((int)(1000/sensor_fps));
+                continue;
             }
+            case start:{
+                //set everything to start
+                Mat leere;
+                im = leere;
+                im_gray = leere;
+                result = 0;
+                UPPER_I = 0;
+                cmt::CMT cmt__;
+                cmt_ = cmt__;
+                last_computed_frame = -1;
 
-            cvtColor(im, im_gray, CV_BGR2GRAY);
-            cmt_.initialize(im_gray, rect);
-            UPPER_I = (float) cmt_.points_active.size();
-            tracker_counter = 2;
 
-
-
-        } else if (tracker_counter == 2) {
-
-            int tmp_frame_nr = ros_grabber.getLastFrameNr();
-            if (last_computed_frame != tmp_frame_nr) {
-                if (im.empty()) continue; //Exit at end of video stream
-                if (im.channels() > 1) {
-                    cvtColor(im, im_gray, CV_BGR2GRAY);
-                } else {
-                    im_gray = im;
+                while (im.empty()) {
+                    ros::spinOnce();
+                    ros_grabber.getImage(&im);
                 }
-                // Let CMT process the frame
-                cmt_.processFrame(im_gray);
-                result = (float) cmt_.points_active.size();
+
+                cvtColor(im, im_gray, CV_BGR2GRAY);
+                cmt_.initialize(im_gray, rect);
+                UPPER_I = (float) cmt_.points_active.size();
+                tracking_status = running;
+                break;
+
             }
-            last_computed_frame = ros_grabber.getLastFrameNr();
-            // Display image and then quit if requested.
-            if (show_tracking_results){
-                char key = display(im, cmt_, result);
-                if (key == 'q') exit(0);
+            case running:{
+                int tmp_frame_nr = ros_grabber.getLastFrameNr();
+                if (last_computed_frame != tmp_frame_nr) {
+                    if (im.empty()){
+                        tracking_status = idle;
+                        continue; //Exit at end of video stream
+                    }
+                    if (im.channels() > 1) {
+                        cvtColor(im, im_gray, CV_BGR2GRAY);
+                    } else {
+                        im_gray = im;
+                    }
+                    // Let CMT process the frame
+                    cmt_.processFrame(im_gray);
+                    result = (float) cmt_.points_active.size();
+                }
+                else{
+                    //TODO sleep for less cpu usage (how long? 1/10 frame duration?)
+                    usleep((int)(1000/(1*sensor_fps)));
+                    continue;
+                }
+                last_computed_frame = ros_grabber.getLastFrameNr();
+                // Display image and then quit if requested.
+                if (show_tracking_results){
+                    char key = display(im, cmt_, result);
+                    if (key == 'q') exit(0);
+                }
+
             }
         }
     }

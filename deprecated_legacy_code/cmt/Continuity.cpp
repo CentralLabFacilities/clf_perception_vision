@@ -21,7 +21,7 @@ namespace cmt {
         // initialize previous values for main loop to work
         this->tracking_rect_prev = rect;
         this->tracking_points_prev = points;
-        this->initial_amount_points = points.size();
+        this->initial_amount_points = points.size()+1;
 
         Point2f center;
         this->get_center_of_rect(rect, center);
@@ -50,8 +50,17 @@ namespace cmt {
         float movement_rating;
         this->generate_movement_rating(movement_rating);
         std::cout << "movement rating: " << movement_rating << std::endl;
-        if(movement_rating > 0.2){
+
+        if(movement_rating > 0.2 || movement_rating < 0.00005){
             continuity_preserved = false;
+            std::cout << "broken because of movement rating" << std::endl;
+        }
+        if(points.size() >= 1){
+            float fraction = points.size()/(float)this->initial_amount_points;
+            std::cout << "fraction " << fraction << "(" << points.size() << "/" << this->initial_amount_points << ")" << std::endl;
+            if(fraction < 0.5) {
+                continuity_preserved = false;
+            }
         }
 
 
@@ -112,15 +121,16 @@ namespace cmt {
             }
             angle_diffs += abs(diff);
         }
-        angle_diffs /= 180*this->last_rect_movements.size()*2; //
+        //angle_diffs basically describes how much the direction has changed over time, based on a fraction.
+        angle_diffs /= 180*this->last_rect_movements.size();
 
         float distance = 0.0;
         for(int i = 0; i < this->last_rect_movements.size(); i++){
             distance += this->last_rect_movements[i].x / this->last_rect_movements.size();
         }
-        distance /= this->initial_rect_size*2;
+        distance /= this->initial_rect_size;
 
-        rating = angle_diffs + distance;
+        rating = angle_diffs * distance;
     }
 }
 
