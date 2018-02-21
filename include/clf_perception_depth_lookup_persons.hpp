@@ -117,3 +117,7 @@ ros::Subscriber info_depth_sub;
 ros::Subscriber info_rgb_sub;
 
 tf::TransformBroadcaster *tfBroadcaster_;
+
+
+const int fontFace = cv::FONT_HERSHEY_PLAIN;
+const double fontScale = 1;

@@ -217,8 +217,10 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
 
-    // Transform vector
     vector<tf::StampedTransform> transforms;
+    vector<cv::Rect> rectangles;
+    vector<cv::Point> points;
+    vector<std::string> probabilities;
 
     // Common time. Copied from extended people, which
     // in turn has been copied from the time of detection
@@ -248,6 +250,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         bbox_xmax = peopleMsg->persons[i].bbox_xmax;
         bbox_ymin = peopleMsg->persons[i].bbox_ymin;
         bbox_ymax = peopleMsg->persons[i].bbox_ymax;
+        string probability = to_string(peopleMsg->persons[i].probability);
 
         float objectWidth = (bbox_xmax - bbox_xmin) / scale_factor;
         float objectHeight = (bbox_ymax - bbox_ymin) / scale_factor;
@@ -280,11 +283,13 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
             // Setup a rectangle to define your region of interest
             cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
+            rectangles.push_back(roi);
+            points.push_back(cv::Point(center_x * scale_factor, center_y * scale_factor));
+            probabilities.push_back(probability);
 
             // Crop the full image to that image contained by the rectangle roi
             // Note that this doesn't copy the data!
             cv::Mat croppedImage = im(roi);
-            cv::imshow("CLF // Depth Look Up //", croppedImage);
 
             // Compose image message
             cv_bridge::CvImage image_out_msg;
@@ -361,6 +366,13 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
        people_pub_extended_pose.publish(pose_ex);
     }
 
+    for(int i=0; i<rectangles.size(); i++) {
+        cv::circle(im, points[i], 10, Scalar(207, 161, 88), CV_FILLED);
+        cv::rectangle(im, rectangles[i], Scalar(0, 255, 255), 2, 8, 0);
+        cv::putText(im, "p "+probabilities[i].substr(0,4), cv::Point(points[i].x+12, points[i].y+5 ), fontFace, fontScale, cv::Scalar(207, 161, 88), 1);
+    }
+
+    cv::imshow("CLF PERCEPTION || Depth Lookup", im);
     cv::waitKey(1);
 }
 
@@ -460,7 +472,7 @@ int main(int argc, char **argv)
     people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
     people_pub_extended_pose = nh.advertise<ExtendedPoseArray>(out_topic_pose_extended, 1);
 
-    cv::namedWindow("CLF // Depth Look Up //", WINDOW_AUTOSIZE);
+    cv::namedWindow("CLF PERCEPTION || Depth Lookup", WINDOW_AUTOSIZE);
 
     ros::spin();
 
