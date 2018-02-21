@@ -68,6 +68,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <clf_perception_vision_msgs/ExtendedPeople.h>
+#include <clf_perception_vision_msgs/ExtendedPoseArray.h>
 #include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 
 // FILTER
@@ -83,10 +84,12 @@ the use of this software, even if advised of the possibility of such damage.
 // TF
 #include <tf/transform_broadcaster.h>
 
+std::string out_topic_pose_extended;
 std::string out_topic_pose;
 std::string people_topic;
 std::string depth_topic;
 std::string depth_info;
+std::string rgb_topic;
 std::string out_topic;
 std::string rgb_info;
 std::string in_topic;
@@ -108,6 +111,9 @@ bool camera_image_rgb_width_is_set = false;
 
 ros::Publisher people_pub;
 ros::Publisher people_pub_pose;
+ros::Publisher people_pub_extended_pose;
+
 ros::Subscriber info_depth_sub;
 ros::Subscriber info_rgb_sub;
+
 tf::TransformBroadcaster *tfBroadcaster_;

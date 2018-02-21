@@ -165,7 +165,7 @@ void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
     }
 }
 
-void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& peopleMsg) {
+void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, const ExtendedPeopleConstPtr& peopleMsg) {
 
     if(!depthConstant_factor_is_set) {
         ROS_WARN(">>> Waiting for first depth camera info message to arrive...");
@@ -177,23 +177,41 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
         return;
     }
 
+    // Lock image
     im_mutex.lock();
 
     cv_bridge::CvImageConstPtr ptrDepth;
 
-    if (depthMsg->encoding == "16UC1") {
-       ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
-    } else if (depthMsg->encoding == "32FC1") {
-       ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
-    } else {
-      ROS_ERROR(">>> Unknown image encoding %s", depthMsg->encoding.c_str());
-	  im_mutex.unlock();
-	  return;
+    try {
+        if (depthMsg->encoding == "16UC1") {
+           ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
+        } else if (depthMsg->encoding == "32FC1") {
+           ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
+        } else {
+          ROS_ERROR(">>> Unknown image encoding %s", depthMsg->encoding.c_str());
+          im_mutex.unlock();
+          return;
+        }
+    } catch (cv_bridge::Exception& e) {
+      ROS_ERROR(">>> cv_bridge exception: %s", e.what());
+      return;
     }
 
     float depthConstant = 1.0f/depthConstant_factor;
 
     setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
+
+    cv_bridge::CvImageConstPtr ptrColor;
+
+    try {
+      ptrColor = cv_bridge::toCvCopy(colorMsg, sensor_msgs::image_encodings::BGR8);
+    } catch (cv_bridge::Exception& e) {
+      ROS_ERROR(">>> cv_bridge exception: %s", e.what());
+      return;
+    }
+
+    // Create a new image to process below
+    cv::Mat im = ptrColor->image;
 
     // Copy Message in order to manipulate it later and sent updated version.
     ExtendedPeople people_cpy;
@@ -211,6 +229,11 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
     PoseArray pose_arr;
     pose_arr.header.stamp = current_stamp;
     pose_arr.header.frame_id = frameId_;
+
+    // Pose extended msgs
+    ExtendedPoseArray pose_ex;
+    // Add header to PoseArrayExtended
+    pose_ex.header = people_cpy.header;
 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
 
@@ -252,7 +275,22 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
 
         string id = "person_" + to_string(i);
 
-        if(isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
+        if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
+
+            // Setup a rectangle to define your region of interest
+            cv::Rect roi(bbox_xmin*scale_factor, bbox_ymin*scale_factor, objectWidth*scale_factor, objectHeight*scale_factor);
+
+            // Crop the full image to that image contained by the rectangle roi
+            // Note that this doesn't copy the data!
+            cv::Mat croppedImage = im(roi);
+            cv::imshow("CLF // Depth Look Up //", croppedImage);
+
+            // Compose image message
+            cv_bridge::CvImage image_out_msg;
+            image_out_msg.header   = people_cpy.header;
+            image_out_msg.encoding = sensor_msgs::image_encodings::BGR8;
+            image_out_msg.image    = croppedImage;
+            pose_ex.images.push_back(*image_out_msg.toImageMsg());
 
             tf::StampedTransform transform;
             transform.setIdentity();
@@ -297,7 +335,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
             pose.orientation.z = 0.0; //q.normalized().z();
             pose.orientation.w = 1.0; //q.normalized().w();
 
-            ///////// FILL ///////////////////////////////////////////////////////
+            ///////// FILL ///////////////////////////////////////////////
             people_cpy.persons[i].pose = pose_stamped;
             people_cpy.persons[i].transformid = id;
             transforms.push_back(transform);
@@ -309,13 +347,20 @@ void syncCallback(const ImageConstPtr& depthMsg, const ExtendedPeopleConstPtr& p
 		}
     }
 
+    // Fill pose array
+    pose_ex.poses = pose_arr;
+
+    // Finally unlock
     im_mutex.unlock();
 
     if(transforms.size() > 0) {
    	   tfBroadcaster_->sendTransform(transforms);
 	   people_pub.publish(people_cpy);
        people_pub_pose.publish(pose_arr);
+       people_pub_extended_pose.publish(pose_ex);
     }
+
+    cv::waitKey(1);
 }
 
 int main(int argc, char **argv)
@@ -328,6 +373,14 @@ int main(int argc, char **argv)
         ROS_INFO(">>> Input depth image topic: %s", depth_topic.c_str());
     } else {
         ROS_ERROR("!Failed to get depth image topic parameter!");
+        exit(EXIT_FAILURE);
+    }
+
+    if (nh.getParam("depthlookup_image_rgb_topic", rgb_topic))
+    {
+        ROS_INFO(">>> Input rgb image topic: %s", rgb_topic.c_str());
+    } else {
+        ROS_ERROR("!Failed to get rgb image topic parameter!");
         exit(EXIT_FAILURE);
     }
 
@@ -371,6 +424,14 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    if (nh.getParam("depthlookup_out_topic_pose_extended", out_topic_pose_extended))
+    {
+        ROS_INFO(">>> Output Topic Pose Extended: %s", out_topic_pose_extended.c_str());
+    } else {
+        ROS_ERROR("!Failed to get pose extended output topic parameter!");
+        exit(EXIT_FAILURE);
+    }
+
     if (nh.getParam("depthlookup_shift_center_y", shift_center_y))
     {
         ROS_INFO(">>> Shift center_y: %f", shift_center_y);
@@ -385,15 +446,20 @@ int main(int argc, char **argv)
     info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
 
     Subscriber<Image> depth_image_sub(nh, depth_topic, 1);
+    Subscriber<Image> rgb_image_sub(nh, rgb_topic, 1);
+
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, ExtendedPeople> sync_pol;
+    typedef sync_policies::ApproximateTime<Image, Image ,ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(2), depth_image_sub, people_sub);
-    sync.registerCallback(boost::bind(&syncCallback, _1, _2));
+    Synchronizer<sync_pol> sync(sync_pol(2), depth_image_sub, rgb_image_sub, people_sub);
+    sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
     people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
+    people_pub_extended_pose = nh.advertise<ExtendedPoseArray>(out_topic_pose_extended, 1);
+
+    cv::namedWindow("CLF // Depth Look Up //", WINDOW_AUTOSIZE);
 
     ros::spin();
 
