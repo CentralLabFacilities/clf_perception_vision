@@ -11,7 +11,7 @@
     <arg name="depthlookup_in_topic" default="/clf_perception_vision/people/raw"/>
     <arg name="depthlookup_out_topic" default="/clf_perception_vision/people/raw/transform"/>
     <arg name="depthlookup_out_topic_pose" default="/clf_perception_vision/people/raw/transform/pose"/>
-    <arg name="depthlookup_out_topic_pose_extended" default="/clf_perception_vision/people/poseextended"/>
+    <arg name="depthlookup_out_topic_pose_extended" default="/clf_perception_vision/people/pose_extended"/>
     <arg name="depthlookup_shift_center_y" default="1.25"/>
 
     <!-- Darknet people percept 2 ExtendedPeople Message -->
