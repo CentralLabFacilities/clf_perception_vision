@@ -249,10 +249,11 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         bbox_ymin = peopleMsg->persons[i].bbox_ymin;
         bbox_ymax = peopleMsg->persons[i].bbox_ymax;
 
-        float objectWidth = bbox_xmax/scale_factor - bbox_xmin/scale_factor;
-        float objectHeight = bbox_ymax/scale_factor - bbox_ymin/scale_factor;
-        float center_x = (bbox_xmin/scale_factor+bbox_xmax/scale_factor)/2;
-        float center_y = (bbox_ymin/scale_factor+bbox_ymax/scale_factor/shift_center_y)/2;
+        float objectWidth = (bbox_xmax - bbox_xmin) / scale_factor;
+        float objectHeight = (bbox_ymax - bbox_ymin) / scale_factor;
+        float center_x = (bbox_xmin + bbox_xmax) / scale_factor / 2;
+        float center_y = ( (bbox_ymin + bbox_ymax) / scale_factor / shift_center_y ) / 2;
+
         // float xAxis_x = 3*objectWidth/4;
         // float xAxis_y = objectHeight/2;
         // float yAxis_x = objectWidth/2;
@@ -278,7 +279,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
             // Setup a rectangle to define your region of interest
-            cv::Rect roi(bbox_xmin*scale_factor, bbox_ymin*scale_factor, objectWidth*scale_factor, objectHeight*scale_factor);
+            cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
 
             // Crop the full image to that image contained by the rectangle roi
             // Note that this doesn't copy the data!
