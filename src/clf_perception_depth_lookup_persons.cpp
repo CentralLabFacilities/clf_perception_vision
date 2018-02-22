@@ -465,7 +465,7 @@ int main(int argc, char **argv)
 
     typedef sync_policies::ApproximateTime<Image, Image ,ExtendedPeople> sync_pol;
 
-    Synchronizer<sync_pol> sync(sync_pol(2), depth_image_sub, rgb_image_sub, people_sub);
+    Synchronizer<sync_pol> sync(sync_pol(10), depth_image_sub, rgb_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
 
     people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
