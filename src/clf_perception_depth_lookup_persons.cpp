@@ -476,7 +476,7 @@ int main(int argc, char **argv)
     // Subscriber for Extended people messages
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
-    typedef sync_policies::ApproximateTime<Image, Image ,ExtendedPeople> sync_pol;
+    typedef sync_policies::ApproximateTime<Image, Image, ExtendedPeople> sync_pol;
 
     Synchronizer<sync_pol> sync(sync_pol(10), depth_image_sub, rgb_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
