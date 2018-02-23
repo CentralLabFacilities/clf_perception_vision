@@ -154,6 +154,9 @@ void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
         depthConstant_factor = cameraInfoMsg->K[4];
         camera_image_depth_width = cameraInfoMsg->width;
         depthConstant_factor_is_set = true;
+    } else {
+      // Unsubscribe, we only need that once.
+      info_depth_sub.shutdown();
     }
 }
 
@@ -162,23 +165,28 @@ void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
         ROS_INFO(">>> Setting camera_rgb_width");
         camera_image_rgb_width = cameraInfoMsgRgb->width;
         camera_image_rgb_width_is_set = true;
+    } else {
+      // Unsubscribe, we only need that once.
+      info_rgb_sub.shutdown();
     }
 }
 
 void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, const ExtendedPeopleConstPtr& peopleMsg) {
 
     if(!depthConstant_factor_is_set) {
-        ROS_WARN(">>> Waiting for first depth camera info message to arrive...");
+        ROS_WARN(">>> Waiting for first depth camera INFO message to arrive...");
         return;
     }
 
     if(!camera_image_rgb_width_is_set) {
-        ROS_WARN(">>> Waiting for first rgb camera info message to arrive...");
+        ROS_WARN(">>> Waiting for first rgb camera INFO message to arrive...");
         return;
     }
 
     // Lock image
-    im_mutex.lock();
+    // im_mutex.lock();
+
+    ///////////////////////////// Image conversion ////////////////////////////////////////////
 
     cv_bridge::CvImageConstPtr ptrDepth;
 
@@ -193,22 +201,23 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
           return;
         }
     } catch (cv_bridge::Exception& e) {
-      ROS_ERROR(">>> cv_bridge exception: %s", e.what());
+      ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
       return;
     }
-
-    float depthConstant = 1.0f/depthConstant_factor;
-
-    setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
 
     cv_bridge::CvImageConstPtr ptrColor;
 
     try {
       ptrColor = cv_bridge::toCvCopy(colorMsg, sensor_msgs::image_encodings::BGR8);
     } catch (cv_bridge::Exception& e) {
-      ROS_ERROR(">>> cv_bridge exception: %s", e.what());
+      ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
       return;
     }
+
+    ///////////////////////////// End image conversion /////////////////////////////////////////
+
+    float depthConstant = 1.0f/depthConstant_factor;
+    setDepthData(depthMsg->header.frame_id, depthMsg->header.stamp, ptrDepth->image, depthConstant);
 
     // Create a new image to process below
     cv::Mat im = ptrColor->image;
@@ -217,14 +226,14 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
     ExtendedPeople people_cpy;
     people_cpy = *peopleMsg;
 
-    vector<tf::StampedTransform> transforms;
-    vector<cv::Rect> rectangles;
     vector<cv::Point> points;
+    vector<cv::Rect> rectangles;
+    vector<tf::StampedTransform> transforms;
     vector<std::string> probabilities;
 
-    // Common time. Copied from extended people, which
-    // in turn has been copied from the time of detection
-    // using Darknet Yolo
+    // Common time. Copied from extended people msg, which
+    // in turn, has been copied from the time of detection
+    // using Yolo
     ros::Time current_stamp = people_cpy.header.stamp;
 
     // Pose Array of people
@@ -240,12 +249,12 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
     int bbox_xmin, bbox_xmax, bbox_ymin, bbox_ymax;
 
     // If depth image and color image have different resolutions,
-    // derive a factor to scale the bounding boxes
+    // derive factor to scale the bounding boxes
     float scale_factor = camera_image_rgb_width/camera_image_depth_width;
-
-    ROS_DEBUG(">>> Scale ratio RGB Image to DEPTH image is: %f ", scale_factor);
+    ROS_DEBUG(">>> Scale ratio RGB --> DEPTH image is: %f ", scale_factor);
 
     for (int i=0; i<peopleMsg->persons.size(); i++) {
+
         bbox_xmin = peopleMsg->persons[i].bbox_xmin;
         bbox_xmax = peopleMsg->persons[i].bbox_xmax;
         bbox_ymin = peopleMsg->persons[i].bbox_ymin;
@@ -267,17 +276,17 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 				float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
 				1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        //cv::Vec3f axisEndX = getDepth(depth_,
+        // cv::Vec3f axisEndX = getDepth(depth_,
         //         xAxis_x+0.5f, xAxis_y+0.5f,
         //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
         //        1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        //cv::Vec3f axisEndY = getDepth(depth_,
+        // cv::Vec3f axisEndY = getDepth(depth_,
         //        yAxis_x+0.5f, yAxis_y+0.5f,
         //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
         //        1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        string id = "person_" + to_string(i);
+        string id = "person__" + to_string(i);
 
         if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
@@ -357,13 +366,13 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
     pose_ex.poses = pose_arr;
 
     // Finally unlock
-    im_mutex.unlock();
+    // im_mutex.unlock();
 
     if(transforms.size() > 0) {
-   	   tfBroadcaster_->sendTransform(transforms);
-	   people_pub.publish(people_cpy);
-       people_pub_pose.publish(pose_arr);
-       people_pub_extended_pose.publish(pose_ex);
+	    people_pub.publish(people_cpy);
+        people_pub_pose.publish(pose_arr);
+        people_pub_extended_pose.publish(pose_ex);
+        tfBroadcaster_->sendTransform(transforms);
     }
 
     for(int i=0; i<rectangles.size(); i++) {
@@ -453,14 +462,18 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    // TF boradcaster
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
+    // Subscriber for camera info topics
     info_depth_sub = nh.subscribe(depth_info, 2, depthInfoCallback);
     info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
 
+    // Subscriber for depth can rgb images
     Subscriber<Image> depth_image_sub(nh, depth_topic, 1);
     Subscriber<Image> rgb_image_sub(nh, rgb_topic, 1);
 
+    // Subscriber for Extended people messages
     Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
 
     typedef sync_policies::ApproximateTime<Image, Image ,ExtendedPeople> sync_pol;
