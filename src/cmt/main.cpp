@@ -1,6 +1,5 @@
 // SELF
 #include "CMT.h"
-//#include "gui.h"
 #include "ros_grabber.hpp"
 
 // CV
@@ -38,9 +37,8 @@
  *      - Done
  * - state designen
  *      - angle | float
- *      - tracked | bool (float?)
- *      - posi | 4 int
- *      - ...
+ *      - tracked | bool
+ *      - position | 2 int
  * - state generieren + publishen
  * - streamende: was tun?
  *      - tracking des objects beenden
@@ -51,8 +49,9 @@
  *          - verhalten vmtl nur nebeneffekt, wenn im vorherigen frame nichts gefunden wurde
  *          - berichtigung: es wird immer das gesamte bild durchsucht. der tracker versucht die features des vergangenen
  *              frames wiederzufinden (optical flow). Diese werden dann mit den detecteten (detector mit FAST) features des aktuellen
- *              frames gematcht (matcher). manchmal können diese nichtmehr gefunden werden, dann werden nur die
+ *              frames gematcht (matcher).
  *      - wenn nur noch wenige features gefunden werden oder der getrackte bereich zu hart springen sollte derselbe vorgang ablaufen
+ *          - Done
  * - Bug: segfault bei mehrmaligem neustarten des trackens
  *      - tritt nur (?) bei sehr wenigen (< 10) punkten auf
  *      - und in der process_frame Methode des CMT, bzw in Methoden der Consensus Klasse
@@ -63,6 +62,7 @@
  *      - über sleep und vergange zeit seit dem letzten bild realisieren
  * - nachdem die continuity getriggert hat, x mal das überprüfen aussetzen (weil neuaquirieren des objects iaR zu einem
  *      Sprung aka schlechter Continuity führt)
+ *      - Done
  */
 
 using cmt::CMT;
@@ -94,9 +94,11 @@ cmt::CMT cmt_;
 int sensor_fps = 5;
 unsigned int last_computed_frame = -1;
 cv::Rect rect;
-enum Tracking_Status {idle, start, running};
+enum Tracking_Status {
+    idle, start, running
+};
 Tracking_Status tracking_status = idle;
-float tracking_lost_fraction = 0.0;
+float tracking_lost_counter = 0.0;
 ros::Publisher tracker_pub_;
 
 /*
@@ -109,35 +111,53 @@ ros::Publisher tracker_pub_;
  * show_tracking_results: 1
  */
 
-
+/**
+ * Will display the momentary webcam image with the outline of the tracked rectangle and the found features.
+ * @param im the picture as openCV mat
+ * @param cmt cmt which tracks the rectangle
+ * @param result what button was pressed while the image was displayed (for escaping etc)
+ * @return
+ */
 int display(Mat im, CMT &cmt, float result) {
     Mat im_cp = Mat(im);
     float fraction = result / UPPER_I;
     cout << result << ", " << fraction << endl;
-    if (fraction > 0.75 || true) {//temporaryly disable fraction based displaying
-        for (size_t i = 0; i < cmt.points_active.size(); i++) {
-            circle(im_cp, cmt.points_active[i], 2, Scalar(0, 255, 0));
-        }
+    for (size_t i = 0; i < cmt.points_active.size(); i++) {
+        circle(im_cp, cmt.points_active[i], 2, Scalar(0, 255, 0));
+    }
 
-        Point2f vertices[4];
-        cmt.bb_rot.points(vertices);
-        for (int i = 0; i < 4; i++) {
-            line(im_cp, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
-        }
+    Point2f vertices[4];
+    cmt.bb_rot.points(vertices);
+    for (int i = 0; i < 4; i++) {
+        line(im_cp, vertices[i], vertices[(i + 1) % 4], Scalar(0, 255, 0));
     }
 
     imshow(WIN_NAME, im_cp);
     return waitKey(5);
 }
 
+/**
+ * Callback method for the rosservice which stops the tracking. Request message is mostly irrelevant. Will stop the
+ * tracking (and therefore publishing of tracking positions)
+ * @param req the request msg (content irrelevant)
+ * @param res
+ * @return
+ */
 bool stop_track(clf_perception_vision::CMTStopObjectTrack::Request &req,
-                         clf_perception_vision::CMTStopObjectTrack::Response &res) {
+                clf_perception_vision::CMTStopObjectTrack::Response &res) {
     tracking_status = idle;
     last_computed_frame = -1;
     res.success = true;
     return true;
 }
 
+/**
+ * Callback for the rosservice which starts the tracking. Request message should contain the x and y min and max values
+ * of the initial rectangle.
+ * @param req
+ * @param res
+ * @return
+ */
 bool track(clf_perception_vision::CMTObjectTrack::Request &req,
            clf_perception_vision::CMTObjectTrack::Response &res) {
     //Initialize CMT
@@ -147,12 +167,22 @@ bool track(clf_perception_vision::CMTObjectTrack::Request &req,
     rect.height = req.ymax - req.ymin;
     cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << std::endl;
     res.success = true;
+    tracking_lost_counter = 0;
 
     tracking_status = start;
     return true;
 }
 
-void pub_state(bool tracked, float &angle, Point2f &position){
+/**
+ * Publishes the state of the tracking. Isn't really more than a wrapper that stuffs its parameters into a msg and
+ * rospublishes it.
+ * @param tracked whether or not the object is considered tracked. If this is false, do not trust the other parts of the
+ * message.
+ * @param angle the angle the object leans to. Negative values indicate left (counterclockwise) and positive values vice
+ * versa
+ * @param position the position where the tracked rectangle is momentarily
+ */
+void pub_state(bool tracked, float &angle, Point2f &position) {
     clf_perception_vision::CMTrackerResults msg_;
     msg_.tracked = tracked;
     msg_.angle = angle;
@@ -161,16 +191,35 @@ void pub_state(bool tracked, float &angle, Point2f &position){
     tracker_pub_.publish(msg_);
 }
 
-bool calculate_still_tracked(){
-    if(!cmt_.continuity_preserved){
-        tracking_lost_fraction += 6;
+/**
+ * Will determine whether or not the object/ rectangle is momentarily tracked. It will do so by keeping track how often
+ * the cmt.continuity determined the object lost (and by how many features were found at all).
+ * @return True if the object is still tracked, False otherwise.
+ */
+bool calculate_still_tracked() {
+    if (!cmt_.continuity_preserved) {
+        tracking_lost_counter += 1.2 * sensor_fps;
     }
-    if(tracking_lost_fraction > 0){
-        tracking_lost_fraction--;
+    // keep counter in range (0, 2*sensor_fps)
+    if (tracking_lost_counter > 0) {
+        tracking_lost_counter--;
+        if (tracking_lost_counter > 2 * sensor_fps) {
+            tracking_lost_counter = 2 * sensor_fps;
+        }
     }
-    return tracking_lost_fraction < sensor_fps && (cmt_.points_active.size() >= 5);
+    //
+    return tracking_lost_counter < 1.2 * sensor_fps && (cmt_.points_active.size() >= 5);
 }
 
+/**
+ * Typical main method of the cmt tracker. Will first read the config file and initialize ros and a few variables
+ * (and e.g. the cmt tracker. Then it will loop indefinitely grabbing the newest image (via rosgrabber) and, depending
+ * on which state it is in (idle, starting or running), it will wait, initialize the cmt, or feed the cmt the newest
+ * image (respectively)
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char **argv) {
     // ROS
     // FILELog::ReportingLevel() = logDEBUG;
@@ -216,7 +265,7 @@ int main(int argc, char **argv) {
 
     fs.release();
 
-    if(show_tracking_results) {
+    if (show_tracking_results) {
         //Create window
         namedWindow(WIN_NAME);
     }
@@ -227,13 +276,8 @@ int main(int argc, char **argv) {
 
     ros::ServiceServer track_ob(ros_grabber.node_handle_.advertiseService("/cmt/track_object", track));
     ros::ServiceServer track_obj_stop(ros_grabber.node_handle_.advertiseService("/cmt/stop_track_object", stop_track));
-    tracker_pub_ = ros_grabber.node_handle_.advertise<clf_perception_vision::CMTrackerResults>("/cmt/tracking_results", 1000);
-
-    //Initialize CMT
-    rect.x = 320 - 50;
-    rect.y = 240 - 50;
-    rect.width = 50;
-    rect.height = 50;
+    tracker_pub_ = ros_grabber.node_handle_.advertise<clf_perception_vision::CMTrackerResults>("/cmt/tracking_results",
+                                                                                               1000);
 
     //The image
     Mat im;
@@ -245,12 +289,12 @@ int main(int argc, char **argv) {
 
         ros::spinOnce();
         ros_grabber.getImage(&im);
-        switch(tracking_status){
-            case idle:{
-                usleep((int)(1000/sensor_fps));
+        switch (tracking_status) {
+            case idle: {
+                usleep((int) (1000 / sensor_fps));
                 continue;
             }
-            case start:{
+            case start: {
                 //set everything to start
                 Mat leere;
                 im = leere;
@@ -274,10 +318,10 @@ int main(int argc, char **argv) {
                 break;
 
             }
-            case running:{
+            case running: {
                 int tmp_frame_nr = ros_grabber.getLastFrameNr();
                 if (last_computed_frame != tmp_frame_nr) {
-                    if (im.empty()){
+                    if (im.empty()) {
                         tracking_status = idle;
                         continue; //Exit at end of video stream
                     }
@@ -289,15 +333,14 @@ int main(int argc, char **argv) {
                     // Let CMT process the frame
                     cmt_.processFrame(im_gray);
                     result = (float) cmt_.points_active.size();
-                }
-                else{
+                } else {
                     //TODO sleep for less cpu usage (how long? 1/10 frame duration?)
-                    usleep((int)(1000/(1*sensor_fps)));
+                    usleep((int) (1000 / (1 * sensor_fps)));
                     continue;
                 }
                 last_computed_frame = ros_grabber.getLastFrameNr();
                 // Display image and then quit if requested.
-                if (show_tracking_results){
+                if (show_tracking_results) {
                     char key = display(im, cmt_, result);
                     if (key == 'q') exit(0);
                 }
@@ -307,6 +350,4 @@ int main(int argc, char **argv) {
             }
         }
     }
-
-    return 0;
 }
