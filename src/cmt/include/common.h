@@ -8,7 +8,7 @@
 
 #include <opencv2/core/core.hpp>
 
-#include "log.h"
+#include "../../../deprecated_legacy_code/include/log.h"
 
 using cv::Mat;
 using cv::Point2f;

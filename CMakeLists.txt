@@ -130,6 +130,7 @@ ADD_MESSAGE_FILES(
    ExtendedObjectsStamped.msg
    ExtendedPeople.msg
    ExtendedObjects.msg
+        CMTrackerResults.msg
 )
 
 ADD_SERVICE_FILES(
@@ -169,7 +170,7 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${dlib_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
                     include
-                    deprecated_legacy_code/include)
+                    src/cmt/include)
 
 #ADD_EXECUTABLE(clf_perception_surb
  #              src/ros_grabber.cpp
@@ -204,16 +205,15 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
 
 
 ADD_EXECUTABLE(clf_cmt
-               deprecated_legacy_code/cmt/common.cpp
-               deprecated_legacy_code/cmt/gui.cpp
-               deprecated_legacy_code/cmt/main.cpp
-               deprecated_legacy_code/cmt/CMT.cpp
-               deprecated_legacy_code/cmt/Consensus.cpp
-               deprecated_legacy_code/cmt/Fusion.cpp
-               deprecated_legacy_code/cmt/Matcher.cpp
-               deprecated_legacy_code/cmt/Tracker.cpp
-               deprecated_legacy_code/cmt/fastcluster.cpp
-               deprecated_legacy_code/cmt/Continuity.cpp
+        src/cmt/common.cpp
+        src/cmt/main.cpp
+        src/cmt/CMT.cpp
+        src/cmt/Consensus.cpp
+        src/cmt/Fusion.cpp
+        src/cmt/Matcher.cpp
+        src/cmt/Tracker.cpp
+        src/cmt/fastcluster.cpp
+        src/cmt/Continuity.cpp
                src/ros_grabber.cpp
                ${INCLUDE_DIRS}
         )

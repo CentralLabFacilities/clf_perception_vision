@@ -121,19 +121,22 @@ void CMT::processFrame(Mat im_gray) {
     //Track keypoints
     vector<Point2f> points_tracked;
     vector<unsigned char> status;
-    tracker.track(im_prev, im_gray, points_active, points_tracked, status);
+    if(continuity_preserved) {
+        tracker.track(im_prev, im_gray, points_active, points_tracked, status);
+    }
 
     FILE_LOG(logDEBUG) << points_tracked.size() << " tracked points.";
 
     // keep only successful classes
     vector<int> classes_tracked;
-    for (size_t i = 0; i < classes_active.size(); i++)
-    {
-        if (status[i])
-        {
-            classes_tracked.push_back(classes_active[i]);
-        }
+    if (continuity_preserved) {
 
+        for (size_t i = 0; i < classes_active.size(); i++) {
+            if (status[i]) {
+                classes_tracked.push_back(classes_active[i]);
+            }
+
+        }
     }
 
     //Detect keypoints, compute descriptors
@@ -198,7 +201,9 @@ void CMT::processFrame(Mat im_gray) {
     //TODO: Use theta to suppress result
     bb_rot = RotatedRect(center,  size_initial * scale, rotation/CV_PI * 180);
 
-    if(continuity.check_for_continuity(points_active, bb_rot)){
+    continuity_preserved = continuity.check_for_continuity(points_active, bb_rot);
+
+    if(continuity_preserved){
         std::cout << "continuity preserved!" << std::endl;
     }else{
         std::cout << "continuity broken!" << std::endl;

@@ -23,7 +23,7 @@ namespace cmt
 class CMT
 {
 public:
-    CMT() : str_detector("FAST"), str_descriptor("BRISK") {};
+    CMT() : str_detector("FAST"), str_descriptor("BRISK"), continuity_preserved(true) {};
     void initialize(const Mat im_gray, const Rect rect);
     void processFrame(const Mat im_gray);
 
@@ -40,6 +40,8 @@ public:
 
     vector<Point2f> points_active; //public for visualization purposes
     RotatedRect bb_rot;
+
+    bool continuity_preserved;
 
 private:
     Ptr<FeatureDetector> detector;

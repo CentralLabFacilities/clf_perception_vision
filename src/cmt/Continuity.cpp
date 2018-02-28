@@ -51,17 +51,31 @@ namespace cmt {
         this->generate_movement_rating(movement_rating);
         std::cout << "movement rating: " << movement_rating << std::endl;
 
-        if(movement_rating > 0.2 || movement_rating < 0.00005){
+        if((movement_rating > 0.2 || // uncontrolled jumping
+                movement_rating < 0.00005) && // complete stagnation
+                this->cycles_to_skip < 1){ // only check for continuity if continuity can be expected (not after reaquiring)
             continuity_preserved = false;
+            this->cycles_to_skip = this->max_saved_rect_movements;
             std::cout << "broken because of movement rating" << std::endl;
         }
-        if(points.size() >= 1){
+        if(points.size() >= 1 && this->cycles_to_skip < 1){
             float fraction = points.size()/(float)this->initial_amount_points;
             std::cout << "fraction " << fraction << "(" << points.size() << "/" << this->initial_amount_points << ")" << std::endl;
-            if(fraction < 0.5) {
+
+            float angle = rect.angle;
+            if(angle < 0.0){
+                angle *= -1;
+            }
+
+            //FAST typically finds less features if the object is rotated, so we need to account for this
+            float fraction_threshold = 0.325+(1-angle/90)*0.425; //this arbitrary threshold seems to work quite well
+            std::cout << "rotation (abs) " << angle << " >> fraction threshold " << fraction_threshold << std::endl;
+            if(fraction < fraction_threshold) {
                 continuity_preserved = false;
+                this->cycles_to_skip = this->max_saved_rect_movements;
             }
         }
+        this->cycles_to_skip--;
 
 
         this->tracking_points_prev = this->tracking_points;

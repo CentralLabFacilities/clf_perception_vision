@@ -1,6 +1,6 @@
 // SELF
 #include "CMT.h"
-#include "gui.h"
+//#include "gui.h"
 #include "ros_grabber.hpp"
 
 // CV
@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 // MSGS
+#include "clf_perception_vision/CMTrackerResults.h"
 #include "clf_perception_vision/CMTObjectTrack.h"
 #include "clf_perception_vision/CMTStopObjectTrack.h"
 #include <sensor_msgs/image_encodings.h>
@@ -39,7 +40,7 @@
  *      - angle | float
  *      - tracked | bool (float?)
  *      - posi | 4 int
- *      -
+ *      - ...
  * - state generieren + publishen
  * - streamende: was tun?
  *      - tracking des objects beenden
@@ -48,13 +49,20 @@
  * - reaquirieren von halb verlorenen objekten
  *      - wenn alle features verloren sind, prüft der cmt auf dem ganzen bild nach den punkten
  *          - verhalten vmtl nur nebeneffekt, wenn im vorherigen frame nichts gefunden wurde
+ *          - berichtigung: es wird immer das gesamte bild durchsucht. der tracker versucht die features des vergangenen
+ *              frames wiederzufinden (optical flow). Diese werden dann mit den detecteten (detector mit FAST) features des aktuellen
+ *              frames gematcht (matcher). manchmal können diese nichtmehr gefunden werden, dann werden nur die
  *      - wenn nur noch wenige features gefunden werden oder der getrackte bereich zu hart springen sollte derselbe vorgang ablaufen
- * - object Erkennung (low prio)
  * - Bug: segfault bei mehrmaligem neustarten des trackens
  *      - tritt nur (?) bei sehr wenigen (< 10) punkten auf
  *      - und in der process_frame Methode des CMT, bzw in Methoden der Consensus Klasse
  *      - Grund: CMT/Consensus scheint neuinitialisieren nicht zu mögen
  *      - Lösung: für jedes tracking einen neuen CMT erstellen
+ *      - Done
+ * - Nur jedes x-te bild zum tracken nutzen
+ *      - über sleep und vergange zeit seit dem letzten bild realisieren
+ * - nachdem die continuity getriggert hat, x mal das überprüfen aussetzen (weil neuaquirieren des objects iaR zu einem
+ *      Sprung aka schlechter Continuity führt)
  */
 
 using cmt::CMT;
@@ -88,6 +96,8 @@ unsigned int last_computed_frame = -1;
 cv::Rect rect;
 enum Tracking_Status {idle, start, running};
 Tracking_Status tracking_status = idle;
+float tracking_lost_fraction = 0.0;
+ros::Publisher tracker_pub_;
 
 /*
  * Config File needed.
@@ -142,8 +152,23 @@ bool track(clf_perception_vision::CMTObjectTrack::Request &req,
     return true;
 }
 
-void pub_state(bool &tracked, float &angle, vector<int> &position){
+void pub_state(bool tracked, float &angle, Point2f &position){
+    clf_perception_vision::CMTrackerResults msg_;
+    msg_.tracked = tracked;
+    msg_.angle = angle;
+    msg_.pos_x = position.x;
+    msg_.pos_y = position.y;
+    tracker_pub_.publish(msg_);
+}
 
+bool calculate_still_tracked(){
+    if(!cmt_.continuity_preserved){
+        tracking_lost_fraction += 6;
+    }
+    if(tracking_lost_fraction > 0){
+        tracking_lost_fraction--;
+    }
+    return tracking_lost_fraction < sensor_fps && (cmt_.points_active.size() >= 5);
 }
 
 int main(int argc, char **argv) {
@@ -202,6 +227,7 @@ int main(int argc, char **argv) {
 
     ros::ServiceServer track_ob(ros_grabber.node_handle_.advertiseService("/cmt/track_object", track));
     ros::ServiceServer track_obj_stop(ros_grabber.node_handle_.advertiseService("/cmt/stop_track_object", stop_track));
+    tracker_pub_ = ros_grabber.node_handle_.advertise<clf_perception_vision::CMTrackerResults>("/cmt/tracking_results", 1000);
 
     //Initialize CMT
     rect.x = 320 - 50;
@@ -276,6 +302,8 @@ int main(int argc, char **argv) {
                     if (key == 'q') exit(0);
                 }
 
+                //publish result
+                pub_state(calculate_still_tracked(), cmt_.bb_rot.angle, cmt_.bb_rot.center);
             }
         }
     }

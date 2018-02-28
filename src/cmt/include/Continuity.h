@@ -24,7 +24,7 @@ namespace cmt {
     class Continuity {
 
     public:
-        Continuity() : max_saved_rect_movements(5) {};
+        Continuity() : max_saved_rect_movements(5), cycles_to_skip(0) {};
 
         void initialize(const vector<Point2f> points, const RotatedRect rect);
 
@@ -52,6 +52,8 @@ namespace cmt {
         vector<Point2f> last_rect_movements;
         //...this many positions (aka the continuity will only remember this many positions)
         unsigned int max_saved_rect_movements;
+        //stores how often continuity calculation should be skipped, after continuity is broken
+        int cycles_to_skip;
 
         //////functions
 
