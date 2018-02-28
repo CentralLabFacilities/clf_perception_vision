@@ -52,7 +52,7 @@ namespace cmt {
         vector<Point2f> last_rect_movements;
         //...this many positions (aka the continuity will only remember this many positions)
         unsigned int max_saved_rect_movements;
-        //stores how often continuity calculation should be skipped, after continuity is broken
+        //keeps track on how often continuity calculation should be skipped, after continuity is broken
         int cycles_to_skip;
 
         //////functions

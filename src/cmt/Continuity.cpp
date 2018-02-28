@@ -14,8 +14,8 @@ namespace cmt {
 
     /**
      * Initialize the Continuity. needed to have previous data for the iterative step.
-     * @param points
-     * @param rect
+     * @param points the initially detected points
+     * @param rect the initially set rectangle to track
      */
     void Continuity::initialize(const vector<Point2f> points, const RotatedRect rect){
         // initialize previous values for main loop to work
@@ -32,8 +32,8 @@ namespace cmt {
 
     /**
      * Iterative step for every frame of the tracking.
-     * @param points
-     * @param rect
+     * @param points the momentary active points, tracked and detected
+     * @param rect the momentary calculated rectangle that encompasses the tracked object
      * @return true when continuity is preserved, false when tracked points should be reaquired
      */
     bool Continuity::check_for_continuity(const vector<Point2f> points, const RotatedRect rect){
@@ -68,7 +68,7 @@ namespace cmt {
             }
 
             //FAST typically finds less features if the object is rotated, so we need to account for this
-            float fraction_threshold = 0.325+(1-angle/90)*0.425; //this arbitrary threshold seems to work quite well
+            float fraction_threshold = 0.325+(1-angle/90) * 0.425; //this arbitrary threshold seems to work quite well
             std::cout << "rotation (abs) " << angle << " >> fraction threshold " << fraction_threshold << std::endl;
             if(fraction < fraction_threshold) {
                 continuity_preserved = false;
@@ -101,8 +101,11 @@ namespace cmt {
     }
 
     /**
-     *
-     * @param new_position
+     * Converts a position of a rectangle from x and y coordinates into a distance and a angle and adds it to the
+     * last_rect_movements vector. The distance and angle will be relative to the last position/ movement. This means
+     * the distance will be the distance between the new position and the last given rectangle position. The angle
+     * will be direction in which the new position lies (with respect to the last given rectangle postion).
+     * @param new_position the momentary position of the tracked rectangle
      */
     void Continuity::add_new_movement_point(const Point2f &new_position){
         Point2f diff = new_position - this->last_rect_position;
@@ -120,7 +123,7 @@ namespace cmt {
      * Generates a rating of the movement of the rect the cmt tracks. This rating indicates how much the rect is jumping
      * around. The rating is normalized between 0.0 and 1.0. Smaller is better (aka less jumpy).
      *
-     * @param rating the rating this  function will generate
+     * @param rating the rating this function will generate
      */
     void Continuity::generate_movement_rating(float &rating){
         // calculate difference in angles
