@@ -30,7 +30,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         message_filters
                                         image_transport
                                         visualization_msgs
-					clf_perception_vision_msgs
+					                    clf_perception_vision_msgs
 )
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         core
