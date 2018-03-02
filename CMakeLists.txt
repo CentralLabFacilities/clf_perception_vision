@@ -127,7 +127,7 @@ CATKIN_PACKAGE(INCLUDE_DIRS include
                               cv_bridge
                               sensor_msgs
                               geometry_msgs
-			      clf_perception_vision_msgs
+			                  clf_perception_vision_msgs
                               message_filters
                               message_runtime
                               image_transport
@@ -188,11 +188,11 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_objects
 
 # Nodelets #
 # TARGET_LINK_LIBRARIES(clf_perception_nodelets ${catkin_LIBRARIES}
-#                                              ${CUSTOM_ROS_LIBS}
-#                                              ${Caffe_LIBRARIES}
-#                                              ${CUSTOM_CV_LIBS}
-#                                              ${dlib_LIBRARIES}
-#                                              ${Boost_LIBRARIES})
+#                                               ${CUSTOM_ROS_LIBS}
+#                                               ${Caffe_LIBRARIES}
+#                                               ${CUSTOM_CV_LIBS}
+#                                               ${dlib_LIBRARIES}
+#                                               ${Boost_LIBRARIES})
 
 # IF(catkin_EXPORTED_LIBRARIES)
 #  ADD_DEPENDENCIES(clf_perception_nodelets ${catkin_EXPORTED_LIBRARIES})
