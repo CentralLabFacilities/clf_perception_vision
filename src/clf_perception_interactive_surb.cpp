@@ -286,6 +286,7 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
     colors = color_mix(target_images.size());
     res.success = true;
     res.name = req.name;
+
     mtx.unlock();
 
     return true;
