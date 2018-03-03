@@ -287,6 +287,10 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
     res.success = true;
     res.name = req.name;
 
+    cout << ">>> Current key points size: --> " << keys_current_target.size() << endl;
+    cout << ">>> Current target images size --> " << target_images.size() << endl;
+    cout << ">>> Current cuda descriptors size --> " << target_images.size() << endl;
+
     mtx.unlock();
 
     return true;

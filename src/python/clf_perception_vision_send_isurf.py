@@ -50,13 +50,13 @@ class SendSurf:
 if __name__ == "__main__":
 
     parser = OptionParser()
-    parser.add_option("--intopic", dest="intopic", default="/people_tracker/persons_extended")
+    parser.add_option("--intopic", dest="intopic", default="/people_tracker/people/extended")
     (options, args) = parser.parse_args()
     send_surf = SendSurf(options.intopic)
     while not rospy.is_shutdown():
         try:
             time.sleep(0.1)
-            inp = raw_input("press ENTER to send learning data")
+            inp = raw_input(">>> Press ENTER to send learning data")
             send_surf.call_service()
         except rospy.ROSInterruptException, ex:
             rospy.logwarn(">>> Exiting, %s" % str(ex))
