@@ -270,6 +270,7 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
             }
         }
 
+        target_labels.push_back(req.name);
         keys_current_target.push_back(tmp_kp);
         target_images.push_back(output_frame_grey);
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
@@ -278,6 +279,10 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
           ROS_ERROR("E >>> CV_BRIDGE exception: %s", e.what());
           res.success = false;
           res.name = req.name;
+          target_labels.clear();
+          keys_current_target.clear();
+          target_images.clear();
+          cuda_desc_current_target_image.clear();
           mtx.unlock();
           return false;
     }
@@ -287,9 +292,9 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
     res.success = true;
     res.name = req.name;
 
-    cout << ">>> Current key points size: --> " << keys_current_target.size() << endl;
-    cout << ">>> Current target images size --> " << target_images.size() << endl;
-    cout << ">>> Current cuda descriptors size --> " << target_images.size() << endl;
+    // cout << ">>> Current key points size: --> " << keys_current_target.size() << endl;
+    // cout << ">>> Current target images size --> " << target_images.size() << endl;
+    // cout << ">>> Current cuda descriptors size --> " << target_images.size() << endl;
 
     mtx.unlock();
 
@@ -299,264 +304,279 @@ bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage
 
 void Detect2DInteractive::detect(Mat input_image, ros::Time timestamp, std::string frame_id) {
 
-    mtx.lock();
+    if (target_images.size() > 0) {
 
-    // START keypoint extraction in actual image //////////////////////////////////////////
-    visualization_msgs::MarkerArray ma;
+        mtx.lock();
 
-    boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
-    cuda_frame_tmp_img.upload(input_image);
+        // START keypoint extraction in actual image //////////////////////////////////////////
+        visualization_msgs::MarkerArray ma;
 
-    if (scale_factor > 1.0) {
-        cuda::pyrUp(cuda_frame_tmp_img, cuda_frame_scaled);
-        cuda::cvtColor(cuda_frame_scaled, cuda_camera_tmp_img, COLOR_BGR2GRAY);
-    } else {
-        cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
-    }
+        boost::posix_time::ptime start_detect = boost::posix_time::microsec_clock::local_time();
+        cuda_frame_tmp_img.upload(input_image);
 
-    if (type_descriptor.compare("ORB") == 0) {
-        try {
-            cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+        if (scale_factor > 1.0) {
+            cuda::pyrUp(cuda_frame_tmp_img, cuda_frame_scaled);
+            cuda::cvtColor(cuda_frame_scaled, cuda_camera_tmp_img, COLOR_BGR2GRAY);
+        } else {
+            cuda::cvtColor(cuda_frame_tmp_img, cuda_camera_tmp_img, COLOR_BGR2GRAY);
         }
-        catch (Exception& e) {
-            cout << "E >>> ORB fail O_O" << "\n";
-        }
-    }
 
-    if (type_descriptor.compare("SURF") == 0) {
-        try {
-            cuda_surf(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
-        }
-        catch (Exception& e) {
-            cout << "E >>> SURF fail O_O" << "\n";
-        }
-    }
-
-    boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
-
-    if (keys_camera_image.empty()) {
-        return;
-    }
-    // END keypoint extraction in actual image //////////////////////////////////////////
-
-    // START keypoint matching: actual image and saved descriptor////////////////////////
-    vector<vector<DMatch>> cum_best_matches;
-    boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
-
-    for(unsigned int i=0; i < target_images.size(); i++) {
-
-        vector<DMatch> matches;
-        vector<vector<DMatch>> knn_matches;
-        vector<DMatch> bestMatches;
-
-        try {
+        if (type_descriptor.compare("ORB") == 0) {
             try {
-                if(!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
-
-                    if (point_matcher.compare("BF") == 0) {
-
-                        cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
-
-                        Mat index;
-                        int nbMatch=int(matches.size());
-
-                        Mat tab(nbMatch, 1, CV_32F);
-
-                        for (int i = 0; i<nbMatch; i++) {
-                            tab.at<float>(i, 0) = matches[i].distance;
-                        }
-
-                        sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
-
-                        for (int i = 0; i<(int)matches.size()-1; i++) {
-                            if (matches[index.at<int>(i, 0)].distance < detection_threshold*matches[index.at<int>(i+1, 0)].distance) {
-                                bestMatches.push_back(matches[index.at<int>(i, 0)]);
-                                if(i >= max_matches) {
-                                    break;
-                                }
-                            }
-                        }
-
-                        cum_best_matches.push_back(bestMatches);
-                    }
-
-                    if (point_matcher.compare("KNN") == 0) {
-
-                        cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
-
-                        for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
-                            if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) &&
-                                ((int)knn_matches[k].size()<=2 && (int)knn_matches[k].size()>0) ) {
-                                bestMatches.push_back(knn_matches[k][0]);
-                                if(k >= max_matches) {
-                                    break;
-                                }
-                            }
-                        }
-
-                        cum_best_matches.push_back(bestMatches);
-                    }
-
-                } else {
-                    do_not_draw = true;
-                    cout << "E >>> Descriptors are empty" << endl;
-                }
-            } catch (Exception& e) {
-                cout << "E >>> Cumulative distance cannot be computed, next iteration" << endl;
-                continue;
+                cuda_orb->detectAndCompute(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image,
+                                           cuda_desc_camera_image);
             }
-        } catch (Exception& e) {
-            cout << "E >>> Matcher is wating for input..." << endl;
-            continue;
-        }
-    }
-
-    boost::posix_time::ptime end_match = boost::posix_time::microsec_clock::local_time();
-    // END keypoint matching: actual image and saved descriptor////////////////////////
-
-    // START fitting //////////////////////////////////////////////////////////////////
-    text_offset_y = 20;
-    boost::posix_time::ptime start_fitting = boost::posix_time::microsec_clock::local_time();
-
-    if (do_not_draw == false) {
-        for (int i=0; i < target_images.size(); i++) {
-            try {
-
-                vector<DMatch>::iterator it;
-
-                for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
-                    Point2d c_t = keys_camera_image[it->trainIdx].pt;
-                    Point2d current_point(c_t.x, c_t.y );
-                    Point2d current_point_draw(c_t.x/scale_factor, c_t.y/scale_factor);
-                    circle(input_image, current_point_draw, 3.0, colors[i], 1, 1 );
-                }
-
-            } catch (Exception& e) {
-                cout << "E >>> Could not derive median" << endl;
-                continue;
+            catch (Exception &e) {
+                cout << "E >>> ORB fail O_O" << "\n";
             }
         }
-    }
 
-    unsigned int detected_classes = 0;
-
-    for (unsigned int i=0; i < target_images.size(); i++) {
-        if (toggle_homography) {
+        if (type_descriptor.compare("SURF") == 0) {
             try {
+                cuda_surf(cuda_camera_tmp_img, cuda::GpuMat(), keys_camera_image, cuda_desc_camera_image);
+            }
+            catch (Exception &e) {
+                cout << "E >>> SURF fail O_O" << "\n";
+            }
+        }
 
-                if ((int)cum_best_matches[i].size() < min_matches) {
-                    // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
+        boost::posix_time::ptime end_detect = boost::posix_time::microsec_clock::local_time();
+
+        if (keys_camera_image.empty()) {
+            return;
+        }
+        // END keypoint extraction in actual image //////////////////////////////////////////
+
+        // START keypoint matching: actual image and saved descriptor////////////////////////
+        vector <vector<DMatch>> cum_best_matches;
+        boost::posix_time::ptime start_match = boost::posix_time::microsec_clock::local_time();
+
+        for (unsigned int i = 0; i < target_images.size(); i++) {
+
+            vector <DMatch> matches;
+            vector <vector<DMatch>> knn_matches;
+            vector <DMatch> bestMatches;
+
+            try {
+                try {
+                    if (!cuda_desc_current_target_image[i].empty() && !cuda_desc_camera_image.empty()) {
+
+                        if (point_matcher.compare("BF") == 0) {
+
+                            cuda_bf_matcher->match(cuda_desc_current_target_image[i], cuda_desc_camera_image, matches);
+
+                            Mat index;
+                            int nbMatch = int(matches.size());
+
+                            Mat tab(nbMatch, 1, CV_32F);
+
+                            for (int i = 0; i < nbMatch; i++) {
+                                tab.at<float>(i, 0) = matches[i].distance;
+                            }
+
+                            sortIdx(tab, index, SORT_EVERY_COLUMN + SORT_ASCENDING);
+
+                            for (int i = 0; i < (int) matches.size() - 1; i++) {
+                                if (matches[index.at<int>(i, 0)].distance <
+                                    detection_threshold * matches[index.at<int>(i + 1, 0)].distance) {
+                                    bestMatches.push_back(matches[index.at<int>(i, 0)]);
+                                    if (i >= max_matches) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            cum_best_matches.push_back(bestMatches);
+                        }
+
+                        if (point_matcher.compare("KNN") == 0) {
+
+                            cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image,
+                                                       knn_matches, 2);
+
+                            for (int k = 0; k < std::min(keys_camera_image.size() - 1, knn_matches.size()); k++) {
+                                if ((knn_matches[k][0].distance < detection_threshold * (knn_matches[k][1].distance)) &&
+                                    ((int) knn_matches[k].size() <= 2 && (int) knn_matches[k].size() > 0)) {
+                                    bestMatches.push_back(knn_matches[k][0]);
+                                    if (k >= max_matches) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            cum_best_matches.push_back(bestMatches);
+                        }
+
+                    } else {
+                        do_not_draw = true;
+                        cout << "E >>> Descriptors are empty" << endl;
+                    }
+                } catch (Exception &e) {
+                    cout << "E >>> Cumulative distance cannot be computed, next iteration" << endl;
                     continue;
                 }
-
-                vector<Point2f> obj;
-                vector<Point2f> scene;
-                vector<DMatch>::iterator it;
-
-                for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
-                    obj.push_back(keys_current_target[i][it->queryIdx].pt);
-                    scene.push_back(keys_camera_image[it->trainIdx].pt);
-                }
-
-                if(!obj.empty() && !scene.empty()) {
-
-                    // CV_LMEDS --> slower
-                    Mat H = findHomography(obj, scene, CV_RANSAC);
-
-                    if (H.empty()) {
-                        continue;
-                    }
-
-                    double quality = determinant(H);
-
-                    if (quality <= 0.195) {
-                        continue;
-                    }
-
-                    vector<cv::Point2f> obj_corners(4);
-                    obj_corners[0] = Point(0, 0);
-                    obj_corners[1] = Point(target_images[i].cols, 0);
-                    obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
-                    obj_corners[3] = Point(0, target_images[i].rows);
-
-                    vector<Point2f> scene_corners;
-                    vector<Point2f> scene_corners_draw;
-
-                    redirectError(handleError);
-                    perspectiveTransform(obj_corners, scene_corners, H);
-                    redirectError(nullptr);
-
-                    for (size_t i=0 ; i<scene_corners.size(); i++) {
-                        float x = scene_corners[i].x/scale_factor;
-                        float y = scene_corners[i].y/scale_factor;
-                        scene_corners_draw.push_back(cv::Point2d(x,y));
-                    }
-
-                    int mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x)/2;
-                    int mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y)/2;
-                    int width_x = cv::norm(scene_corners_draw[0]-scene_corners_draw[1]);
-                    int width_y = cv::norm(scene_corners_draw[0]-scene_corners_draw[2]);
-
-                    std_msgs::Header h;
-                    visualization_msgs::Marker m;
-
-                    geometry_msgs::Pose pose;
-                    geometry_msgs::Point pt;
-
-                    h.stamp = timestamp;
-                    h.frame_id = frame_id;
-                    m.header = h;
-
-                    m.text = target_labels[i];
-                    m.ns =  target_labels[i];
-
-                    pt.x = mid_x;
-                    pt.y = mid_y;
-                    pt.z = width_x*width_y;
-                    m.pose.position = pt;
-
-                    ma.markers.push_back(m);
-
-                    putText(input_image, target_labels[i] , cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1, colors[i], 2);
-
-                    line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 4);
-                    line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 4);
-                    line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 4);
-                    line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 4);
-
-                    detected_classes++;
-                }
-            } catch (cv::Exception& e) {
-                cout << "WARNING >>> Could not derive perspective transform" << endl;
+            } catch (Exception &e) {
+                cout << "E >>> Matcher is wating for input..." << endl;
+                continue;
             }
         }
+
+        boost::posix_time::ptime end_match = boost::posix_time::microsec_clock::local_time();
+        // END keypoint matching: actual image and saved descriptor////////////////////////
+
+        // START fitting //////////////////////////////////////////////////////////////////
+        text_offset_y = 20;
+        boost::posix_time::ptime start_fitting = boost::posix_time::microsec_clock::local_time();
+
+        if (do_not_draw == false) {
+            for (int i = 0; i < target_images.size(); i++) {
+                try {
+
+                    vector<DMatch>::iterator it;
+
+                    for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
+                        Point2d c_t = keys_camera_image[it->trainIdx].pt;
+                        Point2d current_point(c_t.x, c_t.y);
+                        Point2d current_point_draw(c_t.x / scale_factor, c_t.y / scale_factor);
+                        circle(input_image, current_point_draw, 3.0, colors[i], 1, 1);
+                    }
+
+                } catch (Exception &e) {
+                    cout << "E >>> Could not derive median" << endl;
+                    continue;
+                }
+            }
+        }
+
+        unsigned int detected_classes = 0;
+
+        for (unsigned int i = 0; i < target_images.size(); i++) {
+            if (toggle_homography) {
+                try {
+
+                    if ((int) cum_best_matches[i].size() < min_matches) {
+                        // cout << "E >>> Not enough BEST matches: " << cum_best_matches[i].size() << " | " << min_matches << " are required" << endl;
+                        continue;
+                    }
+
+                    vector <Point2f> obj;
+                    vector <Point2f> scene;
+                    vector<DMatch>::iterator it;
+
+                    for (it = cum_best_matches[i].begin(); it != cum_best_matches[i].end(); it++) {
+                        obj.push_back(keys_current_target[i][it->queryIdx].pt);
+                        scene.push_back(keys_camera_image[it->trainIdx].pt);
+                    }
+
+                    if (!obj.empty() && !scene.empty()) {
+
+                        // CV_LMEDS --> slower
+                        Mat H = findHomography(obj, scene, CV_RANSAC);
+
+                        if (H.empty()) {
+                            continue;
+                        }
+
+                        double quality = determinant(H);
+
+                        if (quality <= 0.195) {
+                            continue;
+                        }
+
+                        vector <cv::Point2f> obj_corners(4);
+                        obj_corners[0] = Point(0, 0);
+                        obj_corners[1] = Point(target_images[i].cols, 0);
+                        obj_corners[2] = Point(target_images[i].cols, target_images[i].rows);
+                        obj_corners[3] = Point(0, target_images[i].rows);
+
+                        vector <Point2f> scene_corners;
+                        vector <Point2f> scene_corners_draw;
+
+                        redirectError(handleError);
+                        perspectiveTransform(obj_corners, scene_corners, H);
+                        redirectError(nullptr);
+
+                        for (size_t i = 0; i < scene_corners.size(); i++) {
+                            float x = scene_corners[i].x / scale_factor;
+                            float y = scene_corners[i].y / scale_factor;
+                            scene_corners_draw.push_back(cv::Point2d(x, y));
+                        }
+
+                        int mid_x = (scene_corners_draw[0].x + scene_corners_draw[2].x) / 2;
+                        int mid_y = (scene_corners_draw[0].y + scene_corners_draw[3].y) / 2;
+                        int width_x = cv::norm(scene_corners_draw[0] - scene_corners_draw[1]);
+                        int width_y = cv::norm(scene_corners_draw[0] - scene_corners_draw[2]);
+
+                        std_msgs::Header h;
+                        visualization_msgs::Marker m;
+
+                        geometry_msgs::Pose pose;
+                        geometry_msgs::Point pt;
+
+                        h.stamp = timestamp;
+                        h.frame_id = frame_id;
+                        m.header = h;
+
+                        m.text = target_labels[i];
+                        m.ns = target_labels[i];
+
+                        pt.x = mid_x;
+                        pt.y = mid_y;
+                        pt.z = width_x * width_y;
+                        m.pose.position = pt;
+
+                        ma.markers.push_back(m);
+
+                        putText(input_image, target_labels[i], cv::Point2d(mid_x, mid_y), cv::FONT_HERSHEY_PLAIN, 1,
+                                colors[i], 2);
+
+                        line(input_image, scene_corners_draw[0], scene_corners_draw[1], colors[i], 4);
+                        line(input_image, scene_corners_draw[1], scene_corners_draw[2], colors[i], 4);
+                        line(input_image, scene_corners_draw[2], scene_corners_draw[3], colors[i], 4);
+                        line(input_image, scene_corners_draw[3], scene_corners_draw[0], colors[i], 4);
+
+                        detected_classes++;
+                    }
+                } catch (cv::Exception &e) {
+                    cout << "WARNING >>> Could not derive perspective transform" << endl;
+                }
+            }
+        }
+
+        if (detected_classes > 0) {
+            object_pub.publish(ma);
+        }
+
+        boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::time_duration diff_detect = end_detect - start_detect;
+        boost::posix_time::time_duration diff_match = end_match - start_match;
+        boost::posix_time::time_duration diff_fit = end_fitting - start_fitting;
+
+        string string_time_detect = to_string(diff_detect.total_milliseconds());
+        string string_time_match = to_string(diff_match.total_milliseconds());
+        string string_time_fitting = to_string(diff_fit.total_milliseconds());
+        string result = to_string(detected_classes);
+        string all_classes = to_string((int) target_images.size());
+
+        rectangle(input_image, Point2d(input_image.cols - 160, 8), Point2d(input_image.cols, 22), CV_RGB(128, 128, 128),
+                  CV_FILLED);
+        rectangle(input_image, Point2d(input_image.cols - 160, 28), Point2d(input_image.cols, 42),
+                  CV_RGB(128, 128, 128), CV_FILLED);
+        rectangle(input_image, Point2d(input_image.cols - 160, 48), Point2d(input_image.cols, 62),
+                  CV_RGB(128, 128, 128), CV_FILLED);
+        rectangle(input_image, Point2d(input_image.cols - 160, 68), Point2d(input_image.cols, 82),
+                  CV_RGB(128, 128, 128), CV_FILLED);
+
+        putText(input_image, "Detection: " + string_time_detect + " ms", Point2d(input_image.cols - 160, 20), fontFace,
+                fontScale, Scalar(255, 255, 255), 1);
+        putText(input_image, "Matching: " + string_time_match + " ms", Point2d(input_image.cols - 160, 40), fontFace,
+                fontScale, Scalar(255, 255, 255), 1);
+        putText(input_image, "Fitting: " + string_time_fitting + " ms", Point2d(input_image.cols - 160, 60), fontFace,
+                fontScale, Scalar(255, 255, 255), 1);
+        putText(input_image, "Found: " + result + " of " + all_classes, Point2d(input_image.cols - 160, 80), fontFace,
+                fontScale, Scalar(255, 255, 255), 1);
+        // END fitting //////////////////////////////////////////////////////////////////
+
+        mtx.unlock();
     }
-
-    if (detected_classes > 0) {
-        object_pub.publish(ma);
-    }
-
-    boost::posix_time::ptime end_fitting = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff_detect = end_detect - start_detect;
-    boost::posix_time::time_duration diff_match = end_match - start_match;
-    boost::posix_time::time_duration diff_fit = end_fitting - start_fitting;
-
-    string string_time_detect = to_string(diff_detect.total_milliseconds());
-    string string_time_match = to_string(diff_match.total_milliseconds());
-    string string_time_fitting = to_string(diff_fit.total_milliseconds());
-    string result = to_string(detected_classes);
-    string all_classes = to_string((int)target_images.size());
-
-    rectangle(input_image, Point2d(input_image.cols-160, 8), Point2d(input_image.cols, 22), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-160, 28), Point2d(input_image.cols, 42), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-160, 48), Point2d(input_image.cols, 62), CV_RGB(128,128,128), CV_FILLED);
-    rectangle(input_image, Point2d(input_image.cols-160, 68), Point2d(input_image.cols, 82), CV_RGB(128,128,128), CV_FILLED);
-
-    putText(input_image, "Detection: "+string_time_detect+" ms", Point2d(input_image.cols-160, 20), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Matching: "+string_time_match+" ms", Point2d(input_image.cols-160, 40), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-160, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-160, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
-    // END fitting //////////////////////////////////////////////////////////////////
-
-    mtx.unlock();
 }
