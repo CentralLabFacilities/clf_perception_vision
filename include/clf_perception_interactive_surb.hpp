@@ -44,8 +44,31 @@ the use of this software, even if advised of the possibility of such damage.
 
 */
 
-
 #pragma once
+
+// STD
+#include <mutex>
+#include <vector>
+#include <time.h>
+#include <string>
+#include <iostream>
+#include <stdlib.h>
+#include <unistd.h>
+
+// OPENCV
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+
+// CUDA
+#include <opencv2/core/cuda.hpp>
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudafeatures2d.hpp>
+#include <opencv2/xfeatures2d/cuda.hpp>
+#include <opencv2/cudawarping.hpp>
+
+// BOOST
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 // ROS
 #include <ros/ros.h>
@@ -53,39 +76,66 @@ the use of this software, even if advised of the possibility of such damage.
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 
-// STD
-#include <mutex>
-#include <string>
-#include <sstream>
-#include <iostream>
+// SELF
+#include <clf_perception_vision_msgs/LearnPersonImage.h>
 
-// CV
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-
-// BOOST
-#include "boost/date_time/posix_time/posix_time.hpp"
-
-class ROSGrabber {
+class Detect2DInteractive {
 
 public:
-    ROSGrabber(std::string i_scope);
-    ~ROSGrabber();
-    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
-    void getImage(cv::Mat *mat);
-    void setPyr(bool pyr);
-    ros::Time getTimestamp();
-    ros::NodeHandle node_handle_;
-    std::string frame_id;
-    int getLastFrameNr();
-    int pyr;
+    Detect2DInteractive();
+    ~Detect2DInteractive();
+
+    bool get_silent();
+    int setup(int argc, char *argv[]);
+    int get_x_resolution();
+    int get_y_resolution();
+    const int fontFace = cv::FONT_HERSHEY_PLAIN;
+    const double fontScale = 1;
+    std::string ros_input_topic;
+    std::vector<cv::Scalar> color_mix(int count);
+
+    void detect(cv::Mat i_image, ros::Time timestamp, std::string frame_id);
+    bool addTarget(clf_perception_vision_msgs::LearnPersonImage::Request& req,
+                   clf_perception_vision_msgs::LearnPersonImage::Response& res);
+
 private:
-    int frame_nr;
-    image_transport::ImageTransport it_;
-    image_transport::Subscriber image_sub_;
-    cv::Mat output_frame;
-    cv::Mat source_frame;
-    ros::Time frame_time;
+    std::vector<cv::Scalar> colors;
+    std::vector<std::string> target_paths;
+    std::vector<std::string> target_labels;
+    std::vector<cv::Mat> target_images;
+    std::vector<std::vector<cv::KeyPoint>> keys_current_target;
+    std::vector<cv::cuda::GpuMat> cuda_desc_current_target_image;
+    std::vector<cv::KeyPoint> keys_camera_image;
+
+    const int text_origin = 10;
+    int max_keypoints = 0;
+    int min_matches = 0;
+    int max_matches = 0;
+    int text_offset_y = 20;
+    float detection_threshold = 0;
+    int res_x = 640;
+    int res_y = 480;
+    int pyr = 0;
+    double scale_factor = 1.0;
+
+    bool do_not_draw = false;
+    bool toggle_homography = false;
+    bool toggle_silent = false;
+
+    std::string type_descriptor;
+    std::string point_matcher;
+    std::string draw_homography;
+    std::string draw_image;
+
+    cv::cuda::GpuMat cuda_frame_scaled;
+    cv::cuda::GpuMat cuda_camera_tmp_img;
+    cv::cuda::GpuMat cuda_desc_camera_image;
+    cv::cuda::GpuMat cuda_frame_tmp_img;
+
+    cv::Ptr<cv::cuda::ORB> cuda_orb;
+
+    ros::NodeHandle node_handle_;
+    ros::Publisher object_pub;
+
     std::recursive_mutex mtx;
 };
-

@@ -53,7 +53,7 @@ using namespace geometry_msgs;
 using namespace message_filters;
 using namespace clf_perception_vision_msgs;
 
-// This piece of code luckily already existed in https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp (THANKS!)
+// This function luckily already existed in https://github.com/introlab/find-object/blob/master/src/ros/FindObjectROS.cpp (THANKS!)
 Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
 	if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
 	{

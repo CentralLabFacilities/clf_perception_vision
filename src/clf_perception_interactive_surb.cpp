@@ -45,20 +45,21 @@ the use of this software, even if advised of the possibility of such damage.
 */
 
 
-// SELF
-#include "clf_perception_surb.hpp"
-
 // ROS
+#include <std_msgs/Header.h>
 #include <geometry_msgs/Pose.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <std_msgs/Header.h>
+
+// SELF
+#include "clf_perception_interactive_surb.hpp"
+
 
 using namespace std;
 using namespace cv;
 
-Detect2D::Detect2D(){}
-Detect2D::~Detect2D(){}
+Detect2DInteractive::Detect2DInteractive(){}
+Detect2DInteractive::~Detect2DInteractive(){}
 
 time_t t = time(nullptr);
 char *t_c = asctime(localtime(&t));
@@ -66,7 +67,7 @@ RNG rng(133742+t);
 
 const int minhessian = 400;
 
-string out_topic = "/clf_perception_surb/objects";
+string out_topic = "/clf_perception_interactive_surb/objects";
 
 Ptr<cuda::DescriptorMatcher> cuda_bf_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_HAMMING);
 Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L1);
@@ -74,7 +75,7 @@ Ptr<cuda::DescriptorMatcher> cuda_knn_matcher = cuda::DescriptorMatcher::createB
 // See: http://docs.opencv.org/2.4/modules/nonfree/doc/feature_detection.html
 cuda::SURF_CUDA cuda_surf(minhessian, 4, 2, true, true);
 
-vector<Scalar> Detect2D::color_mix(int count) {
+vector<Scalar> Detect2DInteractive::color_mix(int count) {
     vector<Scalar> colormix;
     for (int i=0; i<count; i++) {
         Scalar color = Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
@@ -89,15 +90,15 @@ bool is_file_exist(const char *fileName)
     return infile.good();
 }
 
-int Detect2D::get_x_resolution() {
+int Detect2DInteractive::get_x_resolution() {
     return res_x;
 }
 
-int Detect2D::get_y_resolution() {
+int Detect2DInteractive::get_y_resolution() {
     return res_y;
 }
 
-bool Detect2D::get_silent() {
+bool Detect2DInteractive::get_silent() {
     return toggle_silent;
 }
 
@@ -107,7 +108,7 @@ int handleError(int status, const char* func_name,
     return 0;
 }
 
-int Detect2D::setup(int argc, char *argv[]) {
+int Detect2DInteractive::setup(int argc, char *argv[]) {
 
     cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
 
@@ -173,29 +174,6 @@ int Detect2D::setup(int argc, char *argv[]) {
         if (draw_image == "true") {
             toggle_silent = true;
         }
-
-        FileNode targets = fs["targets"];
-        FileNodeIterator it = targets.begin(), it_end = targets.end();
-
-        unsigned int idx = 0;
-        for( ; it != it_end; ++it, idx++ ) {
-            cout << ">>> Target " << idx << " --> ";
-            cout << (String)(*it) << endl;
-            target_paths.push_back((String)(*it));
-        }
-
-        FileNode labels = fs["labels"];
-        FileNodeIterator it2 = labels.begin(), it_end2 = labels.end();
-
-        unsigned int idy = 0;
-        for( ; it2 != it_end2; ++it2, idy++ ) {
-            cout << ">>> Label  " << idy << " --> ";
-            cout << (String)(*it2) << endl;
-            target_labels.push_back((String)(*it2));
-        }
-
-        // Generate Random Colors
-        colors = color_mix(idy);
     }
 
     fs.release();
@@ -221,44 +199,61 @@ int Detect2D::setup(int argc, char *argv[]) {
 
     cout << ">>> Initialized ---> " << type_descriptor << " Algorithm" << endl;
 
-    for(int i=0; i < target_paths.size(); i++) {
+    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 10);
 
-        Mat init = imread(target_paths[i], IMREAD_GRAYSCALE);
+    return 0;
 
-        if (init.rows*init.cols <= 0) {
-            cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
-            exit(EXIT_FAILURE);
-        }
+}
 
-        // Resize target images by factor 2 to improve keypoint extraction
-        // PyrUp adds blur to the image to reduce noise! Much wow.
-        Mat tmp_img;
-        pyrUp(init, tmp_img, Size(init.cols*2, init.rows*2));
+bool Detect2DInteractive::addTarget(clf_perception_vision_msgs::LearnPersonImage::Request &req, clf_perception_vision_msgs::LearnPersonImage::Response&res) {
 
-        if (tmp_img.rows*tmp_img.cols <= 0) {
-            cout << "E >>> Image " << target_paths[i] << " is empty or cannot be found" << endl;
-            exit(EXIT_FAILURE);
-        } else {
-            target_images.push_back(tmp_img);
-        }
+    mtx.lock();
 
-        cuda::GpuMat cuda_tmp_img(tmp_img);
+    cv_bridge::CvImagePtr cv_ptr;
 
-        if (cuda_tmp_img.rows*cuda_tmp_img.cols <= 0) {
+    try {
+        cv_ptr = cv_bridge::toCvCopy(req.roi, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception &e) {
+        res.success = false;
+        res.name = req.name;
+        ROS_ERROR("E >>> CV_BRIDGE exception: %s", e.what());
+        mtx.unlock();
+        return false;
+    }
+
+    cv::Mat img_grey;
+    cv::Mat output_frame_grey;
+
+    cv::Mat source_frame = cv_ptr->image;
+    cv::cvtColor(source_frame, img_grey, CV_BGR2GRAY);
+    cv::pyrUp(img_grey, output_frame_grey, cv::Size(source_frame.cols*2, source_frame.rows*2));
+
+    cuda::GpuMat cuda_tmp_img(output_frame_grey);
+
+    try {
+
+        if (cuda_tmp_img.rows * cuda_tmp_img.cols <= 0) {
             cout << "E >>> CUDA Image is empty or cannot be found" << endl;
-            exit(EXIT_FAILURE);
+            res.success = false;
+            res.name = req.name;
+            mtx.unlock();
+            return false;
         }
 
-        vector<KeyPoint> tmp_kp;
+        vector <KeyPoint> tmp_kp;
         cuda::GpuMat tmp_cuda_dc;
 
         if (type_descriptor.compare("ORB") == 0) {
             try {
                 cuda_orb->detectAndCompute(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
-            catch (Exception& e) {
+            catch (Exception &e) {
                 cout << "E >>> ORB init fail O_O | Maybe not enough key points in training image" << "\n";
-                exit(EXIT_FAILURE);
+                res.success = false;
+                res.name = req.name;
+                mtx.unlock();
+                return false;
             }
         }
 
@@ -266,23 +261,40 @@ int Detect2D::setup(int argc, char *argv[]) {
             try {
                 cuda_surf(cuda_tmp_img, cuda::GpuMat(), tmp_kp, tmp_cuda_dc);
             }
-            catch (Exception& e) {
+            catch (Exception &e) {
                 cout << "E >>> SURF init fail O_O | Maybe not enough key points in training image" << "\n";
-                exit(EXIT_FAILURE);
+                res.success = false;
+                res.name = req.name;
+                mtx.unlock();
+                return false;
             }
         }
 
         keys_current_target.push_back(tmp_kp);
+        target_images.push_back(output_frame_grey);
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
+
+    } catch (Exception &e) {
+          ROS_ERROR("E >>> CV_BRIDGE exception: %s", e.what());
+          res.success = false;
+          res.name = req.name;
+          mtx.unlock();
+          return false;
     }
 
-    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 10);
+    // Generate Random Colors
+    colors = color_mix(target_images.size());
+    res.success = true;
+    res.name = req.name;
+    mtx.unlock();
 
-    return 0;
-
+    return true;
 }
 
-void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id) {
+
+void Detect2DInteractive::detect(Mat input_image, ros::Time timestamp, std::string frame_id) {
+
+    mtx.lock();
 
     // START keypoint extraction in actual image //////////////////////////////////////////
     visualization_msgs::MarkerArray ma;
@@ -365,7 +377,7 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
 
                     if (point_matcher.compare("KNN") == 0) {
 
-	                    cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
+                        cuda_knn_matcher->knnMatch(cuda_desc_current_target_image[i], cuda_desc_camera_image, knn_matches, 2);
 
                         for (int k = 0; k < std::min(keys_camera_image.size()-1, knn_matches.size()); k++) {
                             if ((knn_matches[k][0].distance < detection_threshold*(knn_matches[k][1].distance)) &&
@@ -540,4 +552,6 @@ void Detect2D::detect(Mat input_image, ros::Time timestamp, std::string frame_id
     putText(input_image, "Fitting: "+string_time_fitting+" ms", Point2d(input_image.cols-160, 60), fontFace, fontScale, Scalar(255, 255, 255), 1);
     putText(input_image, "Found: "+result+" of "+all_classes, Point2d(input_image.cols-160, 80), fontFace, fontScale, Scalar(255, 255, 255), 1);
     // END fitting //////////////////////////////////////////////////////////////////
+
+    mtx.unlock();
 }

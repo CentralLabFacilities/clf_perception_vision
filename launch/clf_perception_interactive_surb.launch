@@ -1,0 +1,4 @@
+<launch>
+    <arg name="config" default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_surb_example.yaml"/>
+    <node pkg="clf_perception_vision" type="clf_perception_interactive_surb" name="clf_perception_interactive_surb" output="screen" args="$(arg config)"/>
+</launch>
