@@ -47,6 +47,7 @@ class SendSurf:
             rospy.logwarn(">>> Could not send request, image was emtpy")
         self.l.release()
 
+
 if __name__ == "__main__":
 
     parser = OptionParser()
