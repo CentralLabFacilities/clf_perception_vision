@@ -196,7 +196,7 @@ ADD_EXECUTABLE(clf_perception_cmt
         src/cmt/Continuity.cpp
         src/ros_grabber.cpp
         ${INCLUDE_DIRS}
-        )
+)
 
 # Nodelets #
 # ADD_LIBRARY(clf_perception_nodelets
