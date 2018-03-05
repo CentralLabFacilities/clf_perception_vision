@@ -7,6 +7,7 @@
 #include "Fusion.h"
 #include "Matcher.h"
 #include "Tracker.h"
+#include "Continuity.h"
 
 #include <opencv2/features2d/features2d.hpp>
 
@@ -22,7 +23,7 @@ namespace cmt
 class CMT
 {
 public:
-    CMT() : str_detector("FAST"), str_descriptor("BRISK") {};
+    CMT() : str_detector("FAST"), str_descriptor("BRISK"), continuity_preserved(true) {};
     void initialize(const Mat im_gray, const Rect rect);
     void processFrame(const Mat im_gray);
 
@@ -30,6 +31,7 @@ public:
     Matcher matcher;
     Tracker tracker;
     Consensus consensus;
+    Continuity continuity;
 
     vector<int> classes_active;
 
@@ -38,6 +40,8 @@ public:
 
     vector<Point2f> points_active; //public for visualization purposes
     RotatedRect bb_rot;
+
+    bool continuity_preserved;
 
 private:
     Ptr<FeatureDetector> detector;

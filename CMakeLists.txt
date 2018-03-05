@@ -30,7 +30,7 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         message_filters
                                         image_transport
                                         visualization_msgs
-					                    clf_perception_vision_msgs
+					clf_perception_vision_msgs
 )
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         core
@@ -130,11 +130,11 @@ CATKIN_PACKAGE(INCLUDE_DIRS include
                               message_runtime
                               image_transport
                               clf_perception_vision_msgs
-        DEPENDS dlib
-                       CUDA
-                       Caffe
-                       Boost
-                       OpenCV
+               DEPENDS dlib
+                              CUDA
+                              Caffe
+                              Boost
+                              OpenCV
 )
 
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
@@ -143,7 +143,8 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS}
                     ${Caffe_INCLUDE_DIRS}
                     ${dlib_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
-                    include)
+                    include
+                    src/cmt/include)
 
 ADD_EXECUTABLE(clf_perception_surb
                src/ros_grabber.cpp
@@ -166,12 +167,12 @@ ADD_EXECUTABLE(clf_perception_genage
                src/clf_perception_gender_age_main.cpp
                ${INCLUDE_DIRS}
 )
-
 ADD_EXECUTABLE(clf_perception_collect_data
                src/clf_perception_collect_data.cpp
                src/ros_grabber.cpp
                ${INCLUDE_DIRS}
 )
+
 
 ADD_EXECUTABLE(clf_perception_depth_lookup_persons
                src/clf_perception_depth_lookup_persons.cpp
@@ -182,6 +183,20 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
 #               src/clf_perception_depth_lookup_objects.cpp
 #               ${INCLUDE_DIRS}
 # )
+
+ADD_EXECUTABLE(clf_perception_cmt
+        src/cmt/common.cpp
+        src/cmt/main.cpp
+        src/cmt/CMT.cpp
+        src/cmt/Consensus.cpp
+        src/cmt/Fusion.cpp
+        src/cmt/Matcher.cpp
+        src/cmt/Tracker.cpp
+        src/cmt/fastcluster.cpp
+        src/cmt/Continuity.cpp
+        src/ros_grabber.cpp
+        ${INCLUDE_DIRS}
+        )
 
 # Nodelets #
 # ADD_LIBRARY(clf_perception_nodelets
@@ -204,11 +219,13 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
 #  ADD_DEPENDENCIES(clf_perception_nodelets ${catkin_EXPORTED_LIBRARIES})
 # ENDIF()
 
+
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_interactive_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 
 # Nodelets #
 # INSTALL(TARGETS clf_perception_nodelets ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -218,6 +235,7 @@ INSTALL(TARGETS clf_perception_interactive_surb RUNTIME DESTINATION ${CATKIN_PAC
 INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+INSTALL(TARGETS clf_perception_cmt RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

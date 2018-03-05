@@ -9,7 +9,7 @@ namespace cmt {
 class Consensus
 {
 public:
-    Consensus() : estimate_scale(true), estimate_rotation(false), thr_cutoff(20) {};
+    Consensus() : estimate_scale(true), estimate_rotation(true), thr_cutoff(20) {};
 
     void initialize(const vector<Point2f> & points_normalized);
     void estimateScaleRotation(const vector<Point2f> & points, const vector<int> & classes,
