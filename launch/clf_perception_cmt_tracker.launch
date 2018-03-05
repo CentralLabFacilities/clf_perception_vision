@@ -1,0 +1,4 @@
+<launch>
+    <arg name="path_to_config" default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_cmt_example.yaml"/>
+    <node pkg="clf_perception_vision" type="clf_perception_cmt" name="cmt_tracker" output="screen" args="$(arg path_to_config)" />
+</launch>

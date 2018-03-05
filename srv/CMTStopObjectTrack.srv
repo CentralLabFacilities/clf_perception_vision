@@ -1,5 +1,0 @@
-#request fields
-bool start
----
-#response fields
-bool success

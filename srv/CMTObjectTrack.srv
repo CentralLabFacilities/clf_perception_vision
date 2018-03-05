@@ -1,8 +1,0 @@
-#request fields
-int64 xmin
-int64 xmax
-int64 ymin
-int64 ymax
----
-#response fields
-bool success

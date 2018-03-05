@@ -85,7 +85,7 @@ using ::atof;
 static string WIN_NAME = "CMT";
 
 string topic = "/usb_cam/image_raw";
-string state_topic = "/cmt/state";
+string state_topic = "/cmt/tracking_results";
 bool pyr = false;
 bool show_tracking_results = false;
 float UPPER_I = 0;
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
 
     ros::ServiceServer track_ob(ros_grabber.node_handle_.advertiseService("/cmt/track_object", track));
     ros::ServiceServer track_obj_stop(ros_grabber.node_handle_.advertiseService("/cmt/stop_track_object", stop_track));
-    tracker_pub_ = ros_grabber.node_handle_.advertise<clf_perception_vision::CMTrackerResults>("/cmt/tracking_results",
+    tracker_pub_ = ros_grabber.node_handle_.advertise<clf_perception_vision::CMTrackerResults>(state_topic,
                                                                                                1000);
 
     //The image
