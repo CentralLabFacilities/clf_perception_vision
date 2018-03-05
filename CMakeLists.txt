@@ -130,7 +130,6 @@ ADD_MESSAGE_FILES(
    ExtendedObjectsStamped.msg
    ExtendedPeople.msg
    ExtendedObjects.msg
-   CMTrackerResults.msg
 )
 
 ADD_SERVICE_FILES(
@@ -138,8 +137,6 @@ ADD_SERVICE_FILES(
    FILES
    DoIKnowThatPerson.srv
    LearnPerson.srv
-   CMTObjectTrack.srv
-   CMTStopObjectTrack.srv
 )
 
 GENERATE_MESSAGES(DEPENDENCIES geometry_msgs std_msgs)
