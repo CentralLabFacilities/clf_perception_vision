@@ -24,7 +24,7 @@ class BBox2ExtendedObjects:
             h.stamp = data.header.stamp
             e.header = h
             for item in data.boundingBoxes:
-                if item.Class == "person":
+                if item.label == "person":
                     continue
                 else:
                     if item.probability > 0.5:
@@ -35,7 +35,7 @@ class BBox2ExtendedObjects:
                         o.bbox_ymin = item.ymin
                         o.bbox_ymax = item.ymax
                         o.probability = float('%.2f' % item.probability)
-                        o.category = item.Class
+                        o.category = item.label
                         e.objects.append(o)
             self.pub.publish(e)
         except Exception, ex:
