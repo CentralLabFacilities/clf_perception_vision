@@ -1,0 +1,5 @@
+sensor_fps: 5
+pyr: 0
+input_ros_topic: "/usb_cam/image_raw"
+output_ros_topic: "/cmt/tracking_results"
+show_tracking_results: 1
