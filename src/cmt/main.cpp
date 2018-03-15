@@ -165,7 +165,7 @@ bool track(clf_perception_vision_msgs::CMTObjectTrack::Request &req,
     rect.y = req.ymin;
     rect.width = req.xmax - req.xmin;
     rect.height = req.ymax - req.ymin;
-    ROS_INFO("Starting tracking of object in region: x: %d+%d, y: %d+%d", rect.x, rect.y, rect.width, rect.height);
+    ROS_INFO("Starting tracking of object in region: x: %d+%d, y: %d+%d", rect.x, rect.width, rect.y, rect.height);
     res.success = true;
     tracking_lost_counter = 0;
 
