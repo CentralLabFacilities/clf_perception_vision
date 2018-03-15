@@ -1,4 +1,6 @@
 <launch>
-    <arg name="gender_age_config" default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
-    <node pkg="clf_perception_vision" type="clf_perception_gender_age" name="clf_perception_gender_age" output="screen" args="$(arg gender_age_config)"/>
+    <arg name="gender_age_config"
+         default="/vol/pepper/systems/pepper-robocup-nightly/share/pepper_perception_configs/vision/clf_perception/clf_perception_gender_age_example.yaml"/>
+    <node pkg="clf_perception_vision" type="clf_perception_gender_age" name="clf_perception_gender_age" output="screen"
+          args="$(arg gender_age_config)"/>
 </launch>
