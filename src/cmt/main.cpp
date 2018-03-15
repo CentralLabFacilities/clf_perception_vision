@@ -84,7 +84,7 @@ using ::atof;
 
 static string WIN_NAME = "CMT";
 
-string topic = "/usb_cam/image_raw";
+string topic = "/webcam/image_raw";
 string state_topic = "/cmt/tracking_results";
 bool pyr = false;
 bool show_tracking_results = false;
@@ -165,7 +165,7 @@ bool track(clf_perception_vision_msgs::CMTObjectTrack::Request &req,
     rect.y = req.ymin;
     rect.width = req.xmax - req.xmin;
     rect.height = req.ymax - req.ymin;
-    cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << std::endl;
+    ROS_INFO("Starting tracking of object in region: x: %d+%d, y: %d+%d", rect.x, rect.y, rect.width, rect.height);
     res.success = true;
     tracking_lost_counter = 0;
 
@@ -243,6 +243,7 @@ int main(int argc, char **argv) {
 
 
     cv::CommandLineParser parser(argc, argv, "{@config |<none>| yaml config file}" "{help h ||}");
+    cout << ">>> Config File: --> " << argv[1] << endl;
     cv::FileStorage fs(argv[1], cv::FileStorage::READ);
 
     if (fs.isOpened()) {
@@ -261,6 +262,8 @@ int main(int argc, char **argv) {
 
         fs["sensor_fps"] >> sensor_fps;
         cout << ">>> Sensor FPS: --> " << sensor_fps << endl;
+    } else {
+        cout << ">>> Could not open Config file." << endl;
     }
 
     fs.release();
