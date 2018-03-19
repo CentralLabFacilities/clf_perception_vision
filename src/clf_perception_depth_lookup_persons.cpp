@@ -293,6 +293,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
             // Setup a rectangle to define your region of interest
             cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
+            cv::Rect roi_depth(bbox_xmin/scale_factor, bbox_ymin/scale_factor, objectWidth, objectHeight);
             rectangles.push_back(roi);
             points.push_back(cv::Point(center_x * scale_factor, center_y * scale_factor));
             probabilities.push_back(probability);
@@ -300,8 +301,8 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             // Crop the full image to that image contained by the rectangle roi
             // Note that this doesn't copy the data!
             cv::Mat croppedImage = im(roi);
-            cv::Mat croppedImage_depth = im_depth(roi);
-
+            cv::Mat croppedImage_depth = im_depth(roi_depth);
+            
             // Compose image message
             cv_bridge::CvImage image_out_msg;
             image_out_msg.header   = people_cpy.header;
@@ -311,10 +312,8 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             cv_bridge::CvImage image_depth_out_msg;
             image_depth_out_msg.header   = people_cpy.header;
             if (depthMsg->encoding == "16UC1") {
-                ROS_INFO("Setting 16UC1 encoding for depth msg");
                 image_depth_out_msg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
             } else if (depthMsg->encoding == "32FC1") {
-                ROS_INFO("Setting 32FC1 encoding for depth msg");
                 image_depth_out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
             }
             
@@ -395,13 +394,9 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         cv::circle(im, points[i], 10, Scalar(207, 161, 88), CV_FILLED);
         cv::rectangle(im, rectangles[i], Scalar(0, 255, 255), 2, 8, 0);
         cv::putText(im, "p "+probabilities[i].substr(0,4), cv::Point(points[i].x+12, points[i].y+5 ), fontFace, fontScale, cv::Scalar(207, 161, 88), 1);
-
-        cv::circle(im_depth, points[i], 10, Scalar(207, 161, 88), CV_FILLED);
-        cv::rectangle(im_depth, rectangles[i], Scalar(0, 255, 255), 2, 8, 0);
-        cv::putText(im_depth, "p "+probabilities[i].substr(0,4), cv::Point(points[i].x+12, points[i].y+5 ), fontFace, fontScale, cv::Scalar(207, 161, 88), 1);
     }
 
-    cv::imshow("CLF PERCEPTION || Depth Lookup", im_depth);
+    cv::imshow("CLF PERCEPTION || Depth Lookup", im);
     cv::waitKey(1);
 }
 
