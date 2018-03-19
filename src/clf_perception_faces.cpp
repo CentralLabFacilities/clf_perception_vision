@@ -153,27 +153,11 @@ static void displayState(Mat &canvas, double scaleFactor)
 }
 
 void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
-    personMutex.lock();
-    peopleTrackerImages = msg;
 
+    personMutex.lock();
+
+    peopleTrackerImages = msg;
     cv_bridge::CvImagePtr cvBridge;
-    /*for(int i = 0; i< peopleTrackerImages.trackedPeopleImg.size(); i++){
-        try {
-                cvBridge = cv_bridge::toCvCopy(peopleTrackerImages.trackedPeopleImg.at(i).image, sensor_msgs::image_encodings::BGR8);
-            }
-            catch (cv_bridge::Exception &e) {
-                ROS_ERROR("cv_bridge failed to convert sensor msg: %s", e.what());
-                personMutex.unlock();
-            }
-            inputImage = cvBridge->image;
-            
-            imshow("openpose_person", inputImage);
-            waitKey(3);
-            
-        personMutex.unlock();
-    }
-    inputImage = Mat::zeros(30, 30, inputImage.type());
-    personMutex.unlock();*/
 
     Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
     Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascade_profile_file);
@@ -248,8 +232,8 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                         double fps = 1000 / detectionTime;
 
                         if(true) {
-                            //displayState(frame_display, scaleFactor);
-                            imshow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", frame_display);
+                            // displayState(frame_display, scaleFactor);
+                            imshow("CLF PERCEPTION || Face", frame_display);
                             cv::waitKey(3);
                         }
 
@@ -281,7 +265,7 @@ int main(int argc, char *argv[])
     private_node_handle.param("cascade_profile_file", cascade_profile_file, std::string("/home/pepper/citk/systems/pepper-robocup-nightly//share/clf_perception_vision/data/haar/haarcascade_profileface.xml"));
 
     ros::NodeHandle n;
-    //subscriber to recieve extended person message
+    // subscriber to recieve extended person message
     ros::Subscriber extendedPeopleSub = n.subscribe("people_tracker/people/extended", 100, getFaceCb);
 
     if (getCudaEnabledDeviceCount() == 0)
@@ -291,42 +275,11 @@ int main(int argc, char *argv[])
 
     cout << ">>> Cuda Enabled Devices --> " << cuda::getCudaEnabledDeviceCount() << endl;
     cout << ">>> ";
+
     cuda::printShortCudaDeviceInfo(cuda::getDevice());
 
     ROS_INFO("Init done. Can start detecting faces.");
     ros::spin();
     
     return 0;
-
-    /*
-    while(waitKey(5) != 27) {
-        ros::spinOnce();
-        if(toggle) {
-            ros_grabber.getImage(&frame);
-            
-
-        }
-
-        char key = (char)waitKey(1);
-
-        switch (key)
-        {
-        case '+':
-            scaleFactor *= 1.05;
-            break;
-        case '-':
-            if (scaleFactor <= 1.01) {
-                break;
-            }
-            scaleFactor /= 1.05;
-            break;
-        case 's':
-        case 'S':
-            draw = !draw;
-            break;
-        }
-
-    }
-
-    return 0; */
 }

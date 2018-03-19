@@ -162,19 +162,11 @@ ADD_EXECUTABLE(clf_perception_interactive_surb
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_perception_genage
-               src/ros_grabber.cpp
-               src/dlib_detection.cpp
-               src/caffee_classification.cpp
-               src/clf_perception_gender_age_main.cpp
-               ${INCLUDE_DIRS}
-)
 ADD_EXECUTABLE(clf_perception_collect_data
                src/clf_perception_collect_data.cpp
                src/ros_grabber.cpp
                ${INCLUDE_DIRS}
 )
-
 
 ADD_EXECUTABLE(clf_perception_depth_lookup_persons
                src/clf_perception_depth_lookup_persons.cpp
@@ -182,7 +174,7 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
 )
 
 ADD_EXECUTABLE(clf_perception_face
-               src/clf_2d_faces.cpp
+               src/clf_perception_faces.cpp
                ${INCLUDE_DIRS}
 )
 
@@ -230,7 +222,6 @@ ADD_EXECUTABLE(clf_perception_cmt
 TARGET_LINK_LIBRARIES(clf_perception_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_interactive_surb ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_face ${CUSTOM_CUDA_LIBS} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_genage ${Caffe_LIBRARIES} ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES} ${dlib_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_collect_data ${CUSTOM_CV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(clf_perception_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boost_LIBRARIES})
@@ -241,7 +232,6 @@ TARGET_LINK_LIBRARIES(clf_perception_cmt ${OpenCV_LIBS} ${CUSTOM_ROS_LIBS} ${Boo
 INSTALL(TARGETS clf_perception_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_interactive_surb RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_face RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_genage RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_collect_data RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 INSTALL(TARGETS clf_perception_cmt RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

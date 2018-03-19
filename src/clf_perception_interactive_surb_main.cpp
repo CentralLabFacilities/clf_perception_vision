@@ -154,9 +154,9 @@ int main(int argc, char *argv[]) {
                     cv::Size size(current_image.cols/1.5,current_image.rows/1.5);
                     cv::Mat resize;
                     cv::resize(current_image, resize, size, cv::INTER_NEAREST);
-                    cv::imshow(":: CLF PERCEPTION I-SURB ::", resize);
+                    cv::imshow("CLF PERCEPTION || Surb", resize);
                 } else {
-                    cv::imshow(":: CLF PERCEPTION I-SURB ::", current_image);
+                    cv::imshow("CLF PERCEPTION || Surb", current_image);
                 }
 
                 if (time_spend >= 1 ) {

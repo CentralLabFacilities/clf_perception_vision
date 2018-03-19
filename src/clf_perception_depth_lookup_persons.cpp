@@ -380,9 +380,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
     // Fill pose array
     pose_ex.poses = pose_arr;
 
-    // Finally unlock
-    // im_mutex.unlock();
-
     if(transforms.size() > 0) {
 	    people_pub.publish(people_cpy);
         people_pub_pose.publish(pose_arr);
@@ -396,7 +393,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         cv::putText(im, "p "+probabilities[i].substr(0,4), cv::Point(points[i].x+12, points[i].y+5 ), fontFace, fontScale, cv::Scalar(207, 161, 88), 1);
     }
 
-    cv::imshow("CLF PERCEPTION || Depth Lookup", im);
+    cv::imshow("CLF PERCEPTION || DepthLUP", im);
     cv::waitKey(1);
 }
 
