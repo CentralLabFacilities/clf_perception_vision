@@ -317,9 +317,7 @@ int main(int argc, char *argv[])
 
     ros::init(argc, argv, "clf_detect_faces");
     ros::NodeHandle private_node_handle("~");
-
-    shift_center_y = 1.250000;
-
+    
     private_node_handle.param("imageToPoseClient_topic", imageToPoseClient_topic, std::string("/clf_perception_vision/get_pose_from_image"));
     private_node_handle.param("visualize", visualize, false);
     private_node_handle.param("bounding_box_topic", in_topic_bounding_boxes, std::string("/people_tracker/people/extended"));
