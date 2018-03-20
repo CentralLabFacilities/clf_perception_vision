@@ -497,8 +497,8 @@ int main(int argc, char **argv)
     people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
     people_pub_extended_pose = nh.advertise<ExtendedPoseArray>(out_topic_pose_extended, 1);
 
-    cv::namedWindow("CLF PERCEPTION || Depth Lookup", cv::WINDOW_NORMAL);
-    cv::resizeWindow("CLF PERCEPTION || Depth Lookup", 320, 240);
+    cv::namedWindow("CLF PERCEPTION || DepthLUP", cv::WINDOW_NORMAL);
+    cv::resizeWindow("CLF PERCEPTION || DepthLUP", 320, 240);
 
     ros::spin();
 

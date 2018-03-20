@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 
     cout << ">>> Ready, let's go..." << endl;
 
-    cv::namedWindow(":: CLF PERCEPTION I-SURB ::", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
+    cv::namedWindow("CLF PERCEPTION || Surb", cv::WINDOW_AUTOSIZE + cv::WINDOW_OPENGL);
     cv::Mat current_image;
 
     cout << ">>> Press 'ESC' to exit" << endl;

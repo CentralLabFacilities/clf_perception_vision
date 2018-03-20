@@ -162,7 +162,7 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
     Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
     Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascade_profile_file);
 
-    namedWindow(":: CLF GPU Face Detect [ROS] Press ESC to Exit ::", 1);
+    namedWindow("CLF PERCEPTION || Face", 1);
 
     Mat frame, frame_display, to_extract;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 
     ros::NodeHandle n;
     // subscriber to recieve extended person message
-    ros::Subscriber extendedPeopleSub = n.subscribe("people_tracker/people/extended", 100, getFaceCb);
+    ros::Subscriber extendedPeopleSub = n.subscribe("people_tracker/people/extended", 1, getFaceCb);
 
     if (getCudaEnabledDeviceCount() == 0)
     {
