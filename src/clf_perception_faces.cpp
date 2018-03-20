@@ -168,8 +168,10 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
     Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
     Ptr<cuda::CascadeClassifier> cascade_cuda_profile = cuda::CascadeClassifier::create(cascade_profile_file);
 
-    namedWindow("CLF PERCEPTION || Face", 1);
-
+    if(visualize) {
+        namedWindow("CLF PERCEPTION || Face", 1);
+    }
+    
     Mat frame, frame_display, to_extract;
     GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
 
@@ -253,11 +255,12 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                 if (faces.size() > 0) {
                     if (faces.size() > 1) {
                         ROS_WARN(">>> Detected more than one face for this person. Aborting...");
+                        personMutex.unlock();
                         return;
                     }
 
                     //const ImageConstPtr& depthMsg = peopleTrackerImages.trackedPeopleImg.at(i).image;
-                    Image depthMsg = peopleTrackerImages.trackedPeopleImg.at(i).image;
+                    Image depthMsg = peopleTrackerImages.trackedPeopleImg.at(i).image_depth;
                     cv_bridge::CvImageConstPtr ptrDepth;
 
                     try {
@@ -272,14 +275,19 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                         }
                     } catch (cv_bridge::Exception& e) {
                         ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
-                    return;
+                        personMutex.unlock();
+                        return;
                     }
 
                     Rect face = faces[0];
-                    cv::Mat croppedImage_depth = ptrDepth->image(face);
+
+                    float scale_factor = frame.cols/ptrDepth->image.cols;
+                    cv::Rect roi_depth(face.x/scale_factor, face.y/scale_factor, face.width/scale_factor, face.height/scale_factor);
+
+                    cv::Mat croppedImage_depth = ptrDepth->image(roi_depth);
 
                     cv_bridge::CvImage image_depth_out_msg;
-                    image_depth_out_msg.header   = peopleTrackerImages.header;
+                    image_depth_out_msg.header   = depthMsg.header;
                     if (depthMsg.encoding == "16UC1") {
                         image_depth_out_msg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
                     } else if (depthMsg.encoding == "32FC1") {
@@ -337,7 +345,7 @@ int main(int argc, char *argv[])
 
     ros::NodeHandle n;
     // subscriber to recieve extended person message
-    ros::Subscriber extendedPeopleSub = private_node_handle.subscribe("people_tracker/people/extended", 1, getFaceCb);
+    ros::Subscriber extendedPeopleSub = n.subscribe("people_tracker/people/extended", 1, getFaceCb);
 
     if (getCudaEnabledDeviceCount() == 0)
     {
