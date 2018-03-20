@@ -70,6 +70,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <clf_perception_vision_msgs/ExtendedPeople.h>
 #include <clf_perception_vision_msgs/ExtendedPoseArray.h>
 #include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
+#include <clf_perception_vision_msgs/ImageToPose.h>
 
 // FILTER
 #include <message_filters/subscriber.h>
@@ -93,6 +94,7 @@ std::string rgb_topic;
 std::string out_topic;
 std::string rgb_info;
 std::string in_topic;
+std::string pose_service_topic;
 
 cv::Mat depth_;
 cv::Mat depth_copy;
