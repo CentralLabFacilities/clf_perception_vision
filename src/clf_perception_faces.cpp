@@ -110,12 +110,6 @@ double time_spend = 0;
 
 bool findLargestObject = true;
 bool visualize = false;
-bool depthConstant_factor_is_set = false;
-
-float depthConstant_;
-float depthConstant_factor;
-float camera_image_depth_width;
-float shift_center_y;
 
 Size minSize(20,20);
 Size maxSize(100,100);
@@ -123,101 +117,8 @@ Size maxSize(100,100);
 const int fontFace = FONT_HERSHEY_PLAIN;
 const double fontScale = 1;
 
-ros::Subscriber info_depth_sub;
 ros::Publisher face_pub;
 ros::ServiceClient imageToPoseClient;
-
-cv::Mat depth_;
-ros::Time stamp_;
-std::string frameId_;
-
-Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float fx, float fy) {
-	if(!(x >=0 && x<depthImage.cols && y >=0 && y<depthImage.rows))
-	{
-		ROS_ERROR(">>> Point must be inside the image (x=%d, y=%d), image size=(%d,%d)", x, y, depthImage.cols, depthImage.rows);
-		return Vec3f(
-				numeric_limits<float>::quiet_NaN(),
-				numeric_limits<float>::quiet_NaN(),
-				numeric_limits<float>::quiet_NaN());
-	}
-
-	cv::Vec3f pt;
-
-	// Use correct principal point from calibration
-	float center_x = cx; //cameraInfo.K.at(2)
-	float center_y = cy; //cameraInfo.K.at(5)
-
-	bool isInMM = depthImage.type() == CV_16UC1; // is in mm?
-
-	// Combine unit conversion (if necessary) with scaling by focal length for computing (X,Y)
-	float unit_scaling = isInMM?0.001f:1.0f;
-	float constant_x = unit_scaling / fx; //cameraInfo.K.at(0)
-	float constant_y = unit_scaling / fy; //cameraInfo.K.at(4)
-	float bad_point = numeric_limits<float>::quiet_NaN();
-
-	float depth;
-	bool isValid;
-
-	if(isInMM) {
-	    // ROS_DEBUG(">>> Image is in Millimeters");
-	    float depth_samples[21];
-
-        // Sample fore depth points to the right, left, top and down
-        for (int i=0; i<5; i++) {
-            depth_samples[i] = (float)depthImage.at<uint16_t>(y,x+i);
-            depth_samples[i+5] = (float)depthImage.at<uint16_t>(y,x-i);
-            depth_samples[i+10] = (float)depthImage.at<uint16_t>(y+i,x);
-            depth_samples[i+15] = (float)depthImage.at<uint16_t>(y-i,x);
-        }
-
-        depth_samples[20] = (float)depthImage.at<uint16_t>(y, x);
-
-        int arr_size = sizeof(depth_samples)/sizeof(float);
-        sort(&depth_samples[0], &depth_samples[arr_size]);
-        float median = arr_size % 2 ? depth_samples[arr_size/2] : (depth_samples[arr_size/2-1] + depth_samples[arr_size/2]) / 2;
-
-        depth = median;
-		ROS_DEBUG("%f", depth);
-		isValid = depth != 0.0f;
-
-	} else {
-		// ROS_DEBUG(">>> Image is in Meters");
-		float depth_samples[21];
-
-        // Sample fore depth points to the right, left, top and down
-        for (int i=0; i<5; i++) {
-            depth_samples[i] = depthImage.at<float>(y,x+i);
-            depth_samples[i+5] = depthImage.at<float>(y,x-i);
-            depth_samples[i+10] = depthImage.at<float>(y+i,x);
-            depth_samples[i+15] = depthImage.at<float>(y-i,x);
-        }
-
-        depth_samples[20] = depthImage.at<float>(y,x);
-
-        int arr_size = sizeof(depth_samples)/sizeof(float);
-        sort(&depth_samples[0], &depth_samples[arr_size]);
-        float median = arr_size % 2 ? depth_samples[arr_size/2] : (depth_samples[arr_size/2-1] + depth_samples[arr_size/2]) / 2;
-
-        depth = median;
-        ROS_DEBUG("%f", depth);
-		isValid = isfinite(depth);
-	}
-
-	// Check for invalid measurements
-	if (!isValid)
-	{
-	    ROS_DEBUG(">>> WARN Image is invalid, whoopsie.");
-		pt.val[0] = pt.val[1] = pt.val[2] = bad_point;
-	} else{
-		// Fill in XYZ
-		pt.val[0] = (float(x) - center_x) * depth * constant_x;
-		pt.val[1] = (float(y) - center_y) * depth * constant_y;
-		pt.val[2] = depth*unit_scaling;
-	}
-
-	return pt;
-}
-
 
 static void help()
 {
@@ -256,25 +157,6 @@ static void displayState(Mat &canvas, double scaleFactor)
     ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "ScaleFactor " << scaleFactor;
 
     matPrint(canvas, 1, fontColorWhite, ss.str());
-}
-
-void depthInfoCallback(const CameraInfoConstPtr& cameraInfoMsg) {
-    if(!depthConstant_factor_is_set) {
-        ROS_INFO(">>> Setting depthConstant_factor");
-        depthConstant_factor = cameraInfoMsg->K[4];
-        camera_image_depth_width = cameraInfoMsg->width;
-        depthConstant_factor_is_set = true;
-    } else {
-      // Unsubscribe, we only need that once.
-      info_depth_sub.shutdown();
-    }
-}
-
-void setDepthData(const string &frameId, const ros::Time &stamp, const Mat &depth, float depthConstant) {
-    frameId_ = frameId;
-    stamp_ = stamp;
-    depth_ = depth;
-    depthConstant_ = depthConstant;
 }
 
 void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
@@ -374,11 +256,6 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                         return;
                     }
 
-                    if(!depthConstant_factor_is_set) {
-                        ROS_WARN(">>> Waiting for first depth camera INFO message to arrive...");
-                        return;
-                    }
-
                     //const ImageConstPtr& depthMsg = peopleTrackerImages.trackedPeopleImg.at(i).image;
                     Image depthMsg = peopleTrackerImages.trackedPeopleImg.at(i).image;
                     cv_bridge::CvImageConstPtr ptrDepth;
@@ -394,7 +271,7 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                         return;
                         }
                     } catch (cv_bridge::Exception& e) {
-                    ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
+                        ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
                     return;
                     }
 
@@ -410,6 +287,8 @@ void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
                     }
                     
                     image_depth_out_msg.image = croppedImage_depth;
+
+                    ROS_INFO("Sending service call...");
 
                     clf_perception_vision_msgs::ImageToPose srv;
                     srv.request.image_depth = *image_depth_out_msg.toImageMsg();
@@ -447,8 +326,12 @@ int main(int argc, char *argv[])
     private_node_handle.param("publish_topic", out_topic_face, std::string("/clf_perception_vision/people/head_extended"));
     private_node_handle.param("cascade_frontal_file", cascade_frontal_file, std::string("/home/pepper/citk/systems/pepper-robocup-nightly//share/clf_perception_vision/data/haar/haarcascade_frontalface_default.xml"));
     private_node_handle.param("cascade_profile_file", cascade_profile_file, std::string("/home/pepper/citk/systems/pepper-robocup-nightly//share/clf_perception_vision/data/haar/haarcascade_profileface.xml"));
-    private_node_handle.param("depth_info_topic", depth_info, std::string("/pepper_robot/camera/depth/camera_info"));
-    private_node_handle.param("depth_shift_y", shift_center_y, shift_center_y);
+    
+    ROS_INFO("imageToPoseClient_topic set to %s", imageToPoseClient_topic.c_str());
+    ROS_INFO("bounding_box_topic set to %s", in_topic_bounding_boxes.c_str());
+    ROS_INFO("publish_topic set to %s", out_topic_face.c_str());
+    ROS_INFO("cascade_frontal_file set to %s", cascade_frontal_file.c_str());
+    ROS_INFO("cascade_profile_file set to %s", cascade_profile_file.c_str());
 
     face_pub = private_node_handle.advertise<PoseStamped>(out_topic_face, 1);
 
@@ -456,7 +339,6 @@ int main(int argc, char *argv[])
 
     ros::NodeHandle n;
     // subscriber to recieve extended person message
-    info_depth_sub = private_node_handle.subscribe(depth_info, 2, depthInfoCallback);
     ros::Subscriber extendedPeopleSub = private_node_handle.subscribe("people_tracker/people/extended", 1, getFaceCb);
 
     if (getCudaEnabledDeviceCount() == 0)
