@@ -78,6 +78,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <clf_perception_vision_msgs/ExtendedPeople.h>
 #include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 #include <clf_perception_vision_msgs/ImageToPose.h>
+#include <clf_perception_vision_msgs/GetFaceBB.h>
 #include <bayes_people_tracker_msgs/PeopleTrackerImage.h>
 
 // BOOST
@@ -157,6 +158,59 @@ static void displayState(Mat &canvas, double scaleFactor)
     ss << "[" << canvas.cols << "x" << canvas.rows << "] | " << "ScaleFactor " << scaleFactor;
 
     matPrint(canvas, 1, fontColorWhite, ss.str());
+}
+
+bool getBBFromImage(GetFaceBB::Request &req, GetFaceBB::Response &res) {
+
+    cv_bridge::CvImagePtr cvBridge;
+    Mat frame;
+    GpuMat frame_cuda, frame_cuda_grey, facesBuf_cuda, facesBuf_cuda_profile;
+    Ptr<cuda::CascadeClassifier> cascade_cuda = cuda::CascadeClassifier::create(cascade_frontal_file);
+
+    try {
+        cvBridge = cv_bridge::toCvCopy(req.image, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception &e) {
+        ROS_ERROR("cv_bridge failed to convert sensor msg: %s", e.what());
+        return false;
+    }
+    frame = cvBridge->image;
+
+    if (frame.rows*frame.cols > 0) {
+
+        frame_cuda.upload(frame);
+        cuda::cvtColor(frame_cuda, frame_cuda_grey, COLOR_BGR2GRAY);
+
+        cascade_cuda->setMinNeighbors(min_n);
+        cascade_cuda->setScaleFactor(scaleFactor);
+        cascade_cuda->setFindLargestObject(true);
+        cascade_cuda->setMinObjectSize(minSize);
+        cascade_cuda->setMaxObjectSize(maxSize);
+        cascade_cuda->detectMultiScale(frame_cuda_grey, facesBuf_cuda);
+
+        /*cascade_cuda_profile->setMinNeighbors(min_n);
+        cascade_cuda_profile->setScaleFactor(scaleFactor);
+        cascade_cuda_profile->setFindLargestObject(true);
+        cascade_cuda_profile->setMinObjectSize(minSize);
+        cascade_cuda_profile->setMaxObjectSize(maxSize);
+        cascade_cuda_profile->detectMultiScale(frame_cuda_grey, facesBuf_cuda_profile);*/
+
+        std::vector<Rect> faces;
+        //std::vector<Rect> faces_profile;
+
+        cascade_cuda->convert(facesBuf_cuda, faces);
+
+        if (faces.size() == 1) {
+            res.xmin = faces[0].x;
+            res.width = faces[0].width;
+            res.ymin = faces[0].y;
+            res.height = faces[0].height;
+
+            return true;
+        }
+    }
+    ROS_WARN("No face detected");
+    return false;
 }
 
 void getFaceCb(const bayes_people_tracker_msgs::PeopleTrackerImage &msg) {
@@ -345,7 +399,9 @@ int main(int argc, char *argv[])
 
     ros::NodeHandle n;
     // subscriber to recieve extended person message
-    ros::Subscriber extendedPeopleSub = n.subscribe("people_tracker/people/extended", 1, getFaceCb);
+    //ros::Subscriber extendedPeopleSub = n.subscribe("/people_tracker/people/extended", 1, getFaceCb);
+
+    ros::ServiceServer service = n.advertiseService("/clf_perception/vision/get_face_BB", getBBFromImage);
 
     if (getCudaEnabledDeviceCount() == 0)
     {

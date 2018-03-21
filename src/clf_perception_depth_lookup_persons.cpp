@@ -295,8 +295,13 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
     // Pose Array of people
     PoseArray pose_arr;
+    PoseArray pose_arr_face;
+
     pose_arr.header.stamp = current_stamp;
     pose_arr.header.frame_id = frameId_;
+    
+    pose_arr_face.header.stamp = current_stamp;
+    pose_arr_face.header.frame_id = frameId_;
 
     // Pose extended msgs
     ExtendedPoseArray pose_ex;
@@ -385,21 +390,30 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             transform.stamp_ = current_stamp;
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
 
-            // set rotation (y inverted)
-            // tf::Vector3 xAxis(axisEndX.val[0] - center3D.val[0], axisEndX.val[1] - center3D.val[1], axisEndX.val[2] - center3D.val[2]);
-            // xAxis.normalize();
-            // tf::Vector3 yAxis(axisEndY.val[0] - center3D.val[0], axisEndY.val[1] - center3D.val[1], axisEndY.val[2] - center3D.val[2]);
-            // yAxis.normalize();
-            // tf::Vector3 zAxis = xAxis*yAxis;
-            // tf::Matrix3x3 rotationMatrix(
-            //            xAxis.x(), yAxis.x(), zAxis.x(),
-            //            xAxis.y(), yAxis.y(), zAxis.y(),
-            //            xAxis.z(), yAxis.z(), zAxis.z());
-            // tf::Quaternion q;
-            // rotationMatrix.getRotation(q);
-            // set x axis going front of the object, with z up and z left
-            // q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
-            // transform.setRotation(q.normalized());
+            //Check for face
+            Pose poseFace;
+            GetFaceBB srv;
+            srv.request.image = *image_out_msg.toImageMsg();
+            if (faceBBClient.call(srv))
+            {
+                Rect face(srv.response.xmin, srv.response.width, srv.response.ymin, srv.response.height);
+                cv::Vec3f center3DFace = getDepth(depth_,
+                    (face.width/scale_factor/2)+0.5f, (face.height/scale_factor/2)+0.5f,
+                    float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
+                    1.0f/depthConstant_, 1.0f/depthConstant_);
+
+                poseFace.position.x = center3D.val[0];
+                poseFace.position.y = center3D.val[1];
+                poseFace.position.z = center3D.val[2];
+                poseFace.orientation.x = 0.0; //q.normalized().x();
+                poseFace.orientation.y = 0.0; //q.normalized().y();
+                poseFace.orientation.z = 0.0; //q.normalized().z();
+                poseFace.orientation.w = 1.0; //q.normalized().w();
+            }
+            else
+            {
+                ROS_INFO("No face detected!");
+            }
 
             PoseStamped pose_stamped;
             pose_stamped.header = people_cpy.header;
@@ -426,6 +440,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             people_cpy.persons[i].transformid = id;
             transforms.push_back(transform);
             pose_arr.poses.push_back(pose);
+            pose_arr_face.poses.push_back(poseFace);
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -435,6 +450,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
     // Fill pose array
     pose_ex.poses = pose_arr;
+    pose_ex.poses_face = pose_arr_face;
 
     if(transforms.size() > 0) {
 	    people_pub.publish(people_cpy);
@@ -539,6 +555,8 @@ int main(int argc, char **argv)
     }
 
     ros::ServiceServer service = nh.advertiseService(pose_service_topic, getPoseFromDepthImage);
+    
+    faceBBClient = nh.serviceClient<GetFaceBB>("/clf_perception/vision/get_face_BB");
 
     // TF boradcaster
     tfBroadcaster_ = new tf::TransformBroadcaster();

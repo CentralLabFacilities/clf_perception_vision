@@ -71,6 +71,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <clf_perception_vision_msgs/ExtendedPoseArray.h>
 #include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
 #include <clf_perception_vision_msgs/ImageToPose.h>
+#include <clf_perception_vision_msgs/GetFaceBB.h>
 
 // FILTER
 #include <message_filters/subscriber.h>
@@ -117,6 +118,8 @@ ros::Publisher people_pub_extended_pose;
 
 ros::Subscriber info_depth_sub;
 ros::Subscriber info_rgb_sub;
+
+ros::ServiceClient faceBBClient;
 
 tf::TransformBroadcaster *tfBroadcaster_;
 
