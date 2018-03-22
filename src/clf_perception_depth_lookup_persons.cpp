@@ -396,9 +396,15 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             srv.request.image = *image_out_msg.toImageMsg();
             if (faceBBClient.call(srv))
             {
-                Rect face(srv.response.xmin, srv.response.width, srv.response.ymin, srv.response.height);
+
+                Rect face(srv.response.xmin/scale_factor, srv.response.width/scale_factor, srv.response.ymin/scale_factor, srv.response.height/scale_factor);
+                ROS_INFO("center x: %d\tcenter y: %d\nface.x: %d; face.y: %d; face.width: %d; face.height: %d", center_x, center_y, face.x, face.y, face.width, face.height);
+
+                imshow("Face_DLUP", im(face));
+                cv::waitKey(3);
+
                 cv::Vec3f center3DFace = getDepth(depth_,
-                    ((face.x + face.width)/scale_factor/2)+0.5f, ((face.y + face.height)/scale_factor/2)+0.5f,
+                    ((face.x + face.width)/2)+0.5f, ((face.y + face.height)/2)+0.5f,
                     float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                     1.0f/depthConstant_, 1.0f/depthConstant_);
 
