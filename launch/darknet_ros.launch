@@ -13,5 +13,6 @@
   <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros" output="screen">
     <param name="weights_path" value="$(arg yolo_weights_path)" />
     <param name="config_path" value="$(arg yolo_config_path)" />
+    <param name="image_view/enable_opencv" value="false" />
   </node>
 </launch>
