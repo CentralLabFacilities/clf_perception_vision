@@ -398,17 +398,22 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             {
                 Rect face(srv.response.xmin, srv.response.width, srv.response.ymin, srv.response.height);
                 cv::Vec3f center3DFace = getDepth(depth_,
-                    (face.width/scale_factor/2)+0.5f, (face.height/scale_factor/2)+0.5f,
+                    ((face.x + face.width)/scale_factor/2)+0.5f, ((face.y + face.height)/scale_factor/2)+0.5f,
                     float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                     1.0f/depthConstant_, 1.0f/depthConstant_);
 
-                poseFace.position.x = center3DFace.val[0];
-                poseFace.position.y = center3DFace.val[1];
-                poseFace.position.z = center3DFace.val[2];
-                poseFace.orientation.x = 0.0; //q.normalized().x();
-                poseFace.orientation.y = 0.0; //q.normalized().y();
-                poseFace.orientation.z = 0.0; //q.normalized().z();
-                poseFace.orientation.w = 1.0; //q.normalized().w();
+                if (isfinite(center3DFace.val[0]) && isfinite(center3DFace.val[1]) && isfinite(center3DFace.val[2])) {
+
+                    poseFace.position.x = center3DFace.val[0];
+                    poseFace.position.y = center3DFace.val[1];
+                    poseFace.position.z = center3DFace.val[2];
+                    poseFace.orientation.x = 0.0; //q.normalized().x();
+                    poseFace.orientation.y = 0.0; //q.normalized().y();
+                    poseFace.orientation.z = 0.0; //q.normalized().z();
+                    poseFace.orientation.w = 1.0; //q.normalized().w();
+                } else {
+                    ROS_INFO("Face not in depth sensor range");
+                }
             }
             else
             {
