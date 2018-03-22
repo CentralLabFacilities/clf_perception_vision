@@ -402,9 +402,9 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
                     float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                     1.0f/depthConstant_, 1.0f/depthConstant_);
 
-                poseFace.position.x = center3D.val[0];
-                poseFace.position.y = center3D.val[1];
-                poseFace.position.z = center3D.val[2];
+                poseFace.position.x = center3DFace.val[0];
+                poseFace.position.y = center3DFace.val[1];
+                poseFace.position.z = center3DFace.val[2];
                 poseFace.orientation.x = 0.0; //q.normalized().x();
                 poseFace.orientation.y = 0.0; //q.normalized().y();
                 poseFace.orientation.z = 0.0; //q.normalized().z();
