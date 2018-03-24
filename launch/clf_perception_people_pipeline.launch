@@ -32,6 +32,5 @@
         <param name="depthlookup_out_topic_pose_extended" type="str"
                value="$(arg depthlookup_out_topic_pose_extended)"/>
         <param name="depthlookup_shift_center_y" type="double" value="$(arg depthlookup_shift_center_y)"/>
-        <param name="transform_frame" type="str" value="$(arg transform_frame)"/>
     </node>
 </launch>
