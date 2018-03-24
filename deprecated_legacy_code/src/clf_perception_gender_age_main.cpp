@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     ros_grabber.setPyr(_pyr);
 
     ros::Subscriber sub = ros_grabber.node_handle_.subscribe("/clf_perception_gender_age/compute", 1, toggle_callback);
-    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_perception_gender_age/people", 10);
+    ros::Publisher people_pub = ros_grabber.node_handle_.advertise<people_msgs::People>("/clf_perception_gender_age/people", 1);
 
     DlibFace dlf;
     dlf.setup(shape_mode_path);
