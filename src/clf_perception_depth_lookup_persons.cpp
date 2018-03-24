@@ -328,7 +328,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         float center_x = (bbox_xmax - objectWidth*scale_factor/2) / scale_factor;
         float center_y = (bbox_ymax - objectHeight*scale_factor*shift_center_y/2) / scale_factor;
 
-        ROS_INFO("original center: %f\tshifted center: %f", bbox_ymax - objectHeight*scale_factor/2, center_y);
+        ROS_DEBUG("original center: %f\tshifted center: %f", bbox_ymax - objectHeight*scale_factor/2, center_y);
 
         cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
         cv::Mat croppedImage = im(roi);
@@ -338,12 +338,12 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         double ratio = height/(double)width;
 
         if (im.rows*0.02 > bbox_ymin && ratio < 1.5) {
-            ROS_INFO("BBox in upper 2%%\timage ymin: %f\tBB ymin: %d\tratio %f", im.rows*0.02, bbox_ymin, ratio);
+            ROS_DEBUG("BBox in upper 2%%\timage ymin: %f\tBB ymin: %d\tratio %f", im.rows*0.02, bbox_ymin, ratio);
             center_y = ((bbox_ymax - (objectHeight*scale_factor*1.6/2)) / scale_factor);
         }
 
         if (im.rows-im.rows*0.03 < bbox_ymax && ratio < 1.5) {
-            ROS_INFO("BBox in lower 3%% \timage ymax: %f\tBB ymax: %d\tratio %f", im.rows-im.rows*0.03, bbox_ymax, ratio);
+            ROS_DEBUG("BBox in lower 3%% \timage ymax: %f\tBB ymax: %d\tratio %f", im.rows-im.rows*0.03, bbox_ymax, ratio);
             center_y = ((bbox_ymax - (objectHeight*scale_factor*0.7/2)) / scale_factor);
         } 
 
@@ -371,17 +371,18 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
         if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
+            float center_x_rgb = center_x * scale_factor;
+            float center_y_rgb = center_y * scale_factor;
+
             // Setup a rectangle to define your region of interest
             cv::Rect roi_depth(bbox_xmin/scale_factor, bbox_ymin/scale_factor, objectWidth, objectHeight);
             rectangles.push_back(roi);
-            points.push_back(cv::Point(center_x * scale_factor, center_y * scale_factor));
+            points.push_back(cv::Point(center_x_rgb, center_y_rgb));
             probabilities.push_back(probability);
 
             // Crop the full image to that image contained by the rectangle roi
             // Note that this doesn't copy the data!
             cv::Mat croppedImage_depth = im_depth(roi_depth);
-            
-            //ROS_INFO("roi_depth x: %d; y: %d; width: %d; height: %d", roi_depth.x, roi_depth.y, roi_depth.width, roi_depth.height);
 
             // Compose image message
             cv_bridge::CvImage image_out_msg;
@@ -412,22 +413,27 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             //Check for face
             Pose poseFace;
             GetFaceBB srv;
+            
+            double head_dlup_pixel_offset = -1;
+            double face_center_x = -1; 
+            double face_center_y = -1;
+            
             srv.request.image = *image_out_msg.toImageMsg();
-            if (faceBBClient.call(srv))
-            {
+            if (faceBBClient.call(srv)) {
 
-                Rect face(srv.response.xmin, srv.response.ymin, srv.response.width, srv.response.height);
                 Rect faceDepth(srv.response.xmin/scale_factor+0.5f, srv.response.ymin/scale_factor, srv.response.width/scale_factor, srv.response.height/scale_factor);
                 
+                face_center_x = (srv.response.xmin + srv.response.width/2)+0.5f;
+                face_center_y = (srv.response.ymin + srv.response.height/2)+0.5f;
+
                 cv::Vec3f center3DFace = getDepth(croppedImage_depth,
                     (faceDepth.x + faceDepth.width/2)+0.5f, (faceDepth.y + faceDepth.height/2)+0.5f,
                     float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
                     1.0f/depthConstant_, 1.0f/depthConstant_);
 
-                cv::circle(croppedImage, cv::Point((face.x + face.width/2)+0.5f, (face.y + face.height/2)+0.5f), 10, Scalar(207, 161, 88), CV_FILLED);
+                head_dlup_pixel_offset = center_y_rgb - (face_center_y);
 
-                float head_dlup_pixel_offset = (bbox_ymin + bbox_ymax)/2 - (face.y + face.height/2);
-                //ROS_INFO("head_dlup_offset: %f px", head_dlup_pixel_offset);
+                cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(207, 0, 0), CV_FILLED);
 
                 if (isfinite(center3DFace.val[0]) && isfinite(center3DFace.val[1]) && isfinite(center3DFace.val[2])) {
 
@@ -447,6 +453,25 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             {
                 ROS_DEBUG("No face detected!");
             }
+
+            double bbox_center_x = (bbox_xmax - objectWidth*scale_factor/2) - bbox_xmin;
+            double bbox_center_y = (bbox_ymax - objectHeight*scale_factor/2) - bbox_ymin;
+
+            if (head_dlup_pixel_offset < 0 || face_center_y < 0 || true) {
+                ROS_INFO("Head detected in lower body part. Discarding detection and using heuristic instead");
+
+                face_center_x = bbox_center_x;
+                face_center_y = bbox_center_y - (0.8 * (objectHeight*scale_factor/2));
+
+                if(face_center_y < 0) {
+                    face_center_y = bbox_ymin + 20;
+                }
+
+                head_dlup_pixel_offset = (bbox_ymin + bbox_ymax)/2 - (face_center_y);
+                cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(0, 0, 207), CV_FILLED);
+            }
+
+            ROS_INFO("head_dlup_offset: %f px", head_dlup_pixel_offset);
 
             PoseStamped pose_stamped;
             pose_stamped.header = people_cpy.header;
