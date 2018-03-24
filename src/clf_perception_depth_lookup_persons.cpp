@@ -446,9 +446,11 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             try{
                 tfListener_->transformPose(transform_frame, pose_stamped, transformed_pose);
             } catch (tf::TransformException &ex) {
-                ROS_ERROR("%s", ex.what());
+                ROS_WARN("%s", ex.what());
                 continue;
             }
+
+             transformed_pose.header.frame_id = transform_frame;
 
             ///////// FILL ///////////////////////////////////////////////
 
