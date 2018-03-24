@@ -478,8 +478,8 @@ int main(int argc, char **argv)
     tfBroadcaster_ = new tf::TransformBroadcaster();
 
     // Subscriber for camera info topics
-    info_depth_sub = nh.subscribe(depth_info, 2, depthInfoCallback);
-    info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
+    info_depth_sub = nh.subscribe(depth_info, 1, depthInfoCallback);
+    info_rgb_sub = nh.subscribe(rgb_info, 1, rgbInfoCallback);
 
     // Subscriber for depth can rgb images
     Subscriber<Image> depth_image_sub(nh, depth_topic, 1);

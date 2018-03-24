@@ -199,7 +199,7 @@ int Detect2DInteractive::setup(int argc, char *argv[]) {
 
     cout << ">>> Initialized ---> " << type_descriptor << " Algorithm" << endl;
 
-    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 10);
+    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 1);
 
     return 0;
 
