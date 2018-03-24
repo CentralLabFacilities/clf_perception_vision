@@ -192,7 +192,6 @@ bool getPoseFromDepthImage(ImageToPose::Request &req, ImageToPose::Response &res
            ptrDepth = cv_bridge::toCvCopy(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
         } else {
           ROS_ERROR(">>> Unknown image encoding %s", depthMsg.encoding.c_str());
-          im_mutex.unlock();
           return false;
         }
     } catch (cv_bridge::Exception& e) {
@@ -239,9 +238,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         return;
     }
 
-    // Lock image
-    // im_mutex.lock();
-
     ///////////////////////////// Image conversion ////////////////////////////////////////////
 
     cv_bridge::CvImageConstPtr ptrDepth;
@@ -253,7 +249,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
            ptrDepth = cv_bridge::toCvShare(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
         } else {
           ROS_ERROR(">>> Unknown image encoding %s", depthMsg->encoding.c_str());
-          im_mutex.unlock();
           return;
         }
     } catch (cv_bridge::Exception& e) {
@@ -347,25 +342,10 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             center_y = ((bbox_ymax - (objectHeight*scale_factor*0.7/2)) / scale_factor);
         } 
 
-        // float xAxis_x = 3*objectWidth/4;
-        // float xAxis_y = objectHeight/2;
-        // float yAxis_x = objectWidth/2;
-        // float yAxis_y = 3*objectHeight/4;
-
         cv::Vec3f center3D = getDepth(depth_,
 				center_x+0.5f, center_y+0.5f,
 				float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
 				1.0f/depthConstant_, 1.0f/depthConstant_);
-
-        // cv::Vec3f axisEndX = getDepth(depth_,
-        //         xAxis_x+0.5f, xAxis_y+0.5f,
-        //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-        //        1.0f/depthConstant_, 1.0f/depthConstant_);
-
-        // cv::Vec3f axisEndY = getDepth(depth_,
-        //        yAxis_x+0.5f, yAxis_y+0.5f,
-        //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-        //        1.0f/depthConstant_, 1.0f/depthConstant_);
 
         string id = "person__" + to_string(i);
 
@@ -412,66 +392,30 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
             //Check for face
             Pose poseFace;
-            GetFaceBB srv;
             
-            double head_dlup_pixel_offset = -1;
-            double face_center_x = -1; 
-            double face_center_y = -1;
-            
-            srv.request.image = *image_out_msg.toImageMsg();
-            if (faceBBClient.call(srv)) {
-
-                Rect faceDepth(srv.response.xmin/scale_factor+0.5f, srv.response.ymin/scale_factor, srv.response.width/scale_factor, srv.response.height/scale_factor);
-                
-                face_center_x = (srv.response.xmin + srv.response.width/2)+0.5f;
-                face_center_y = (srv.response.ymin + srv.response.height/2)+0.5f;
-
-                cv::Vec3f center3DFace = getDepth(croppedImage_depth,
-                    (faceDepth.x + faceDepth.width/2)+0.5f, (faceDepth.y + faceDepth.height/2)+0.5f,
-                    float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-                    1.0f/depthConstant_, 1.0f/depthConstant_);
-
-                head_dlup_pixel_offset = center_y_rgb - (face_center_y);
-
-                cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(207, 0, 0), CV_FILLED);
-
-                if (isfinite(center3DFace.val[0]) && isfinite(center3DFace.val[1]) && isfinite(center3DFace.val[2])) {
-
-                    poseFace.position.x = center3DFace.val[0];
-                    poseFace.position.y = center3DFace.val[1];
-                    poseFace.position.z = center3DFace.val[2];
-                    poseFace.orientation.x = 0.0; //q.normalized().x();
-                    poseFace.orientation.y = 0.0; //q.normalized().y();
-                    poseFace.orientation.z = 0.0; //q.normalized().z();
-                    poseFace.orientation.w = 1.0; //q.normalized().w();
-
-                } else {
-                    ROS_INFO("Face not in depth sensor range");
-                }
-            }
-            else
-            {
-                ROS_DEBUG("No face detected!");
-            }
-
+            double face_center_x, face_center_y, face_estimate_shift;
             double bbox_center_x = (bbox_xmax - objectWidth*scale_factor/2) - bbox_xmin;
             double bbox_center_y = (bbox_ymax - objectHeight*scale_factor/2) - bbox_ymin;
 
-            if (head_dlup_pixel_offset < 0 || face_center_y < 0 || true) {
-                ROS_INFO("Head detected in lower body part. Discarding detection and using heuristic instead");
+            face_estimate_shift = (0.8 * (objectHeight*scale_factor/2));
+            face_center_x = bbox_center_x;
+            face_center_y = bbox_center_y - face_estimate_shift;
 
-                face_center_x = bbox_center_x;
-                face_center_y = bbox_center_y - (0.8 * (objectHeight*scale_factor/2));
-
-                if(face_center_y < 0) {
-                    face_center_y = bbox_ymin + 20;
-                }
-
-                head_dlup_pixel_offset = (bbox_ymin + bbox_ymax)/2 - (face_center_y);
-                cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(0, 0, 207), CV_FILLED);
+            if(face_center_y < 0) {
+                face_center_y = bbox_ymin + 20;
             }
+            
+            double face_height_estimate = ((face_center_y + bbox_ymin)/scale_factor - float(depth_.rows/2)-0.5f) * center3D.val[1]/(center_y+0.5f - float(depth_.rows/2)-0.5f);
 
-            ROS_INFO("head_dlup_offset: %f px", head_dlup_pixel_offset);
+            poseFace.position.x = center3D.val[0];
+            poseFace.position.y = face_height_estimate;
+            poseFace.position.z = center3D.val[2];
+            poseFace.orientation.x = 0.0; //q.normalized().x();
+            poseFace.orientation.y = 0.0; //q.normalized().y();
+            poseFace.orientation.z = 0.0; //q.normalized().z();
+            poseFace.orientation.w = 1.0;
+
+            cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(0, 0, 207), CV_FILLED);
 
             PoseStamped pose_stamped;
             pose_stamped.header = people_cpy.header;
