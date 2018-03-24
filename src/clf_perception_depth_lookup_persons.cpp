@@ -171,61 +171,6 @@ void rgbInfoCallback(const CameraInfoConstPtr& cameraInfoMsgRgb) {
     }
 }
 
-bool getPoseFromDepthImage(ImageToPose::Request &req, ImageToPose::Response &res) {
-    if(!depthConstant_factor_is_set) {
-        ROS_WARN(">>> Waiting for first depth camera INFO message to arrive...");
-        return false;
-    }
-
-    if(!camera_image_rgb_width_is_set) {
-        ROS_WARN(">>> Waiting for first rgb camera INFO message to arrive...");
-        return false;
-    }
-
-    sensor_msgs::Image depthMsg = req.image_depth;
-    cv_bridge::CvImageConstPtr ptrDepth;
-
-    try {
-        if (depthMsg.encoding == "16UC1") {
-           ptrDepth = cv_bridge::toCvCopy(depthMsg, sensor_msgs::image_encodings::TYPE_16UC1);
-        } else if (depthMsg.encoding == "32FC1") {
-           ptrDepth = cv_bridge::toCvCopy(depthMsg, sensor_msgs::image_encodings::TYPE_32FC1);
-        } else {
-          ROS_ERROR(">>> Unknown image encoding %s", depthMsg.encoding.c_str());
-          return false;
-        }
-    } catch (cv_bridge::Exception& e) {
-      ROS_ERROR(">>> CV_BRIDGE exception: %s", e.what());
-      return false;
-    }
-
-    float depthConstant = 1.0f/depthConstant_factor;
-    float center_x = ptrDepth->image.cols / 2;
-    float center_y = ( ptrDepth->image.rows / shift_center_y ) / 2;
-
-    cv::Vec3f center3D = getDepth(ptrDepth->image,
-    center_x+0.5f, center_y+0.5f,
-    float(ptrDepth->image.cols/2)-0.5f, float(ptrDepth->image.rows/2)-0.5f,
-    1.0f/depthConstant, 1.0f/depthConstant);
-
-
-    if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
-
-        res.pose_stamped.header = depthMsg.header;
-        res.pose_stamped.header.frame_id = depthMsg.header.frame_id;
-        res.pose_stamped.pose.position.x = center3D.val[0];
-        res.pose_stamped.pose.position.y = center3D.val[1];
-        res.pose_stamped.pose.position.z = center3D.val[2];
-        res.pose_stamped.pose.orientation.x = 0.0; //q.normalized().x();
-        res.pose_stamped.pose.orientation.y = 0.0; //q.normalized().y();
-        res.pose_stamped.pose.orientation.z = 0.0; //q.normalized().z();
-        res.pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
-        return true;
-    }
-
-    return false;
-}
-
 void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, const ExtendedPeopleConstPtr& peopleMsg) {
 
     if(!depthConstant_factor_is_set) {
@@ -478,14 +423,6 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "clf_perception_depth_lookup", ros::init_options::AnonymousName);
     ros::NodeHandle nh("~");
-
-    if (nh.getParam("pose_service_topic", pose_service_topic))
-    {
-        ROS_INFO(">>> Pose service topic: %s", pose_service_topic.c_str());
-    } else {
-        ROS_ERROR("!Failed to get pose service topic parameter!");
-        exit(EXIT_FAILURE);
-    }
 
     if (nh.getParam("depthlookup_image_topic", depth_topic))
     {

@@ -70,8 +70,6 @@ the use of this software, even if advised of the possibility of such damage.
 #include <clf_perception_vision_msgs/ExtendedPeople.h>
 #include <clf_perception_vision_msgs/ExtendedPoseArray.h>
 #include <clf_perception_vision_msgs/ExtendedPersonStamped.h>
-#include <clf_perception_vision_msgs/ImageToPose.h>
-#include <clf_perception_vision_msgs/GetFaceBB.h>
 
 // FILTER
 #include <message_filters/subscriber.h>

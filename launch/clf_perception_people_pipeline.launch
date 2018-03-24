@@ -13,7 +13,6 @@
     <arg name="depthlookup_out_topic_pose" default="/clf_perception_vision/people/raw/transform/pose"/>
     <arg name="depthlookup_out_topic_pose_extended" default="/clf_perception_vision/people/pose_extended"/>
     <arg name="depthlookup_shift_center_y" default="1.2"/>
-    <arg name="pose_service_topic" default="/clf_perception_vision/get_pose_from_image"/>
 
 
     <!-- Darknet people percept 2 ExtendedPeople Message -->
@@ -23,7 +22,6 @@
 
     <node pkg="clf_perception_vision" type="clf_perception_depth_lookup_persons"
           name="clf_perception_depth_lookup_persons" output="screen">
-        <param name="pose_service_topic" type="str" value="$(arg pose_service_topic)" />
         <param name="depthlookup_depth_info_topic" type="str" value="$(arg depthlookup_depth_info_topic)"/>
         <param name="depthlookup_rgb_info_topic" type="str" value="$(arg depthlookup_rgb_info_topic)"/>
         <param name="depthlookup_image_topic" type="str" value="$(arg depthlookup_image_topic)"/>
