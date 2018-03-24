@@ -451,6 +451,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             }
 
              transformed_pose.header.frame_id = transform_frame;
+             pose_arr.header.frame_id = transform_frame;
 
             ///////// FILL ///////////////////////////////////////////////
 
