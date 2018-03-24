@@ -238,15 +238,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         return;
     }
 
-<<<<<<< 383f5d047c246f03d5df1e9bc78cc240dcb6ea34
-<<<<<<< 9fcd68f8379cf07c65793d365e64f9735b9f25a1
-=======
-=======
-    // Lock image
-    // im_mutex.lock();
->>>>>>> revert transform approach
-
->>>>>>> dynamic transform frame and transform implemented
     ///////////////////////////// Image conversion ////////////////////////////////////////////
 
     cv_bridge::CvImageConstPtr ptrDepth;
