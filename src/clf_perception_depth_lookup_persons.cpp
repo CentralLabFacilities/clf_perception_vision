@@ -238,6 +238,10 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         return;
     }
 
+<<<<<<< 9fcd68f8379cf07c65793d365e64f9735b9f25a1
+=======
+
+>>>>>>> dynamic transform frame and transform implemented
     ///////////////////////////// Image conversion ////////////////////////////////////////////
 
     cv_bridge::CvImageConstPtr ptrDepth;
@@ -379,7 +383,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             }
             
             image_depth_out_msg.image = croppedImage_depth;
-
             pose_ex.images_depth.push_back(*image_depth_out_msg.toImageMsg());
             pose_ex.images.push_back(*image_out_msg.toImageMsg());
 
@@ -423,26 +426,38 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             pose_stamped.pose.position.x = center3D.val[0];
             pose_stamped.pose.position.y = center3D.val[1];
             pose_stamped.pose.position.z = center3D.val[2];
-            pose_stamped.pose.orientation.x = 0.0; //q.normalized().x();
-            pose_stamped.pose.orientation.y = 0.0; //q.normalized().y();
-            pose_stamped.pose.orientation.z = 0.0; //q.normalized().z();
-            pose_stamped.pose.orientation.w = 1.0; //q.normalized().w();
+            pose_stamped.pose.orientation.x = 0.0; // q.normalized().x();
+            pose_stamped.pose.orientation.y = 0.0; // q.normalized().y();
+            pose_stamped.pose.orientation.z = 0.0; // q.normalized().z();
+            pose_stamped.pose.orientation.w = 1.0; // q.normalized().w();
 
-            Pose pose;
-            pose.position.x = center3D.val[0];
-            pose.position.y = center3D.val[1];
-            pose.position.z = center3D.val[2];
-            pose.orientation.x = 0.0; //q.normalized().x();
-            pose.orientation.y = 0.0; //q.normalized().y();
-            pose.orientation.z = 0.0; //q.normalized().z();
-            pose.orientation.w = 1.0; //q.normalized().w();
+            // Old approach
+            // Pose pose;
+            // pose.position.x = center3D.val[0];
+            // pose.position.y = center3D.val[1];
+            // pose.position.z = center3D.val[2];
+            // pose.orientation.x = 0.0; // q.normalized().x();
+            // pose.orientation.y = 0.0; // q.normalized().y();
+            // pose.orientation.z = 0.0; // q.normalized().z();
+            // pose.orientation.w = 1.0; // q.normalized().w();
+
+            PoseStamped transformed_pose;
+
+            try{
+                tfListener_->transformPose(transform_frame, pose_stamped, transformed_pose);
+            } catch (tf::TransformException &ex) {
+                ROS_ERROR("%s", ex.what());
+                continue;
+            }
 
             ///////// FILL ///////////////////////////////////////////////
-            people_cpy.persons[i].pose = pose_stamped;
+
+            people_cpy.persons[i].pose = transformed_pose;
             people_cpy.persons[i].transformid = id;
             transforms.push_back(transform);
             pose_arr.poses.push_back(pose);
             pose_arr_face.poses.push_back(poseFace);
+
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -450,11 +465,10 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 		}
     }
 
-    // Fill pose array
-    pose_ex.poses = pose_arr;
-    pose_ex.poses_face = pose_arr_face;
-
     if(transforms.size() > 0) {
+        // Fill pose array for extended
+        pose_ex.poses = pose_arr;
+        pose_ex.poses_face = pose_arr_face;
 	    people_pub.publish(people_cpy);
         people_pub_pose.publish(pose_arr);
         people_pub_extended_pose.publish(pose_ex);
@@ -556,12 +570,8 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    ros::ServiceServer service = nh.advertiseService(pose_service_topic, getPoseFromDepthImage);
-    
-    faceBBClient = nh.serviceClient<GetFaceBB>("/clf_perception/vision/get_face_BB");
-
-    // TF boradcaster
     tfBroadcaster_ = new tf::TransformBroadcaster();
+    tfListener_ = new tf::TransformListener();
 
     // Subscriber for camera info topics
     info_depth_sub = nh.subscribe(depth_info, 1, depthInfoCallback);
