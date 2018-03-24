@@ -12,13 +12,8 @@
     <arg name="depthlookup_out_topic" default="/clf_perception_vision/people/raw/transform"/>
     <arg name="depthlookup_out_topic_pose" default="/clf_perception_vision/people/raw/transform/pose"/>
     <arg name="depthlookup_out_topic_pose_extended" default="/clf_perception_vision/people/pose_extended"/>
-<<<<<<< 9fcd68f8379cf07c65793d365e64f9735b9f25a1
     <arg name="depthlookup_shift_center_y" default="1.2"/>
     <arg name="pose_service_topic" default="/clf_perception_vision/get_pose_from_image"/>
-=======
-    <arg name="depthlookup_shift_center_y" default="1.25"/>
-    <arg name="transform_frame" default="odom"/>
->>>>>>> dynamic transform frame and transform implemented
 
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
