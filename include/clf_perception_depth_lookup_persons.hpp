@@ -121,8 +121,11 @@ ros::Publisher people_pub_extended_pose;
 ros::Subscriber info_depth_sub;
 ros::Subscriber info_rgb_sub;
 
+<<<<<<< HEAD
 ros::ServiceClient faceBBClient;
 
+=======
+>>>>>>> eee5571e53809f44a41bb7f944d8434abadaa4ab
 tf::TransformBroadcaster *tfBroadcaster_;
 tf::TransformListener *tfListener_;
 

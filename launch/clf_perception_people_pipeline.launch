@@ -15,6 +15,7 @@
     <arg name="depthlookup_shift_center_y" default="1.2"/>
     <arg name="pose_service_topic" default="/clf_perception_vision/get_pose_from_image"/>
 
+
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"
           args="--intopic=$(arg darknet_2_people_in) --outtopic=$(arg darknet_2_people_out)" output="screen">
