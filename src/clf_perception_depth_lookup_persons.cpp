@@ -336,7 +336,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             transform.stamp_ = current_stamp;
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
 
-            //Check for face
+            // Check for face
             Pose poseFace;
             
             double face_center_x, face_center_y, face_estimate_shift;
@@ -395,9 +395,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 			ROS_DEBUG(">>> WARN person_%d detected, center 2D at (%f,%f), but invalid depth, cannot set frame \"%s\"!\n", i, center_x, center_y, id.c_str());
 		}
     }
-
-    // Fill pose array
-    pose_ex.poses = pose_arr;
 
     if(transforms.size() > 0) {
         // Fill pose array for extended
