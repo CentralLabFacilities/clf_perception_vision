@@ -276,7 +276,7 @@ int Detect2D::setup(int argc, char *argv[]) {
         cuda_desc_current_target_image.push_back(tmp_cuda_dc);
     }
 
-    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 10);
+    object_pub = node_handle_.advertise<visualization_msgs::MarkerArray>(out_topic, 1);
 
     return 0;
 

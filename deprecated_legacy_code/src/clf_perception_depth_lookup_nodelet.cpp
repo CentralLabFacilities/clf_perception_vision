@@ -80,7 +80,7 @@ namespace clf_perception_vision {
 
             message_filters::Subscriber<Image> image_sub(private_nh, depth_topic.c_str(), 5);
             message_filters::Subscriber<CameraInfo> info_sub(private_nh, depth_info.c_str(), 5);
-            people_pub = private_nh.advertise<clf_perception_vision_msgs::ExtendedPeople>(out_topic.c_str(), 5);
+            people_pub = private_nh.advertise<clf_perception_vision_msgs::ExtendedPeople>(out_topic.c_str(), 1);
 
             TimeSynchronizer<Image, CameraInfo> sync(image_sub, info_sub, 5);
             sync.registerCallback(boost::bind(&DepthLookup::depth_callback, this ,_1, _2));

@@ -12,7 +12,8 @@
     <arg name="depthlookup_out_topic" default="/clf_perception_vision/people/raw/transform"/>
     <arg name="depthlookup_out_topic_pose" default="/clf_perception_vision/people/raw/transform/pose"/>
     <arg name="depthlookup_out_topic_pose_extended" default="/clf_perception_vision/people/pose_extended"/>
-    <arg name="depthlookup_shift_center_y" default="1.25"/>
+    <arg name="depthlookup_shift_center_y" default="1.2"/>
+
 
     <!-- Darknet people percept 2 ExtendedPeople Message -->
     <node pkg="clf_perception_vision" type="clf_perception_box2people.py" name="clf_perception_box2people"

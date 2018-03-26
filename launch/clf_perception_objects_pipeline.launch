@@ -1,27 +1,18 @@
 <launch>
-    <!-- Darknet to People MSG config -->
-    <arg name="darknet_2_objects_in"  default="/darknet_ros/bounding_boxes"/>
-    <arg name="darknet_2_objects_out" default="/clf_perception_vision/objects/raw"/>
 
     <!-- Depth Lookup Config -->
-    <arg name="depthlookup_depth_info_topic" default="/pepper_robot/camera/depth/camera/camera_info"/>
-    <arg name="depthlookup_rgb_info_topic"   default="/pepper_robot/camera/front/camera_info"/>
-    <arg name="depthlookup_image_topic"      default="/pepper_robot/sink/depth/image_raw"/>
-    <arg name="depthlookup_in_topic"         default="/clf_perception_vision/objects/raw"/>
-    <arg name="depthlookup_out_topic"        default="/clf_perception_vision/objects/raw/transform"/>
-    <arg name="depthlookup_shift_center_y"   default="1.0" />
+    <arg name="depthlookup_depth_info_topic" default="/pepper_robot/camera/depth/camera_info"/>
+    <arg name="depthlookup_rgb_info_topic" default="/pepper_robot/camera/front/camera_info"/>
+    <arg name="depthlookup_image_topic" default="/pepper_robot/sink/depth/image_raw"/>
+    <arg name="depthlookup_image_rgb_topic" default="/pepper_robot/sink/front/image_raw"/>
+    <arg name="depthlookup_shift_center_y" default="1.25"/>
 
-    <!-- Darknet people percept 2 ExtendedPeople Message -->
-    <node pkg="clf_perception_vision" type="clf_perception_box2objects.py" name="clf_perception_box2objects"
-          args="--intopic=$(arg darknet_2_objects_in) --outtopic=$(arg darknet_2_objects_out)" output="screen">
-    </node>
-
-    <node pkg="clf_perception_vision" type="clf_perception_depth_lookup_objects" name="clf_perception_depth_lookup_objects" output="screen">
+    <node pkg="clf_perception_vision" type="clf_perception_depth_lookup_objects"
+          name="clf_perception_depth_lookup_objects" output="screen">
         <param name="depthlookup_depth_info_topic" type="str" value="$(arg depthlookup_depth_info_topic)"/>
         <param name="depthlookup_rgb_info_topic" type="str" value="$(arg depthlookup_rgb_info_topic)"/>
         <param name="depthlookup_image_topic" type="str" value="$(arg depthlookup_image_topic)"/>
-        <param name="depthlookup_in_topic" type="str" value="$(arg depthlookup_in_topic)"/>
-        <param name="depthlookup_out_topic" type="str" value="$(arg depthlookup_out_topic)"/>
+        <param name="depthlookup_image_rgb_topic" type="str" value="$(arg depthlookup_image_rgb_topic)"/>
         <param name="depthlookup_shift_center_y" type="double" value="$(arg depthlookup_shift_center_y)"/>
     </node>
 </launch>

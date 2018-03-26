@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     ros::Publisher people_pub;
     ros::Subscriber toggle_sub;
 
-    people_pub = nh_.advertise<people_msgs::People>("clf_detect_faces/people", 20);
+    people_pub = nh_.advertise<people_msgs::People>("clf_detect_faces/people", 1);
     toggle_sub = nh_.subscribe("/clf_detect_faces/compute", 1, toggle_callback);
 
     if (getCudaEnabledDeviceCount() == 0)

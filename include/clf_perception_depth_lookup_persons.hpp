@@ -83,8 +83,10 @@ the use of this software, even if advised of the possibility of such damage.
 
 // TF
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 std::string out_topic_pose_extended;
+std::string transform_frame;
 std::string out_topic_pose;
 std::string people_topic;
 std::string depth_topic;
@@ -93,6 +95,7 @@ std::string rgb_topic;
 std::string out_topic;
 std::string rgb_info;
 std::string in_topic;
+std::string pose_service_topic;
 
 cv::Mat depth_;
 cv::Mat depth_copy;
@@ -117,7 +120,7 @@ ros::Subscriber info_depth_sub;
 ros::Subscriber info_rgb_sub;
 
 tf::TransformBroadcaster *tfBroadcaster_;
-
+tf::TransformListener *tfListener_;
 
 const int fontFace = cv::FONT_HERSHEY_PLAIN;
 const double fontScale = 1;

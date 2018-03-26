@@ -183,9 +183,6 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
         return;
     }
 
-    // Lock image
-    // im_mutex.lock();
-
     ///////////////////////////// Image conversion ////////////////////////////////////////////
 
     cv_bridge::CvImageConstPtr ptrDepth;
@@ -239,8 +236,13 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
     // Pose Array of people
     PoseArray pose_arr;
+    PoseArray pose_arr_face;
+
     pose_arr.header.stamp = current_stamp;
     pose_arr.header.frame_id = frameId_;
+    
+    pose_arr_face.header.stamp = current_stamp;
+    pose_arr_face.header.frame_id = frameId_;
 
     // Pose extended msgs
     ExtendedPoseArray pose_ex;
@@ -264,45 +266,50 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 
         float objectWidth = (bbox_xmax - bbox_xmin) / scale_factor;
         float objectHeight = (bbox_ymax - bbox_ymin) / scale_factor;
-        float center_x = (bbox_xmin + bbox_xmax) / scale_factor / 2;
-        float center_y = ( (bbox_ymin + bbox_ymax) / scale_factor / shift_center_y ) / 2;
+        float center_x = (bbox_xmax - objectWidth*scale_factor/2) / scale_factor;
+        float center_y = (bbox_ymax - objectHeight*scale_factor*shift_center_y/2) / scale_factor;
 
-        // float xAxis_x = 3*objectWidth/4;
-        // float xAxis_y = objectHeight/2;
-        // float yAxis_x = objectWidth/2;
-        // float yAxis_y = 3*objectHeight/4;
+        ROS_DEBUG("original center: %f\tshifted center: %f", bbox_ymax - objectHeight*scale_factor/2, center_y);
+
+        cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
+        cv::Mat croppedImage = im(roi);
+
+        int height = croppedImage.rows;
+        int width = croppedImage.cols;
+        double ratio = height/(double)width;
+
+        if (im.rows*0.02 > bbox_ymin && ratio < 1.5) {
+            ROS_DEBUG("BBox in upper 2%%\timage ymin: %f\tBB ymin: %d\tratio %f", im.rows*0.02, bbox_ymin, ratio);
+            center_y = ((bbox_ymax - (objectHeight*scale_factor*1.6/2)) / scale_factor);
+        }
+
+        if (im.rows-im.rows*0.03 < bbox_ymax && ratio < 1.5) {
+            ROS_DEBUG("BBox in lower 3%% \timage ymax: %f\tBB ymax: %d\tratio %f", im.rows-im.rows*0.03, bbox_ymax, ratio);
+            center_y = ((bbox_ymax - (objectHeight*scale_factor*0.7/2)) / scale_factor);
+        } 
 
         cv::Vec3f center3D = getDepth(depth_,
 				center_x+0.5f, center_y+0.5f,
 				float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
 				1.0f/depthConstant_, 1.0f/depthConstant_);
 
-        // cv::Vec3f axisEndX = getDepth(depth_,
-        //         xAxis_x+0.5f, xAxis_y+0.5f,
-        //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-        //        1.0f/depthConstant_, 1.0f/depthConstant_);
-
-        // cv::Vec3f axisEndY = getDepth(depth_,
-        //        yAxis_x+0.5f, yAxis_y+0.5f,
-        //        float(depth_.cols/2)-0.5f, float(depth_.rows/2)-0.5f,
-        //        1.0f/depthConstant_, 1.0f/depthConstant_);
-
         string id = "person__" + to_string(i);
 
         if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
+            float center_x_rgb = center_x * scale_factor;
+            float center_y_rgb = center_y * scale_factor;
+
             // Setup a rectangle to define your region of interest
-            cv::Rect roi(bbox_xmin, bbox_ymin, objectWidth * scale_factor, objectHeight * scale_factor);
             cv::Rect roi_depth(bbox_xmin/scale_factor, bbox_ymin/scale_factor, objectWidth, objectHeight);
             rectangles.push_back(roi);
-            points.push_back(cv::Point(center_x * scale_factor, center_y * scale_factor));
+            points.push_back(cv::Point(center_x_rgb, center_y_rgb));
             probabilities.push_back(probability);
 
             // Crop the full image to that image contained by the rectangle roi
             // Note that this doesn't copy the data!
-            cv::Mat croppedImage = im(roi);
             cv::Mat croppedImage_depth = im_depth(roi_depth);
-            
+
             // Compose image message
             cv_bridge::CvImage image_out_msg;
             image_out_msg.header   = people_cpy.header;
@@ -316,7 +323,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             } else if (depthMsg->encoding == "32FC1") {
                 image_depth_out_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
             }
-            
+
             image_depth_out_msg.image = croppedImage_depth;
 
             pose_ex.images_depth.push_back(*image_depth_out_msg.toImageMsg());
@@ -329,21 +336,32 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             transform.stamp_ = current_stamp;
             transform.setOrigin(tf::Vector3(center3D.val[0], center3D.val[1], center3D.val[2]));
 
-            // set rotation (y inverted)
-            // tf::Vector3 xAxis(axisEndX.val[0] - center3D.val[0], axisEndX.val[1] - center3D.val[1], axisEndX.val[2] - center3D.val[2]);
-            // xAxis.normalize();
-            // tf::Vector3 yAxis(axisEndY.val[0] - center3D.val[0], axisEndY.val[1] - center3D.val[1], axisEndY.val[2] - center3D.val[2]);
-            // yAxis.normalize();
-            // tf::Vector3 zAxis = xAxis*yAxis;
-            // tf::Matrix3x3 rotationMatrix(
-            //            xAxis.x(), yAxis.x(), zAxis.x(),
-            //            xAxis.y(), yAxis.y(), zAxis.y(),
-            //            xAxis.z(), yAxis.z(), zAxis.z());
-            // tf::Quaternion q;
-            // rotationMatrix.getRotation(q);
-            // set x axis going front of the object, with z up and z left
-            // q *= tf::createQuaternionFromRPY(CV_PI/2.0, CV_PI/2.0, 0);
-            // transform.setRotation(q.normalized());
+            // Check for face
+            Pose poseFace;
+            
+            double face_center_x, face_center_y, face_estimate_shift;
+            double bbox_center_x = (bbox_xmax - objectWidth*scale_factor/2) - bbox_xmin;
+            double bbox_center_y = (bbox_ymax - objectHeight*scale_factor/2) - bbox_ymin;
+
+            face_estimate_shift = (0.8 * (objectHeight*scale_factor/2));
+            face_center_x = bbox_center_x;
+            face_center_y = bbox_center_y - face_estimate_shift;
+
+            if(face_center_y < 0) {
+                face_center_y = bbox_ymin + 20;
+            }
+            
+            double face_height_estimate = ((face_center_y + bbox_ymin)/scale_factor - float(depth_.rows/2)-0.5f) * center3D.val[1]/(center_y+0.5f - float(depth_.rows/2)-0.5f);
+
+            poseFace.position.x = center3D.val[0];
+            poseFace.position.y = face_height_estimate;
+            poseFace.position.z = center3D.val[2];
+            poseFace.orientation.x = 0.0; //q.normalized().x();
+            poseFace.orientation.y = 0.0; //q.normalized().y();
+            poseFace.orientation.z = 0.0; //q.normalized().z();
+            poseFace.orientation.w = 1.0;
+
+            cv::circle(croppedImage, cv::Point(face_center_x, face_center_y), 10, Scalar(0, 0, 207), CV_FILLED);
 
             PoseStamped pose_stamped;
             pose_stamped.header = people_cpy.header;
@@ -370,6 +388,7 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
             people_cpy.persons[i].transformid = id;
             transforms.push_back(transform);
             pose_arr.poses.push_back(pose);
+            pose_arr_face.poses.push_back(poseFace);
 
             ROS_DEBUG(">>> person_%d detected, center 2D at (%f,%f) setting frame \"%s\" \n", i, center_x, center_y, id.c_str());
 		} else {
@@ -377,10 +396,10 @@ void syncCallback(const ImageConstPtr& depthMsg, const ImageConstPtr& colorMsg, 
 		}
     }
 
-    // Fill pose array
-    pose_ex.poses = pose_arr;
-
     if(transforms.size() > 0) {
+        // Fill pose array for extended
+        pose_ex.poses = pose_arr;
+        pose_ex.poses_face = pose_arr_face;
 	    people_pub.publish(people_cpy);
         people_pub_pose.publish(pose_arr);
         people_pub_extended_pose.publish(pose_ex);
@@ -482,20 +501,20 @@ int main(int argc, char **argv)
     info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
 
     // Subscriber for depth can rgb images
-    Subscriber<Image> depth_image_sub(nh, depth_topic, 1);
-    Subscriber<Image> rgb_image_sub(nh, rgb_topic, 1);
+    Subscriber<Image> depth_image_sub(nh, depth_topic, 2);
+    Subscriber<Image> rgb_image_sub(nh, rgb_topic, 2);
 
     // Subscriber for Extended people messages
-    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 1);
+    Subscriber<ExtendedPeople> people_sub(nh, in_topic, 2);
 
     typedef sync_policies::ApproximateTime<Image, Image, ExtendedPeople> sync_pol;
 
     Synchronizer<sync_pol> sync(sync_pol(10), depth_image_sub, rgb_image_sub, people_sub);
     sync.registerCallback(boost::bind(&syncCallback, _1, _2, _3));
 
-    people_pub = nh.advertise<ExtendedPeople>(out_topic, 1);
-    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 1);
-    people_pub_extended_pose = nh.advertise<ExtendedPoseArray>(out_topic_pose_extended, 1);
+    people_pub = nh.advertise<ExtendedPeople>(out_topic, 2);
+    people_pub_pose = nh.advertise<PoseArray>(out_topic_pose, 2);
+    people_pub_extended_pose = nh.advertise<ExtendedPoseArray>(out_topic_pose_extended, 2);
 
     cv::namedWindow("CLF PERCEPTION || DepthLUP", cv::WINDOW_NORMAL);
     cv::resizeWindow("CLF PERCEPTION || DepthLUP", 320, 240);

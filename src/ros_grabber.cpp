@@ -50,7 +50,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 
 ROSGrabber::ROSGrabber(std::string i_scope) : it_(node_handle_) {
-    image_sub_ = it_.subscribe(i_scope, 10, &ROSGrabber::imageCallback, this);
+    image_sub_ = it_.subscribe(i_scope, 1, &ROSGrabber::imageCallback, this);
     frame_nr = -1;
     pyr = 0;
 }
