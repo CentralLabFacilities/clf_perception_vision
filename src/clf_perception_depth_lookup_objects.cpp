@@ -383,8 +383,8 @@ int main(int argc, char **argv)
     info_rgb_sub = nh.subscribe(rgb_info, 2, rgbInfoCallback);
 
     // Subscriber for depth can rgb images
-    Subscriber<Image> depth_image_sub(nh, depth_topic, 1);
-    Subscriber<Image> rgb_image_sub(nh, rgb_topic, 1);
+    Subscriber<Image> depth_image_sub(nh, depth_topic, 2);
+    Subscriber<Image> rgb_image_sub(nh, rgb_topic, 2);
 
     // Synchronize depth and rgb input
     typedef sync_policies::ApproximateTime<Image, Image> sync_pol;
