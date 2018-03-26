@@ -43,6 +43,8 @@
   <build_depend>nodelet</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>bayes_people_tracker_msgs</build_depend>
+  <build_depend>object_tracking_msgs</build_depend>
+  <run_depend>object_tracking_msgs</run_depend>
   <run_depend>bayes_people_tracker_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>message_filters</run_depend>
