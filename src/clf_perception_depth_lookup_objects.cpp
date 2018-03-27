@@ -362,14 +362,6 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (nh.getParam("depthlookup_in_topic", in_topic))
-    {
-        ROS_INFO(">>> Input Topic: %s", in_topic.c_str());
-    } else {
-        ROS_ERROR("!Failed to get input topic parameter!");
-        exit(EXIT_FAILURE);
-    }
-
     if (nh.getParam("depthlookup_shift_center_y", shift_center_y))
     {
         ROS_INFO(">>> Shift center_y: %f", shift_center_y);
