@@ -79,6 +79,8 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 	float bad_point = numeric_limits<float>::quiet_NaN();
 
 	float depth;
+    //minimum depth of an object roi (in m)
+    float minDepth = 0.2;
 	bool isValid;
 
 	if(isInMM) {
@@ -98,7 +100,7 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         int arr_size = sizeof(depth_samples)/sizeof(float);
         sort(&depth_samples[0], &depth_samples[arr_size]);
         float median = arr_size % 2 ? depth_samples[arr_size/2] : (depth_samples[arr_size/2-1] + depth_samples[arr_size/2]) / 2;
-        // get roi depth (at least 300mm)
+        // get roi depth (at least  minDepth)
         float min = 9999;
         float max = 0.0;
         for(int i = 0; i < arr_size; i++) {
@@ -110,8 +112,8 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
             }
         }
         objectDepth = max - min;
-        if (objectDepth < 300) {
-            objectDepth = 300;
+        if (objectDepth < minDepth*1000) {
+            objectDepth = minDepth*1000;
         }
         ROS_INFO("roi depth: %f", objectDepth);
 
@@ -149,8 +151,8 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
             }
         }
         objectDepth = max - min;
-        if (objectDepth < 0.3) {
-            objectDepth = 0.3;
+        if (objectDepth < minDepth) {
+            objectDepth = minDepth;
         }
         ROS_INFO("roi depth: %f", objectDepth);
 
@@ -299,7 +301,7 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
         //TODO: convert to 3d roi
         if (isfinite(center3D.val[0]) && isfinite(center3D.val[1]) && isfinite(center3D.val[2])) {
 
-            float depth = 0.0;
+            float depth = 0.2;
             if (objectDepth != 0.0f) {
                 depth = objectDepth;
             }
@@ -310,8 +312,10 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
             objectShape.center.x = center3D.val[0];
             objectShape.center.y = center3D.val[1];
             objectShape.center.z = center3D.val[2];
-            objectShape.width = objectWidth;
-            objectShape.height = objectHeight;
+            //depth value is just an assumption (at least 0.2m)
+            //TODO: get width and height (and depth?) according to 2d roi size
+            objectShape.width = depth;
+            objectShape.height = depth;
             objectShape.depth = depth;
 
             // fill objectShape with data from objectLocation
