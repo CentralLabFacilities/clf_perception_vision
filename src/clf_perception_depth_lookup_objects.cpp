@@ -115,9 +115,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         if (objectDepth < minDepth*1000) {
             objectDepth = minDepth*1000;
         }
-        ROS_DEBUG("roi depth: %f", objectDepth);
         ROS_DEBUG("convert roi depth to m");
         objectDepth = objectDepth/1000;
+        ROS_INFO("roi depth in m: %f", objectDepth);
 
         depth = median;
         ROS_DEBUG("depth: %f", depth);
