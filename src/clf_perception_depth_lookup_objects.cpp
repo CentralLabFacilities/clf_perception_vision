@@ -115,7 +115,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         if (objectDepth < minDepth*1000) {
             objectDepth = minDepth*1000;
         }
-        ROS_INFO("roi depth: %f", objectDepth);
+        ROS_DEBUG("roi depth: %f", objectDepth);
+        ROS_DEBUG("convert roi depth to m");
+        objectDepth = objectDepth/1000;
 
         depth = median;
         ROS_DEBUG("depth: %f", depth);
@@ -312,7 +314,7 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
             objectShape.center.x = center3D.val[0];
             objectShape.center.y = center3D.val[1];
             objectShape.center.z = center3D.val[2];
-            //depth value is just an assumption (at least 0.2m)
+            //depth value is just an assumption (at least 0.2m, should be in m!)
             //TODO: get width and height (and depth?) according to 2d roi size
             objectShape.width = depth;
             objectShape.height = depth;
