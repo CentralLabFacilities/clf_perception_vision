@@ -80,7 +80,8 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
 
 	float depth;
     //minimum depth of an object roi (in m)
-    float minDepth = 0.2;
+    float minDepth = 0.1;
+    float maxDepth = 0.4;
 	bool isValid;
 
 	if(isInMM) {
@@ -114,6 +115,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         objectDepth = max - min;
         if (objectDepth < minDepth*1000) {
             objectDepth = minDepth*1000;
+        }
+        if (objectDepth > maxDepth*1000) {
+            objectDepth = maxDepth*1000;
         }
         ROS_DEBUG("convert roi depth to m");
         objectDepth = objectDepth/1000;
@@ -155,6 +159,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         objectDepth = max - min;
         if (objectDepth < minDepth) {
             objectDepth = minDepth;
+        }
+        if (objectDepth > maxDepth) {
+            objectDepth = maxDepth;
         }
         ROS_INFO("roi depth: %f", objectDepth);
 
