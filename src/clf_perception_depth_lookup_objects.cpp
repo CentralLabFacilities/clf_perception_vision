@@ -88,6 +88,8 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         ROS_DEBUG(">>> Image is in Millimeters");
 	    float depth_samples[21];
 
+
+
         // Sample fore depth points to the right, left, top and down
         for (int i=0; i<5; i++) {
             depth_samples[i] = (float)depthImage.at<uint16_t>(y,x+i);
@@ -293,6 +295,7 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
     // derive factor to scale the bounding boxes
     float scale_factor = camera_image_rgb_width/camera_image_depth_width;
     ROS_DEBUG(">>> Scale ratio RGB --> DEPTH image is: %f ", scale_factor);
+    ROS_DEBUG("Depth image width: "+camera_image_depth_width)
 
     for (int i=0; i<req.objectLocationList.size(); i++) {
 
@@ -305,6 +308,8 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
         float objectHeight = (bbox_ymax - bbox_ymin) / scale_factor;
         float center_x = (bbox_xmin + bbox_xmax) / scale_factor / 2;
         float center_y = ( (bbox_ymin + bbox_ymax) / scale_factor / shift_center_y ) / 2;
+
+        ROS_DEBUG("Getting depth for BB at center %.2f %.2f", center_x, center_y);
 
         cv::Vec3f center3D = getDepth(depth_,
 				center_x+0.5f, center_y+0.5f,
