@@ -295,7 +295,7 @@ bool srvCallback(object_tracking_msgs::DepthLookup::Request &req, object_trackin
     // derive factor to scale the bounding boxes
     float scale_factor = camera_image_rgb_width/camera_image_depth_width;
     ROS_DEBUG(">>> Scale ratio RGB --> DEPTH image is: %f ", scale_factor);
-    ROS_DEBUG("Depth image width: %.2f"+camera_image_depth_width);
+    ROS_DEBUG("Depth image width: %.2f",camera_image_depth_width);
 
     for (int i=0; i<req.objectLocationList.size(); i++) {
 
