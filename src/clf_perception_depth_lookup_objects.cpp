@@ -105,6 +105,9 @@ Vec3f getDepth(const Mat & depthImage, int x, int y, float cx, float cy, float f
         float min = 9999;
         float max = 0.0;
         for(int i = 0; i < arr_size; i++) {
+
+            ROS_DEBUG("Depth at index %d: %.2f", i, depth_samples[i]);
+
             if(depth_samples[i] < min) {
                 min = depth_samples[i];
             }
