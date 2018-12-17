@@ -51,17 +51,6 @@ ELSE()
         MESSAGE(FATAL_ERROR "OpenCV NOT FOUND")
 ENDIF()
 
-SET(CUSTOM_CV_LIBS  ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgcodecs.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_face.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_imgproc.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_core.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_highgui.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_xfeatures2d.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_features2d.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_calib3d.so
-                    ${CMAKE_INSTALL_PREFIX}/lib/libopencv_objdetect.so
-)
-
 CATKIN_PACKAGE(INCLUDE_DIRS include
                # LIBRARIES clf_perception_nodelets
                CATKIN_DEPENDS tf
@@ -90,7 +79,7 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
                ${INCLUDE_DIRS}
 )
 
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${OpenCV_libs} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
