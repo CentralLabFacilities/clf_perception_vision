@@ -90,12 +90,6 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
                ${INCLUDE_DIRS}
 )
 
-ADD_EXECUTABLE(clf_perception_depth_lookup_objects
-              src/clf_perception_depth_lookup_objects.cpp
-              ${INCLUDE_DIRS}
-)
-
-
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
