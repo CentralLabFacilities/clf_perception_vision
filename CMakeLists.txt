@@ -29,7 +29,6 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS tf
                                         visualization_msgs
                                         clf_perception_vision_msgs
                                         bayes_people_tracker_msgs
-                                        object_tracking_msgs
 )
 FIND_PACKAGE(OpenCV REQUIRED COMPONENTS highgui
                                         core
@@ -77,7 +76,6 @@ CATKIN_PACKAGE(INCLUDE_DIRS include
                               image_transport
                               clf_perception_vision_msgs
                               bayes_people_tracker_msgs
-                              object_tracking_msgs
                DEPENDS OpenCV
 )
 
@@ -99,10 +97,8 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_objects
 
 
 TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_objects ${catkin_LIBRARIES} ${CUSTOM_CV_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-INSTALL(TARGETS clf_perception_depth_lookup_objects RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/launch" DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
