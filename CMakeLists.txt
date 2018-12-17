@@ -79,7 +79,7 @@ ADD_EXECUTABLE(clf_perception_depth_lookup_persons
                ${INCLUDE_DIRS}
 )
 
-TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${OpenCV_libs} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(clf_perception_depth_lookup_persons ${catkin_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 INSTALL(TARGETS clf_perception_depth_lookup_persons RUNTIME DESTINATION RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
