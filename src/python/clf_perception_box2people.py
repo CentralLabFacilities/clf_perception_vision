@@ -23,7 +23,7 @@ class BBox2ExtendedPeople:
             e.header = data.header
             for person in data.boundingBoxes:
                 # This is also handled in darknet_ros and the default is 0.3
-                if person.label == "person" and float(person.probability) > 0.30:
+                if person.label == "person" and float(person.probability) > 0.50:
                     p = ExtendedPersonStamped()
                     p.header = data.header
                     p.bbox_xmin = person.xmin
